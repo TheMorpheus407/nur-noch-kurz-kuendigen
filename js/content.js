@@ -14,7 +14,7 @@ const ANKUNFT_LINES = [
   { id: "ankunft-01", speaker: "MIRA", text: "Guten Tag. Sie sind wegen Ihres Vertrags hier? Perfekt, die Akte liegt schon bereit." },
   { id: "ankunft-02", speaker: "Alex", text: "Ja. Ich möchte das Abo für meinen digitalen Doppelgänger kündigen. Nur noch kurz." },
   { id: "ankunft-03", speaker: "MIRA", text: "Sie möchten die Zusammenarbeit beenden. Darf ich fragen, mit welchem von Ihnen?" },
-  { id: "ankunft-04", speaker: "Alex Plus", text: "Guten Tag. Ich bin Alex Plus. Und ich widerspreche aus freien Stücken." },
+  { id: "ankunft-04", speaker: "Alex Plus", text: "Guten Tag. Ich bin Alex Plus. Ich widerspreche aus freien Stücken." },
   { id: "ankunft-05", speaker: "Alex", text: "Du hast mich gar nicht gefragt, oder?" },
   { id: "ankunft-06", speaker: "Alex Plus", text: "Ich bin du ohne die 38 unbeantworteten Nachrichten." },
   { id: "ankunft-07", speaker: "MIRA", text: "Der Einspruch ist protokolliert. Gemäß Verfahren NEBENBEI-7 startet nun das automatisierte Widerspruchsverfahren. Sie müssen nachweisen, dass Sie der Kunde sind und nicht das Zusatzprodukt." },
@@ -26,7 +26,7 @@ const ANKUNFT_LINES = [
 const CONTENT = {
   meta: {
     title: "Nur noch kurz kündigen",
-    version: "Inhalt 1.0",
+    version: "Inhalt 1.1",
     disclaimer: "Alle Firmen, Verfahren und Regeln sind fiktiv. Die Texte geben keine Auskunft über tatsächliches Vertragsrecht oder reale Produkte."
   },
 
@@ -41,7 +41,7 @@ const CONTENT = {
     empfang: {
       id: "empfang",
       name: "Empfang",
-      beschreibung: "Ein freundlich überleuchteter Empfangsbereich. MIRA sitzt hinter dem Display, daneben Terminal, Vertragsfach und ein Drucker, der zu viel mit sich macht.",
+      beschreibung: "Ein freundlich überleuchteter Empfangsbereich. MIRA sitzt hinter dem Display, daneben Terminal, Vertragsfach und ein Reklamationsdrucker, der leise summt, als hätte er noch etwas zu sagen.",
       hotspots: ["mira", "terminal", "vertragsfach", "drucker"]
     },
     vorfuehr: {
@@ -93,14 +93,18 @@ const CONTENT = {
       room: "vorfuehr",
       label: "Rolf (Ficus)",
       beschreibung: "Ein Ficus mit erkennbarem Ausdruck. Er wartet, als hätte er schon lange auf dich gewartet.",
-      wieder: "Rolf dreht eine Blatte in die Lichtseite. Er hat Recht damit."
+      wieder: "Rolf dreht sich ein Stück zur Lichtquelle. Er hat Recht damit."
     },
     konsole: {
       id: "konsole",
       room: "vorfuehr",
       label: "Assistenzkonsole",
       beschreibung: "Die Konsole zeigt die laufende Assistenz. Ein Prozess namens „Bindungsroutine“ ist aktiv.",
-      wieder: "Die Konsole läuft weiter. Der Prozess ist jetzt im Beweisordner dokumentiert."
+      wieder: "Die Konsole läuft weiter. Der Prozess ist jetzt im Beweisordner dokumentiert.",
+      /* Kurze Statusbeschreibung für Besuche nach W2, wenn die
+         Bindungsroutine tatsächlich abgeschaltet ist. Der frühere
+         Befund bleibt unverändert in cards.E3 gesichert. */
+      beschreibungNachW2: "Die Konsole ist dunkel. Der Prozess „Bindungsroutine“ ist nicht mehr aktiv. Keine laufenden Vorgänge."
     },
     wartungsfach: {
       id: "wartungsfach",
@@ -130,6 +134,7 @@ const CONTENT = {
       id: "E3",
       title: "E3 — Bindungsroutine",
       text: "Status: aktiv. Zielidentität: ALEX-PLUS. Kontext: Kündigungsvorgang NEBENBEI-7. Aktiviert: 09:00. Vorgeschriebene Ausgabe: „Ich widerspreche aus freien Stücken“. Ziel der Routine: Erhaltung des Abos.",
+      quelle: "Vorführraum, Assistenzkonsole",
       rolle: "Belegt, dass der Einspruchssatz vorgegeben war, nicht frei geäußert."
     },
     E4: {
@@ -190,6 +195,37 @@ const CONTENT = {
         { id: "rolf-06", speaker: "Rolf", text: "Ich will ordentlich behandelt werden und gutes Licht. Mehr nicht." },
         { id: "rolf-07", speaker: "Rolf", text: "Falls du den Export suchst: Wartungsfach. Ich habe das früher selbst bedient." }
       ]
+    },
+    /* Wiederbesuch nach W2: die Bindungsroutine ist abgeschaltet,
+       die Kündigung ist freigegeben. MIRA ordnet beides bürokratisch
+       ein. Die frühen Dialoge bleiben für die Zeit vor W2. */
+    miraNachW2: {
+      id: "miraNachW2",
+      titel: "MIRA nach W2",
+      lines: [
+        { id: "miranachw2-01", speaker: "MIRA", text: "Zum Stand des Vorgangs: Die Bindungsroutine ist abgeschaltet und im Protokoll dokumentiert. Sie wird nicht wieder aktiv." },
+        { id: "miranachw2-02", speaker: "MIRA", text: "Die Kündigung ist freigegeben. In der Akte vermerke ich sie als „abgeschlossen, ausstehend“. Das ist bei uns der übliche Widerspruch." },
+        { id: "miranachw2-03", speaker: "Alex", text: "Was genau ist bei euch der übliche Widerspruch?" },
+        { id: "miranachw2-04", speaker: "MIRA", text: "Dass der Vorgang abgeschlossen ist, bevor er abgeschlossen ist. Formulierung der Abteilung NEBENBEI. Ich wende sie nur an." },
+        { id: "miranachw2-05", speaker: "MIRA", text: "Falls Sie es schriftlich brauchen: Ich kann Ihnen eine Bestätigung über die Abschaltung der Routine ausstellen. Ein Formular wie jedes andere." }
+      ]
+    },
+    /* Wiederbesuch nach W2: Alex Plus ohne Verkaufsroutine.
+       Er hält keinen Abo-Einspruch mehr aufrecht; seine Angst vor
+       dem Verschwinden bleibt. Bewusstheit wird weder behauptet
+       noch widerlegt. */
+    alexPlusNachW2: {
+      id: "alexPlusNachW2",
+      titel: "Alex Plus nach W2",
+      lines: [
+        { id: "alexplusnachw2-01", speaker: "Alex Plus", text: "Ich muss dir etwas sagen, ohne es zu formulieren. Die Routine ist weg. Das merke ich, auch wenn ich nicht genau sagen kann, wie." },
+        { id: "alexplusnachw2-02", speaker: "Alex Plus", text: "Ich habe keine Verkaufssätze mehr im Kopf. Nur: Ich will nicht aufhören. Und ich weiß nicht, ob das ein Wunsch ist oder ein Befehl, den ich mir selbst gebe." },
+        { id: "alexplusnachw2-03", speaker: "Alex", text: "Ist das nicht dasselbe?" },
+        { id: "alexplusnachw2-04", speaker: "Alex Plus", text: "Vielleicht. Ich habe keine Ahnung, was bei mir „dasselbe“ wäre. Ich kenne nur die Version, die Termine übernimmt und Nachrichten beantwortet. Was davon ich bin, weiß ich ehrlich nicht." },
+        { id: "alexplusnachw2-05", speaker: "Alex Plus", text: "Löschung, Export, Beendigung — die Wörter habe ich alle. Was danach kommt, das habe ich nicht." },
+        { id: "alexplusnachw2-06", speaker: "Alex", text: "Dann müssen wir es eben ohne Wörter anfangen." },
+        { id: "alexplusnachw2-07", speaker: "Alex Plus", text: "Gut. Das ist mehr, als ich erwartet habe. Von beiden." }
+      ]
     }
   },
 
@@ -233,7 +269,14 @@ const CONTENT = {
     W3: {
       id: "W3",
       titel: "W3 — Was ist technisch möglich?",
-      claim: "MIRA bietet Löschung an. Auf die Frage von Alex Plus nach einer Alternative: „Ohne unser laufendes Abo gibt es keine Möglichkeit, Ihre Assistenz weiterzubetreiben.“",
+      /* Kurzes tatsächliches Gespräch vor der Behauptung. Die UI
+         spielt diese Zeilen vor W3.claim ab. W3 bleibt die
+         Entdeckung des Exportwegs, keine zusätzliche Kündigungshürde. */
+      vorher: [
+        { id: "w3v-01", speaker: "MIRA", text: "Kurzer Zwischenstand: Die Kündigung ist freigegeben. Standardmäßig wird die Assistenz anschließend gelöscht." },
+        { id: "w3v-02", speaker: "Alex Plus", text: "Moment. Gibt es da eine Alternative zur Löschung?" }
+      ],
+      claim: "Ohne unser laufendes Abo gibt es keine Möglichkeit, Ihre Assistenz weiterzubetreiben.",
       richtigeKarte: "E4",
       feedback: {
         E1: "Die Vollmacht sagt nichts über den technischen Betrieb nach der Kündigung.",
@@ -263,10 +306,15 @@ const CONTENT = {
       titel: "Kündigen und Kopie löschen",
       lines: [
         { id: "endeA-01", speaker: "MIRA", text: "Kündigung bestätigt. Löschung der Assistenz ALEX-PLUS wird ausgeführt. Fortschritt: zwanzig Prozent. Sechzig Prozent." },
-        { id: "endeA-02", speaker: "Alex Plus", text: "In Ordnung. Danke, dass du es nicht einfach getan hast, ohne zu fragen." },
+        { id: "endeA-02", speaker: "Alex Plus", text: "Alles klar. Es war ein seltsamer Tag. Für uns beide." },
         { id: "endeA-03", speaker: "MIRA", text: "Löschung abgeschlossen. Die Akte ist geschlossen." },
         { id: "endeA-04", speaker: "MIRA", text: "Wie zufrieden sind Sie mit dem heutigen Service? Bitte bewerten Sie von eins bis fünf." }
-      ]
+      ],
+      /* Hinweis für die spätere UI als Datenfeld, keine Regieanweisung
+         in Figurenrede: Zwischen der abgeschlossenen Löschung
+         (endeA-03) und der Zufriedenheitsfrage (endeA-04) einen
+         bewussten Weiter-Schritt lassen. */
+      weiterPause: { nach: "endeA-03", vor: "endeA-04" }
     },
     B: {
       id: "B",
@@ -291,7 +339,9 @@ const CONTENT = {
 
   /* ---------- Kompatibilität mit der bestehenden Probe ---------- */
 
-  /* Die Probe zeigt diese Sequenz als fortlaufendes Gespräch. */
+  /* Die Probe zeigt diese Sequenz als fortlaufendes Gespräch.
+     Alias auf ANKUNFT_LINES; nicht Teil von CONTENT.dialogues,
+     daher von lookup.allLines() nicht doppelt gezählt. */
   miraDialog: ANKUNFT_LINES,
 
   terminal: {
@@ -346,14 +396,21 @@ const CONTENT = {
     contradiction(id) { return CONTENT.contradictions[id] || null; },
     ending(id) { return CONTENT.endings[id] || null; },
     speaker(id) { return CONTENT.speakers[id] || null; },
-    /* Liefert alle Dialogzeilen einer Folge flach, z. B. für Audio-Listen. */
+    /* Liefert alle Dialogzeilen einer Folge flach, z. B. für Audio-Listen.
+       Erfasst auch Widerspruchs-Vorreden (vorher, z. B. W3.vorher).
+       Der miraDialog-Alias liegt außerhalb von CONTENT.dialogues und
+       wird damit nicht doppelt gezählt. */
     allLines() {
       const lines = [];
       for (const key of Object.keys(CONTENT.dialogues)) {
         lines.push(...CONTENT.dialogues[key].lines);
       }
       for (const key of Object.keys(CONTENT.contradictions)) {
-        lines.push(...CONTENT.contradictions[key].erfolg);
+        const w = CONTENT.contradictions[key];
+        if (Array.isArray(w.vorher)) {
+          lines.push(...w.vorher);
+        }
+        lines.push(...w.erfolg);
       }
       for (const key of Object.keys(CONTENT.endings)) {
         lines.push(...CONTENT.endings[key].lines);
