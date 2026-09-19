@@ -68,7 +68,8 @@ const UI_TEXTS = {
 const UI = {
   els: {},
   _dialogue: null,        /* aktive Dialogfolge: {steps, index, onDone} */
-  _procedureView: null,   /* aktive Verfahrensansicht: {type, rid} */
+  _procedureView: null,   /* aktive Verfahrensansicht: {type, rid, step?} */
+  _procedureSeq: null,    /* Verfahren-Sequenz: {rid, phase, lines, index} */
   _focusReturn: null,     /* Element, auf das der Fokus beim Schließen zurückgeht */
   _openStack: [],         /* geöffnete schließbare Panels, zuletzt oben (Escape) */
   lastAdvanceAt: 0,
@@ -396,6 +397,10 @@ const UI = {
   closeAllPanels() {
     this.stopAudio();
     this._dialogue = null;
+    /* Veraltete UI-Sequenzen verwerfen: Laden/Checkpoint/Neustart
+       rendern den Stand ausschließlich aus dem unveränderten GameState. */
+    this._procedureSeq = null;
+    this._procedureView = null;
     this._openStack.length = 0;
     this.els.dialoguePanel.hidden = true;
     this.els.evidencePanel.hidden = true;
@@ -693,30 +698,37 @@ const UI = {
     }
   },
 
-  /* Bei bewusstem Einschalten: genau die gerade sichtbaren vertonten
-     Verfahrenszeilen der tatsächlich aktiven Ansicht in sichtbarer
-     Reihenfolge abspielen (Erfolgsfolge bzw. W3-Einleitung). Keine
-     veraltete Folge, keine neue Runde, keine Dialogansicht im
-     Hintergrund. Stille Zeilen bleiben still; ohne vertonte Zeilen
-     passiert nichts. */
+  /* Bei bewusstem Einschalten: nur die EINE gerade sichtbare
+     Verfahrenszeile starten (aktuelles Moment der Sequenz). Keine
+     Folge, keine ältere Zeile: Kartenauswahl ohne aktuelle
+     Sprecherzeile, stille Zeilen, offener Ordner/Verlauf oder Pause
+     starten nichts. */
   playVisibleProcedureAudio() {
     const view = this._procedureView;
-    if (!view || !view.rid) {
+    if (!view || (view.type !== "round" && view.type !== "success")) {
       return false;
     }
-    const w = CONTENT.contradictions[view.rid];
-    if (!w) {
+    const line = this.currentProcedureLine();
+    if (!line) {
       return false;
     }
-    if (view.type === "success" && Array.isArray(w.erfolg)) {
-      GameAudio.playSequence(w.erfolg.map((l) => l.id));
-      return true;
+    if (!GameAudio.hasLine(line.id)) {
+      return false;
     }
-    if (view.type === "round" && Array.isArray(w.vorher)) {
-      GameAudio.playSequence(w.vorher.map((l) => l.id));
-      return true;
+    this.stopAudio();
+    GameAudio.playLine(line.id);
+    return true;
+  },
+
+  /* Die EINE aktuell sichtbare Zeile der Verfahren-Sequenz (oder null,
+     z. B. in der Kartenauswahl ohne aktuelle Sprecherzeile). */
+  currentProcedureLine() {
+    const seq = this._procedureSeq;
+    if (!seq || !Array.isArray(seq.lines)) {
+      return null;
     }
-    return false;
+    const line = seq.lines[seq.index];
+    return (line && typeof line.id === "string") ? line : null;
   },
 
   /* Bewusst angeklickte Zeile wieder abspielen (Dialog oder Verlauf).
