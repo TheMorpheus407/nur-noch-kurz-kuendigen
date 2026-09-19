@@ -5,7 +5,7 @@
   "selection_and_crops": "Cedric; rectangular pixel-preserving crops and byte-identical copies",
   "lora_applied": true,
   "emotion_variants": true,
-  "note": "Mixed collection: five original room/neutral images have no LoRA; three MIRA and two Alex Plus expression PNGs use their separate locally trained Krea 2 RAW400 adapters with Turbo FP8. The original confident Alex Plus remains the default. All ten PNGs are fixed offline assets. Per-file flags and adapter hashes describe actual usage; top-level flags mean such assets are included.",
+  "note": "Mixed collection: the five original room/neutral images have no LoRA. Three MIRA, two Alex Plus and the additional Rolf images use their own locally trained Krea 2 RAW character adapters with Turbo FP8. The original Rolf room crop is retained but no longer used by the current portrait catalog. All PNGs are fixed offline assets. Per-file flags and adapter hashes describe actual usage; top-level flags mean such assets are included.",
   "files": [
     {
       "file": "mira-neutral.png",
@@ -38,7 +38,8 @@
         824
       ],
       "bytes": 345143,
-      "lora_applied": false
+      "lora_applied": false,
+      "usage": "Original room crop retained for provenance; current Rolf portrait uses selected LoRA image."
     },
     {
       "file": "empfang.png",
@@ -143,6 +144,23 @@
       "adapter_sha256": "38b8e4c772e512ffc9dc26face13e86e4239c5269ea95fa9be243a35858eb1ab",
       "expression": "relieved",
       "transform": "None; byte-identical original PNG including generation metadata."
+    },
+    {
+      "file": "rolf-gentle-bend.png",
+      "source": "setup/lora/evidence/007_rolf_character.prepared/evaluation-operator/p2_gentle_bend.step400_strength1_attempt_001/p2_gentle_bend.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "bde03566d5f5f61b50382c39d09079b9667eca7ecf724189bcdeb8c3ed775782",
+      "bytes": 1072472,
+      "size": [
+        1024,
+        1024
+      ],
+      "lora_applied": true,
+      "character": "Rolf",
+      "adapter": "rolf-raw-character-001.safetensors",
+      "adapter_sha256": "5018dbe8045b63b001f600ea9a7709908c6191f6ef7fece6aabf2017e9c8497d",
+      "expression": "gentle-bend",
+      "transform": "None; byte-identical original Krea2 Turbo FP8 output with local RAW-trained Rolf LoRA400."
     }
   ]
 }

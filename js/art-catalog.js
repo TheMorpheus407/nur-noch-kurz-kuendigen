@@ -1,5 +1,5 @@
 "use strict";
-// Operator asset metadata; images: local Krea 2 Turbo FP8; separate character LoRAs where documented.
+// Operator asset metadata; local Krea 2 Turbo FP8; separate MIRA, Alex Plus and Rolf LoRAs as documented.
 const ART_ASSETS = Object.freeze({
   "rooms": {
     "empfang": {
@@ -61,9 +61,9 @@ const ART_ASSETS = Object.freeze({
       "height": 944
     },
     "Rolf": {
-      "url": "assets/art/rolf-room.png",
-      "width": 392,
-      "height": 824
+      "url": "assets/art/rolf-gentle-bend.png",
+      "width": 1024,
+      "height": 1024
     }
   },
   "expressions": {
@@ -92,6 +92,13 @@ const ART_ASSETS = Object.freeze({
       },
       "relieved": {
         "url": "assets/art/alex-plus-relieved.png",
+        "width": 1024,
+        "height": 1024
+      }
+    },
+    "Rolf": {
+      "gentle-bend": {
+        "url": "assets/art/rolf-gentle-bend.png",
         "width": 1024,
         "height": 1024
       }
@@ -161,6 +168,26 @@ const ART_ASSETS = Object.freeze({
     "endeB-06": {
       "speaker": "Alex Plus",
       "expression": "relieved"
+    },
+    "rolf-01": {
+      "speaker": "Rolf",
+      "expression": "gentle-bend"
+    },
+    "rolf-03": {
+      "speaker": "Rolf",
+      "expression": "gentle-bend"
+    },
+    "rolf-04": {
+      "speaker": "Rolf",
+      "expression": "gentle-bend"
+    },
+    "rolf-06": {
+      "speaker": "Rolf",
+      "expression": "gentle-bend"
+    },
+    "rolf-07": {
+      "speaker": "Rolf",
+      "expression": "gentle-bend"
     }
   }
 });
