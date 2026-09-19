@@ -48,6 +48,8 @@ const UI_TEXTS = {
   checkpointOk: "Entscheidungspunkt geladen. Die Entscheidung ist wieder offen.",
   checkpointNone: "Noch kein Entscheidungspunkt gesichert — er entsteht automatisch nach Runde W3.",
   checkpointAuto: "Entscheidungspunkt automatisch gesichert.",
+  checkpointAutoMemory: "Entscheidungspunkt nur für diese Sitzung gesichert — lokales Speichern ist im Browser blockiert; nach Schließen/Neuladen nicht verlässlich wiederherstellbar.",
+  decisionCheckpointMemory: "Der Entscheidungspunkt ist nur für diese Sitzung gesichert (lokales Speichern blockiert) — nach Schließen/Neuladen nicht verlässlich wiederherstellbar.",
   roundDone: "Runde abgeschlossen.",
   endingConfirm: "Diese Entscheidung ist für diesen Spielstand endgültig. Der Entscheidungspunkt bleibt ladbar. Bestätigen?",
   endingNote: "Das Ende ist für diesen Spielstand abgeschlossen. Über „Zum Entscheidungspunkt“ können Sie zum gesicherten Stand zurückkehren und die andere Option wählen.",
@@ -64,6 +66,7 @@ const UI = {
   els: {},
   _dialogue: null,        /* aktive Dialogfolge: {steps, index, onDone} */
   _focusReturn: null,     /* Element, auf das der Fokus beim Schließen zurückgeht */
+  _openStack: [],         /* geöffnete schließbare Panels, zuletzt oben (Escape) */
   lastAdvanceAt: 0,
   ADVANCE_LOCK_MS: 250,   /* Mehrfachklick-Schutz: keine Zeilen springen verloren */
 
@@ -138,18 +141,23 @@ const UI = {
     this.els.btnCheckpoint.addEventListener("click", () => this.doCheckpoint());
     this.els.btnRestart.addEventListener("click", () => this.doRestart());
 
-    /* Escape: schließt das oberste geöffnete Panel, ohne Fortschritt zu verlieren. */
+    /* Escape: schließt das zuletzt geöffnete schließbare Panel in der
+       tatsächlichen Öffnungsreihenfolge, ohne Fortschritt zu verlieren. */
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") {
         return;
       }
-      if (!this.els.dialoguePanel.hidden) {
+      const top = this._openStack[this._openStack.length - 1];
+      if (!top) {
+        return;
+      }
+      if (top === "dialogue") {
         this.finishDialogue();
-      } else if (!this.els.procedurePanel.hidden) {
+      } else if (top === "procedure") {
         this.closeProcedure();
-      } else if (!this.els.evidencePanel.hidden) {
+      } else if (top === "evidence") {
         this.closeEvidence();
-      } else if (!this.els.logPanel.hidden) {
+      } else if (top === "log") {
         this.closeLog();
       }
     });
@@ -182,11 +190,40 @@ const UI = {
     this._focusReturn = document.activeElement;
   },
 
-  restoreFocus() {
+  /* Öffnungsreihenfolge der schließbaren Panels verwalten: das zuletzt
+     geöffnete Panel steht oben; Escape schließt genau dieses (LIFO). */
+  trackOpen(panelId) {
+    const i = this._openStack.indexOf(panelId);
+    if (i >= 0) {
+      this._openStack.splice(i, 1);
+    }
+    this._openStack.push(panelId);
+  },
+
+  trackClose(panelId) {
+    const i = this._openStack.lastIndexOf(panelId);
+    if (i >= 0) {
+      this._openStack.splice(i, 1);
+    }
+  },
+
+  restoreFocus(fallback) {
     const target = this._focusReturn;
     this._focusReturn = null;
+    const candidates = [];
     if (target && document.contains(target)) {
-      target.focus();
+      candidates.push(target);
+    }
+    if (fallback && document.contains(fallback) && fallback !== target) {
+      candidates.push(fallback);
+    }
+    /* Fokussierter Knoten fehlt/ersetzt/verborgen: sinnvoller, erreichbarer
+       Rückkehrpunkt statt Fokusverlust. */
+    for (const el of candidates) {
+      el.focus();
+      if (document.activeElement === el) {
+        return;
+      }
     }
   },
 
@@ -233,6 +270,7 @@ const UI = {
 
   closeAllPanels() {
     this._dialogue = null;
+    this._openStack.length = 0;
     this.els.dialoguePanel.hidden = true;
     this.els.evidencePanel.hidden = true;
     this.els.logPanel.hidden = true;
@@ -460,6 +498,7 @@ const UI = {
     this.els.dialogueTitle.textContent = opts.title;
     this.rememberFocus();
     this.els.dialoguePanel.hidden = false;
+    this.trackOpen("dialogue");
     this.renderStep();
     this.els.btnDialogueNext.focus();
   },
@@ -522,8 +561,9 @@ const UI = {
   finishDialogue() {
     const d = this._dialogue;
     this._dialogue = null;
+    this.trackClose("dialogue");
     this.els.dialoguePanel.hidden = true;
-    this.restoreFocus();
+    this.restoreFocus(document.body);
     if (d && d.onDone) {
       d.onDone();
     }
@@ -547,12 +587,14 @@ const UI = {
     this.renderEvidenceList();
     this.rememberFocus();
     this.els.evidencePanel.hidden = false;
+    this.trackOpen("evidence");
     this.els.btnEvidenceClose.focus();
   },
 
   closeEvidence() {
+    this.trackClose("evidence");
     this.els.evidencePanel.hidden = true;
-    this.restoreFocus();
+    this.restoreFocus(this.els.btnEvidence);
   },
 
   renderEvidenceList() {
@@ -583,12 +625,14 @@ const UI = {
     this.renderLog();
     this.rememberFocus();
     this.els.logPanel.hidden = false;
+    this.trackOpen("log");
     this.els.btnLogClose.focus();
   },
 
   closeLog() {
+    this.trackClose("log");
     this.els.logPanel.hidden = true;
-    this.restoreFocus();
+    this.restoreFocus(this.els.btnLog);
   },
 
   renderLog() {
@@ -618,13 +662,15 @@ const UI = {
     this.renderProcedure();
     this.rememberFocus();
     this.els.procedurePanel.hidden = false;
+    this.trackOpen("procedure");
     const firstBtn = this.els.procedureBody.querySelector("button");
     (firstBtn || this.els.btnProcedureClose).focus();
   },
 
   closeProcedure() {
+    this.trackClose("procedure");
     this.els.procedurePanel.hidden = true;
-    this.restoreFocus();
+    this.restoreFocus(this.els.btnProcedure);
     this.setStatus(CONTENT.status.contradictionCancelled);
   },
 
@@ -726,7 +772,11 @@ const UI = {
       this.renderSuccess(rid, body);
       this.updateProgress();
       if (res.checkpoint && res.checkpoint.ok) {
-        this.setStatus(UI_TEXTS.checkpointAuto);
+        if (res.checkpoint.storage === "memory") {
+          this.setStatus(UI_TEXTS.checkpointAutoMemory);
+        } else {
+          this.setStatus(UI_TEXTS.checkpointAuto);
+        }
       } else {
         this.setStatus(UI_TEXTS.roundDone);
       }
@@ -798,8 +848,13 @@ const UI = {
   renderDecision(body) {
     this.els.procedureTitle.textContent = CONTENT.labels.entscheidung;
     body.appendChild(this.make("p", "decision-prompt", CONTENT.decision.prompt));
-    body.appendChild(this.make("p", null,
-      "Der Entscheidungspunkt wurde automatisch gesichert — die andere Option bleibt erreichbar."));
+    const cp = GameState.hasSave("checkpoint");
+    if (cp.exists && cp.storage === "local") {
+      body.appendChild(this.make("p", null,
+        "Der Entscheidungspunkt wurde automatisch gesichert — die andere Option bleibt erreichbar."));
+    } else {
+      body.appendChild(this.make("p", null, UI_TEXTS.decisionCheckpointMemory));
+    }
 
     const options = this.make("div", "decision-options");
     for (const opt of CONTENT.decision.optionen) {
@@ -843,6 +898,10 @@ const UI = {
         steps.splice(i + 1, 0, { kind: "pause" });
       }
     }
+    /* Erledigte Entscheidungsansicht beim Start des Enddialogs ausblenden:
+       die Endwahl ist erst nach geladenem Entscheidungspunkt wieder offen. */
+    this.trackClose("procedure");
+    this.els.procedurePanel.hidden = true;
     this.openDialogue({
       title: e.titel,
       steps: steps,
@@ -888,6 +947,12 @@ const UI = {
     const r = GameState.load("save");
     if (r.ok) {
       this.renderAll();
+      const s = GameState.get();
+      if (s.ended && s.ending) {
+        /* Abgeschlossener Stand: passendes Endpanel wieder zeigen, ohne neu
+           zu entscheiden oder den Stand zurückzusetzen. */
+        this.showEndingPanel(s.ending);
+      }
       this.setStatus(UI_TEXTS.loadOk);
     } else if (r.reason === "no-save") {
       this.setStatus(UI_TEXTS.loadNone);

@@ -76,6 +76,14 @@ Dann öffnen: http://127.0.0.1:8000/
 - **Entscheidungspunkt:** Wird unmittelbar nach Runde W3 (vor der Endwahl)
   automatisch gesichert und ist über „Zum Entscheidungspunkt“ ladbar —
   auch nach beiden Enden. Damit bleibt die andere Endwahl erreichbar.
+  Ist `localStorage` blockiert, liegt der Checkpoint nur im
+  Sitzungs-RAM; die UI meldet das ehrlich (automatischer Checkpoint und
+  Entscheidungsansicht) und verspricht keine Wiederherstellung nach
+  Schließen/Neuladen.
+- **Stand laden:** Lädt den gespeicherten Stand; ist der geladene Stand
+  bereits beendet (A oder B), wird das passende Endpanel mit
+  „Zum Entscheidungspunkt“ wieder angezeigt — ohne neu zu entscheiden
+  oder den Stand zurückzusetzen.
 - **Neustart** erst nach echter Bestätigung; Abbrechen erhält den
   Fortschritt. Der Neustart betrifft nur den Spielzustand (die eigenen
   beiden Speicherslots), nie allgemeine Browserdaten. Beim normalen
@@ -86,8 +94,10 @@ Dann öffnen: http://127.0.0.1:8000/
 
 - Alle Aktionen sind echte, erreichbare Buttons mit sichtbarem Fokus;
   Fokusführung beim Öffnen/Schließen der Panels.
-- **Escape** schließt das oberste geöffnete Panel (Dialog/Verfahren/
-  Ordner/Verlauf) ohne Fortschrittsverlust. Keine Mauspflicht.
+- **Escape** schließt das zuletzt geöffnete schließbare Panel in der
+  tatsächlichen Öffnungsreihenfolge (Dialog/Verfahren/Ordner/Verlauf)
+  ohne Fortschrittsverlust; der Fokus kehrt zu einem erreichbaren Punkt
+  zurück. Keine Mauspflicht.
 - Layout für 320 px bis Desktop: Textumbrüche und breite Klickziele;
   Text wird nicht durch `overflow:hidden` kaschiert; Beweisordner und
   Verlauf auch auf schmalem Fenster bedienbar.
@@ -108,17 +118,26 @@ Dann öffnen: http://127.0.0.1:8000/
 
 ## Ausgeführte Prüfung
 
-- `node --check` auf allen `js/*.js`-Dateien (Syntaxprüfung) — siehe
-  aktueller Lauf; das ist **ausschließlich** eine Syntaxprüfung, kein
-  Browser- oder Funktionstest.
+- `node --check` auf allen `js/*.js`-Dateien (Syntaxprüfung) — für diesen
+  Stand tatsächlich ausgeführt; das ist **ausschließlich** eine
+  Syntaxprüfung, kein Browser- oder Funktionstest.
+
+## Unabhängige Browserbefunde (Grundlage, keine Abnahme durch diese Reparatur)
+
+- Die drei hier korrigierten Bedienfehler (Escape schließt das zuletzt
+  geöffnete Panel; Endpanel nach Laden eines beendeten Stands; ehrliche
+  Checkpoint-Meldung bei blockiertem `localStorage`) beruhen auf
+  eigenständigen Browserbeobachtungen (Chromium/Firefox) über die
+  vollständigen Wege W1→W2→W3 und beide Enden.
+- Diese Reparatur wurde **nicht** erneut in einem Browser abgenommen;
+  ob die Korrekturen im Browser wie beschrieben greifen, ist eine
+  separate Browserprüfung.
 
 ## Nicht abgenommene Teile / offene Punkte
 
 - Die frühere Mikro-Browserprüfung (Empfangsraum-Ausschnitt) und die
   29 bestandenen unabhängigen State-VM-Fixtures sind **keine**
-  Browserabnahme der jetzt vollständigen Oberfläche. Die neue UI
-  (zwei Räume, drei NPCs, drei Runden, beide Enden, Checkpoint,
-  Speichern/Laden) braucht eine eigene Browserprüfung.
+  Browserabnahme der jetzt vollständigen Oberfläche.
 - Noch keine Kunst und kein Ton: keine Bilder, keine Sprachdateien,
   keine erfundenen Assets. Dialogzeilen tragen stabile IDs als
   spätere Audio-Anknüpfung; die Bebilderung folgt mit lokalen
