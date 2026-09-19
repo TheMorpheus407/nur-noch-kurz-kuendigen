@@ -188,7 +188,9 @@ const UI = {
         }
         requestAnimationFrame(() => {
           menu.open = false;
-          if (document.activeElement === document.body &&
+          const active = document.activeElement;
+          if ((active === document.body || !active.getClientRects().length ||
+               active.closest("[inert]")) &&
               document.contains(menuSummary)) {
             menuSummary.focus();
           }
@@ -293,10 +295,10 @@ const UI = {
     this.syncActivePanel();
   },
 
-  /* Sichtbare Interaktionsfläche synchronisieren: das Panel an der Spitze
-     des Öffnungsstapels ist aktiv; offene Panels dahinter bleiben
-     sichtbar, werden aber inert (nicht fokussierbar, keine Doppel-
-     bedienung) und visuell zurückgenommen. Der bestehende hidden-
+  /* Sichtbare Interaktionsfläche synchronisieren: nur das Panel an der Spitze
+     des Öffnungsstapels belegt die Bühne. Offene Panels dahinter bleiben
+     im DOM, werden aber inert und per Darstellungsklasse ausgeblendet.
+     Der bestehende hidden-
      Zustand der Panels bleibt unberührt; ohne aktives Panel bleibt
      alles bedienbar. */
   syncActivePanel() {
@@ -328,9 +330,21 @@ const UI = {
     if (fallback && document.contains(fallback) && fallback !== target) {
       candidates.push(fallback);
     }
+    const top = this._openStack[this._openStack.length - 1];
+    const panel = top ? document.getElementById(top + "-panel") : null;
+    if (panel) {
+      const action = panel.querySelector("button.primary:not(:disabled)") ||
+        panel.querySelector("button:not(:disabled)");
+      if (action) candidates.push(action);
+    }
+    const menuSummary = document.querySelector("#menu-secondary summary");
+    if (menuSummary) candidates.push(menuSummary);
     /* Fokussierter Knoten fehlt/ersetzt/verborgen: sinnvoller, erreichbarer
        Rückkehrpunkt statt Fokusverlust. */
     for (const el of candidates) {
+      if (!el.getClientRects().length || el.closest("[inert], [hidden]") || el.disabled) {
+        continue;
+      }
       el.focus();
       if (document.activeElement === el) {
         return;
@@ -461,6 +475,8 @@ const UI = {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "hotspot";
+      btn.setAttribute("aria-label", (isNpc ? "Gespräch: " : "Fundstelle: ") + label);
+      btn.dataset.label = label;
       if (collected) {
         btn.classList.add("is-collected");
       } else if (visited) {

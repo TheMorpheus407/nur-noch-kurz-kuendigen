@@ -380,9 +380,9 @@ main {
 
 .panel[hidden] { display: none; }
 
-/* Offenes Panel, das hinter dem aktiven liegt: visuell zurückgenommen */
+/* Hintergrundzustand erhalten, aber nur die oberste Fläche nimmt Platz ein. */
 .panel--dim {
-  opacity: 0.88;
+  display: none;
 }
 
 .panel-head {
@@ -891,9 +891,65 @@ blockquote.claim {
 
 /* ---------- Schmale Fenster: Bühne über Interaktion ---------- */
 
+/* Auf der Bildbühne bleiben die Motive sichtbar. Die vollständigen Namen
+   stehen für Tastatur/Zeiger am Marker und immer im zugänglichen Namen. */
+@media (min-width: 901px) {
+  .stage-hotspots { counter-reset: hotspot; }
+  .stage:not(.stage--list) .hotspot {
+    counter-increment: hotspot;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+  }
+  .stage:not(.stage--list) .hotspot > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+  }
+  .stage:not(.stage--list) .hotspot::before {
+    content: counter(hotspot);
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font-weight: 800;
+  }
+  .stage:not(.stage--list) .hotspot.is-visited::before { border-color: var(--plum); }
+  .stage:not(.stage--list) .hotspot.is-collected::before { background: var(--coral); }
+  .stage:not(.stage--list) .hotspot:hover::after,
+  .stage:not(.stage--list) .hotspot:focus-visible::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 190px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    background: var(--paper);
+    text-align: center;
+    font-weight: 700;
+  }
+}
+
 @media (max-width: 900px) {
   .game {
     grid-template-columns: 1fr;
+    gap: 0.65rem;
   }
 
   /* Bild vollständig in natürlicher Höhe; Hotspots als sichere Liste */
@@ -920,6 +976,17 @@ blockquote.claim {
     min-height: 48px;
     transform: none;
   }
+
+  /* Im Gespräch ist das Raumbild Kontext, die Ortsliste erscheint beim
+     Schließen wieder. Kein verstecktes Scrollen und kein Bildbeschnitt. */
+  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-col > :not(.scene),
+  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-hotspots {
+    display: none;
+  }
+  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-bg {
+    max-height: 180px;
+    object-fit: contain;
+  }
 }
 
 /* ---------- Sehr schmale Fenster (320px und aufwärts) ---------- */
@@ -928,41 +995,60 @@ blockquote.claim {
   .page-head {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
   }
+
+  .head-titles { flex: 0 1 auto; }
+  .page-head h1 { font-size: 1.25rem; }
+  .kicker { font-size: 0.58rem; letter-spacing: 0.06em; }
 
   .head-controls {
     margin-left: 0;
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .room-nav {
-    width: 100%;
+    gap: 0.25rem;
   }
 
   .room-btn {
     justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.4rem;
   }
+
+  .room-mark { display: none; }
 
   #btn-audio {
-    width: 100%;
+    width: auto;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.4rem;
   }
 
+  main { padding-top: 0.65rem; }
+
   .panel {
-    padding: 0.8rem 0.85rem;
+    padding: 0.65rem;
   }
+
+  .panel-head { flex-wrap: nowrap; gap: 0.4rem; margin-bottom: 0.4rem; }
+  .panel-head h2 { font-size: 0.8rem; line-height: 1.25; }
+  .panel-head button { flex: 0 0 auto; font-size: 0.8rem; padding: 0.3rem 0.45rem; }
 
   /* Dialog: Portrait über dem Text, Replay darunter */
   .dialogue-line {
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
   }
 
   .speaker-portrait {
-    width: 96px;
-    height: 96px;
-    max-height: 96px;
+    width: 112px;
+    height: 112px;
+    max-height: 112px;
   }
 
   .dialogue-speaker {
