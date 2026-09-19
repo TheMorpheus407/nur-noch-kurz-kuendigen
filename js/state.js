@@ -183,6 +183,7 @@ function _writeRaw(slot, json) {
       ls.setItem(STORAGE_KEYS[slot], json);
       /* Lokales Schreiben erfolgreich: lokaler Stand ist wieder der
          neueste; RAM-Vorrang für diesen Slot entfällt. */
+      _memoryStore[slot] = json; // Auch der Notfallspeicher folgt dem neuesten Stand.
       delete _memoryPreferred[slot];
       return { storage: "local", warning: null };
     } catch (_) { /* auf RAM-Fallback ausweichen */ }
@@ -336,6 +337,7 @@ function _validate(data) {
 
   /* Jede gelöste Runde braucht ihre tatsächlich gefundene Beweiskarte. */
   for (const r of resolved) {
+    if (!_knownRound(r)) continue; // Ungültige IDs wurden oben bereits beanstandet.
     const need = CORRECT_CARD[r];
     if (need !== undefined && !cards.includes(need)) {
       errors.push("evidence/" + r);
