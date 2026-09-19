@@ -1,0 +1,738 @@
+{
+  "source": "Local Qwen3-TTS dialogue batch004, attempt0001 for each line",
+  "voice_selection": {
+    "MIRA": "MIRA B",
+    "Alex Plus": "Alex Plus A",
+    "Rolf": "original selected voice"
+  },
+  "processing": "Local CPU postproduction: constant gain per speaker, PCM16, no duration change",
+  "gains_db": {
+    "MIRA": -2.85,
+    "Alex Plus": 0.35,
+    "Rolf": 0.0
+  },
+  "source_manifest_sha256": "7d263e6eff18fe9c8c54c3680a7dcb47441edbe560a59a8edd1e4184f27d9661",
+  "entries": [
+    {
+      "id": "ankunft-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "0748f1fb9e7db5f2d93be309259ac27c3c2b8c010f510305732f6a365a480b41",
+      "source_pcm_sha256": "f133988a8cd6c7e9a312f2fa3bbced9e348f9513357a882b5f871cc227c60d5a",
+      "sha256": "c61991210a3b9f59d0a343fa40d782164adc9c2a0a6be997f3565c3dc82c48cb",
+      "header": {
+        "frames": 140160,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.2,
+      "true_peak_dbfs": -4.8
+    },
+    {
+      "id": "ankunft-03",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "c971874a0258e33f3ecae49effabe1c943d0a914afac53a5329f90667c70715f",
+      "source_pcm_sha256": "68b43d8e4a145f57b210d56f0f34fcfb86e3bbe046d93434c67d54b39c17c325",
+      "sha256": "4d15f0d33af3112307077448ecbf6d3679fc9b2b87ad007131ede26d90723dee",
+      "header": {
+        "frames": 109440,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -18.7,
+      "true_peak_dbfs": -5.6
+    },
+    {
+      "id": "ankunft-04",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "d1366bf68d8be7afedab7fb04fab9dca166a9c9adc36be51ab45a261b46f00e6",
+      "source_pcm_sha256": "a16d3579afdc548d81c89ed35f6bcebf47cda416959b66c805aade0fd7b65e0f",
+      "sha256": "2e98a54c5bdf74424da78044ef884a4fc37245f48921b57426f3481bec5b5318",
+      "header": {
+        "frames": 105600,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.1,
+      "true_peak_dbfs": -2.7
+    },
+    {
+      "id": "ankunft-06",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "f76c9e086bc24cd960ba0f9a38f8fdf2877fd7c11f70fa31fc0c382651b26d3e",
+      "source_pcm_sha256": "d3776f11f561f2333fb92016765ebf12b8aa063250d2d1bef22525c444a5c0f4",
+      "sha256": "4a38b3d57d9a4d3d6a0facd57e6416cb1f4e99c5598d6916d46ee421d876b167",
+      "header": {
+        "frames": 90240,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.8,
+      "true_peak_dbfs": -2.1
+    },
+    {
+      "id": "ankunft-07",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "6857a956c135d0e8c222f289fcee2adde3b3c70b93f1b29fbf167f8b7ae5c649",
+      "source_pcm_sha256": "14c03fedf77bc554d7aaaed1970239a966760c6939d19f4224ebbd448f6fa623",
+      "sha256": "c242c248fefb2a279b0d06fc8a60f9a94cd438607f6b91199892070b8975401d",
+      "header": {
+        "frames": 270720,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.9,
+      "true_peak_dbfs": -5.3
+    },
+    {
+      "id": "ankunft-08",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "11f2cd03afd3cfed679c7137e9f11749780db2bbed93ffb2d0e54d349816a95b",
+      "source_pcm_sha256": "f64df93c4e1c0e7f1341a4cb74d71496e303ce5fb7f58df61db94df57c094a0e",
+      "sha256": "ed3e24555d4051e507f108ecb9774109133b98659aed7a2e762ab3b9982e6ca6",
+      "header": {
+        "frames": 136320,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.9,
+      "true_peak_dbfs": -5.9
+    },
+    {
+      "id": "ankunft-10",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "04fb016331352ad7fb26e4482775d7d2c682962ea9b140277d9abd9dea3929a4",
+      "source_pcm_sha256": "f9980ec4c88a563221db8812fb58a62da1a13dfd4009f7d6c82dc78aaa2c4598",
+      "sha256": "650bb590c988c0a4880d39cb3ecce76610406ad19af9992e9b798db65dbc5e8b",
+      "header": {
+        "frames": 197760,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.9,
+      "true_peak_dbfs": -5.5
+    },
+    {
+      "id": "mira-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "9924fcbd34633dca159948f017fbfff217fe321ea770d343836fd79ddaae24a0",
+      "source_pcm_sha256": "55e6c6cb52ebf52cf070cb489b3096cacd94e1ae095d289577041134e3121c65",
+      "sha256": "bd0d3940b70f22adfc694e561efb5a3c40fb27213fc800d33ba6ad591ff853d4",
+      "header": {
+        "frames": 145920,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.0,
+      "true_peak_dbfs": -6.6
+    },
+    {
+      "id": "mira-03",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "bf1fcde93a52fc393d10ef4dcf4c564031ec0e671bca6c8c9bc8c39ec60e9dea",
+      "source_pcm_sha256": "5cec894c2ae156e56332056712a8545811beddf0ec6797db76f24779a27ec1bd",
+      "sha256": "1eacb3ab652bd9ff4d4e77b16cb908d3e18f30521bf0736e5f610b698e51c9f9",
+      "header": {
+        "frames": 120960,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.2,
+      "true_peak_dbfs": -3.4
+    },
+    {
+      "id": "mira-04",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "d216f425a93c3625720bd52f77c4b494f3ec8a13dac5223b8c4799dcffad17a4",
+      "source_pcm_sha256": "f00b053e2b2388f035f3b5e8621d935fec6a7d7a539985b9647e97e242377ede",
+      "sha256": "b209f0263dc3a44a5eaed8be9957f093551cf92fc4d465f6407d4a9cee981974",
+      "header": {
+        "frames": 145920,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -18.8,
+      "true_peak_dbfs": -4.5
+    },
+    {
+      "id": "mira-06",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "674c2513e77eb13d9e1770a514234b3716732528a24a78f268d244cf572dd7bf",
+      "source_pcm_sha256": "53990a7a8dbe9c27d8753152775a58c532965fbf5fa6e078af4fb140a25e2509",
+      "sha256": "37feed870756e303d1d725ef65251dba76e259dfa6ab0a89a9fb75e2ae048439",
+      "header": {
+        "frames": 134400,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.1,
+      "true_peak_dbfs": -5.3
+    },
+    {
+      "id": "alexplus-01",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "c2a8ca7d5593c580d2f178e2e95c4b8e2983516393c3a265cdc3db0201259f5f",
+      "source_pcm_sha256": "a920a524c440b3bea2afbd04cad22af92b1e4e7058822f8c62812dbd35b9f05d",
+      "sha256": "a0aee7930e26a9f60ca5ca5a72a6a13a93928affc962a4c5755e4b3478dc5804",
+      "header": {
+        "frames": 132480,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.9,
+      "true_peak_dbfs": -1.6
+    },
+    {
+      "id": "alexplus-03",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "781029fd54c76258ba325abc03f0effbb579a453fab9e3d1c841b29866638cf1",
+      "source_pcm_sha256": "c529542b486113e8cc27358c2d9b13d100644ba8b0a63c2ced4757240d60271d",
+      "sha256": "fcd76e59f843b7b962ef0451483a9ae69cb9204d449d3e0e693c8f29918cae74",
+      "header": {
+        "frames": 140160,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.5,
+      "true_peak_dbfs": -2.5
+    },
+    {
+      "id": "alexplus-05",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "9b4df91565d7c00a2782f233d63223a84a983d3c3db310461d78f2a78e04c714",
+      "source_pcm_sha256": "78f52654cd03b26657ce56d0b4fa389a3fd58bd3290b8944f7ea72ba6a1bc8ee",
+      "sha256": "67a925f32bb30f1f2bb18eee1224ab3f0530cc4cbfcf09af2f9777d131b8e150",
+      "header": {
+        "frames": 111360,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.8,
+      "true_peak_dbfs": -1.9
+    },
+    {
+      "id": "rolf-01",
+      "speaker": "Rolf",
+      "gain_db": 0.0,
+      "source_float_sha256": "907958cba3fe6793465885622e00d2e39a351bbf66c2ec811ac3baab4356818b",
+      "source_pcm_sha256": "811ab753b8c809a73d8c6d2bd33d5563cb6be4cc10e4a7af017ec888df893f35",
+      "sha256": "811ab753b8c809a73d8c6d2bd33d5563cb6be4cc10e4a7af017ec888df893f35",
+      "header": {
+        "frames": 69120,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.5,
+      "true_peak_dbfs": -4.4
+    },
+    {
+      "id": "rolf-03",
+      "speaker": "Rolf",
+      "gain_db": 0.0,
+      "source_float_sha256": "0166a2eec330301173e22cdddbe32bb82fcc846329ba187580f76eea0702c35b",
+      "source_pcm_sha256": "faf85c7bba8ad25459515d9b1ab0fd0eb8f7cf05006aafee2ab9a7391f9713e6",
+      "sha256": "faf85c7bba8ad25459515d9b1ab0fd0eb8f7cf05006aafee2ab9a7391f9713e6",
+      "header": {
+        "frames": 145920,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.6,
+      "true_peak_dbfs": -3.1
+    },
+    {
+      "id": "rolf-04",
+      "speaker": "Rolf",
+      "gain_db": 0.0,
+      "source_float_sha256": "1e83a733714e5603760f14a0df60c0033071417b6a5fc7770f082e8497e23c67",
+      "source_pcm_sha256": "28570e3fece2c4c394b2e45d02b75fc397192c6b7e308142bf21da97bcb73333",
+      "sha256": "28570e3fece2c4c394b2e45d02b75fc397192c6b7e308142bf21da97bcb73333",
+      "header": {
+        "frames": 278400,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.4,
+      "true_peak_dbfs": -3.1
+    },
+    {
+      "id": "rolf-06",
+      "speaker": "Rolf",
+      "gain_db": 0.0,
+      "source_float_sha256": "8c22c144cbd1ffea23318ee8ec7aa86c85afdfc82fe641fc9a75c65ad0263b4e",
+      "source_pcm_sha256": "b31bafdef71b428fae19ea35ebc322ea5e00a8a4995f28975393b69217a296ef",
+      "sha256": "b31bafdef71b428fae19ea35ebc322ea5e00a8a4995f28975393b69217a296ef",
+      "header": {
+        "frames": 92160,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.5,
+      "true_peak_dbfs": -3.2
+    },
+    {
+      "id": "rolf-07",
+      "speaker": "Rolf",
+      "gain_db": 0.0,
+      "source_float_sha256": "3cfe9e760701f37bf1ebe0f12e1c6fe6216214688a52061dbe145c2f9d470b23",
+      "source_pcm_sha256": "5f1ceb37316ddcf01ddc4a38690aa3ac983d99cd00bbe6c09bd7f24a6b0b3694",
+      "sha256": "5f1ceb37316ddcf01ddc4a38690aa3ac983d99cd00bbe6c09bd7f24a6b0b3694",
+      "header": {
+        "frames": 113280,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.3,
+      "true_peak_dbfs": -0.6
+    },
+    {
+      "id": "miranachw2-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "4bcb4da116d1596930c7d31e3eb43eedb9ddb77a353b3be92601259f109547bf",
+      "source_pcm_sha256": "cfaa93b4ef8aeba8e87295194cb7ce248ba69fcaf2b31fcff20a0ae64c6630b2",
+      "sha256": "ff063be44fca66676e4e878f77a8ddc4abf96cd6854aeb85bd65e0f9f29562a1",
+      "header": {
+        "frames": 190080,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.2,
+      "true_peak_dbfs": -4.7
+    },
+    {
+      "id": "miranachw2-02",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "4c4b9e938b123ee82a39ec685c3acc35dc3b591644bd27588c8c78a4264f0c19",
+      "source_pcm_sha256": "8867d55e147e3fd5f0ca1ecd79c8c65788224b6b5675a2d61f23b7bd93af0ba9",
+      "sha256": "fc821ff18acb03c5476b8149b225301dd036add23972401bcd8f4eca006806d2",
+      "header": {
+        "frames": 180480,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -22.1,
+      "true_peak_dbfs": -7.0
+    },
+    {
+      "id": "miranachw2-04",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "2817cf9a4f8298cd97302eca0c6951e59d8d12e742ec876f3b2ab3d7d3596747",
+      "source_pcm_sha256": "34a0e0cc760a5d07b9741af7afe4d6be75ada41f7478dd6a78e038680a78714a",
+      "sha256": "300febc3ebb0a1afe5e181f26cfb5e907530299d5a60ea6f4ae52fdb66dcd93f",
+      "header": {
+        "frames": 170880,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.9,
+      "true_peak_dbfs": -6.2
+    },
+    {
+      "id": "alexplusnachw2-01",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "f9ae05056d4620688b6658964d6efdc682966e695ec7084693481c4b0a21182b",
+      "source_pcm_sha256": "a6ad62ba237f94234665ecbcf87e11c5d994d2fa85ce4d95411440ab45343d24",
+      "sha256": "f35f411ed04577b17a3872acc532caf779ffe3adcdbb0ad03edfe92fe42fa600",
+      "header": {
+        "frames": 205440,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -19.5,
+      "true_peak_dbfs": -2.4
+    },
+    {
+      "id": "alexplusnachw2-02",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "7d2a0f251b0e17731cf2c6fc6451e4931e0feacbd4256b568208a1242346e6bb",
+      "source_pcm_sha256": "a11523a01e7785c027e6d56f67e5fac971ac77d518e01521f3c2e52f56062347",
+      "sha256": "7c6277e8ed589ca3f245c6f8bba0d62284241a31c9f0d2b6c4ba079e266daca6",
+      "header": {
+        "frames": 222720,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.4,
+      "true_peak_dbfs": -2.1
+    },
+    {
+      "id": "alexplusnachw2-04",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "4f7793a64f4aa0b1a9c7521b631935790b7a4ff49b36e4109daf43001e593e6b",
+      "source_pcm_sha256": "7ed793cdd42c18f3f57616de746d03501d94b4a9b571831aba5c81fcb55c0635",
+      "sha256": "0c6d84a5d1b0a950ed1f41c7886213e6aab807b058a408e4b3239139fd8b622d",
+      "header": {
+        "frames": 266880,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.1,
+      "true_peak_dbfs": -1.8
+    },
+    {
+      "id": "alexplusnachw2-05",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "71754bf51d478d1003057da951370b561a778aa193b6878e3a95bff82f90699f",
+      "source_pcm_sha256": "8bbd2fc2971d8ec16d0f8e94fe082fd97af0ee39de1b3fbac6471b28ef76c5bf",
+      "sha256": "851950f261bf282e6651b69365ae428a189026a912504fb198f5fd625df2f48b",
+      "header": {
+        "frames": 168960,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.1,
+      "true_peak_dbfs": -1.9
+    },
+    {
+      "id": "alexplusnachw2-07",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "c15003d8abeaf7af814af622cd7e52a0f28fa20704b88003691b4600301e2a34",
+      "source_pcm_sha256": "a4c0ada0651f9ecef1d9a4fc829c041145f58c662c631dd459b6de4818a9e824",
+      "sha256": "5d753eba925a551ff4227ddead2825fa5c0e53961df3e9b8bf28f8b61adecd22",
+      "header": {
+        "frames": 86401,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.4,
+      "true_peak_dbfs": -2.2
+    },
+    {
+      "id": "w1-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "b355e03c7e7b42ed6f99cadb2fc1ed62c8c30d8b442aee71456863a88dff33cf",
+      "source_pcm_sha256": "aed506bb35e42712aeb3709b124dfb23d7c21e57a44de185f72bfcd08eee5207",
+      "sha256": "eaa6ba97ed80e009d1e5cd41dff648fa1b550e0f10ff60d0798794c151a82ff5",
+      "header": {
+        "frames": 155520,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.1,
+      "true_peak_dbfs": -6.0
+    },
+    {
+      "id": "w1-02",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "dc7a07a4544beb33d93e06352912a05db7ca8332c07544323b08d7e18082e8f9",
+      "source_pcm_sha256": "87a353fa382de7aac558b59964679ab322ba79e69e7c7a64e09cd991ab2e54ac",
+      "sha256": "c10774ff09d9921ef1882a37cf084739c34d3e044c1a8a736503042d42d58c8e",
+      "header": {
+        "frames": 144000,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.5,
+      "true_peak_dbfs": -5.4
+    },
+    {
+      "id": "w2-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "d7454722bb41da9cae8c3d3e15e7a7bb41e09cf3a106c3259830d31cd61bd0e8",
+      "source_pcm_sha256": "0e992b235683ba1743b8033748ed4dce712e07f8a9172c3a6f017f68f22cd948",
+      "sha256": "0152b3b874bc381f1c990bcb1b81d1bc90a422a78197b29e41812610dc753f0f",
+      "header": {
+        "frames": 203520,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.3,
+      "true_peak_dbfs": -5.3
+    },
+    {
+      "id": "w2-02",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "bc7e4e071ae44974945a13dfd65cea63c229a26ceb9e39de919ab70c4e704018",
+      "source_pcm_sha256": "06f49f47b5568f9c1521d48bc2f8c6bd39d3730b80b1ecc0557dc14390560e99",
+      "sha256": "d0877a485554aef217e1c9a0e52023ed17327a21fc23a64a10f453dbca715d61",
+      "header": {
+        "frames": 122880,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.9,
+      "true_peak_dbfs": -6.3
+    },
+    {
+      "id": "w2-03",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "2cb2cb06bcd6bb085f84fe1c2b50747ba0191ee43d36ec073b180e6392b9b431",
+      "source_pcm_sha256": "4ace66b793604c47ab68a54da12c5450213bcc3af932728d0f7e315dba7c3d5f",
+      "sha256": "daf2b54d7db6a3e7896123ec1fee42d6823e81e6d814b42a8dbfb3fbe4a78468",
+      "header": {
+        "frames": 78720,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -17.9,
+      "true_peak_dbfs": -3.7
+    },
+    {
+      "id": "w2-04",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "27ae0ebd6dc01dca5535a920ff5e4757db3473bb40ce6f979281bf7e964ace99",
+      "source_pcm_sha256": "993cd2a3f86c592868adda81314835c984bed2cedc5771ef925d284bb9e9b468",
+      "sha256": "a14ac620f4e2cb9e6cc65900749715aeda3c5dd3e0d50100ff81e191c2753702",
+      "header": {
+        "frames": 142080,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.1,
+      "true_peak_dbfs": -6.5
+    },
+    {
+      "id": "w3v-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "738d1eb1432b7be069ffaed5ac43b4ccc87e5ac092dd0aa9e17d44a59b4502ed",
+      "source_pcm_sha256": "de9630a9f4d2207efd19ee68391cf34e06dbe7665a922e801fbd4f9bfc19bac5",
+      "sha256": "e451e84ef4ef1d34ef8b7ed6bff8701ca879174475694e3179a0b0fbcad50487",
+      "header": {
+        "frames": 145920,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.6,
+      "true_peak_dbfs": -6.9
+    },
+    {
+      "id": "w3v-02",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "bac1419aa28714c7d3c2b1b6d1f462214fd196d9a59a450c9a5ef8c17846a765",
+      "source_pcm_sha256": "fab4ade19b2591097f0c4f2026000ffbb714259891d4f7739cb6371fddef9a31",
+      "sha256": "f3eb3beaa70fa336620b5f0c1962d86411226561b6cb5725173405fa162d8479",
+      "header": {
+        "frames": 103680,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.5,
+      "true_peak_dbfs": -3.5
+    },
+    {
+      "id": "w3-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "e5bac08263a4c2de7f41ab095af1f621a975e35ebe09f935227783fa5ed24665",
+      "source_pcm_sha256": "c10c9fc2a14aea07e416eb4cc76b95712faa2a77122a697238b4d786443c1fe3",
+      "sha256": "b4b978902cf755d13e72c1b1c7dcffab7eddf4eb299f27a27c11274761ad35e6",
+      "header": {
+        "frames": 243840,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.4,
+      "true_peak_dbfs": -5.3
+    },
+    {
+      "id": "w3-02",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "98aac517f9279174be5c66118e9adadf436292cdfb4a3a51d9f5eabf6ae969a2",
+      "source_pcm_sha256": "0d422b7de27f97bf476c7bea8792ef4cde9b63c44ce010b1ed16e00eecf9c35a",
+      "sha256": "4f09267a1975c4e52f08e02ae7e603a02cb64253beac16a333db8bda869ab8ea",
+      "header": {
+        "frames": 188160,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.7,
+      "true_peak_dbfs": -5.9
+    },
+    {
+      "id": "endeA-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "16622a22c667182ae36ea957892c04e3cf68697e87aa729dfb0ee9484fce15d6",
+      "source_pcm_sha256": "b82558211ba78f223dd7dbc908cba0b788d2b2ca472ac91dec03971a39a82dfa",
+      "sha256": "949d29b8f8c631549c8912f7331fd4224802ff6be965fddf84d97524b72c8add",
+      "header": {
+        "frames": 193920,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.0,
+      "true_peak_dbfs": -5.1
+    },
+    {
+      "id": "endeA-02",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "2b8ada8da043da570dd1b288d35f812abc52fb1a8445893b8e937eca11cf173b",
+      "source_pcm_sha256": "74fc762616a5694626d1aa21af4fa1954907e278058f7bf60ba2f2cc2abcb749",
+      "sha256": "125f226a1f4e42c290e361e2e60d39005173dbfa1375b87dc24aa5eb86c0ff36",
+      "header": {
+        "frames": 109440,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -21.2,
+      "true_peak_dbfs": -2.4
+    },
+    {
+      "id": "endeA-03",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "7a4237ccd78a48364e1a742a658fc7c1ea0369c7aa59f83af3468051f0528ca3",
+      "source_pcm_sha256": "7b048ef2691ada4952dff2abd381a5733c4cbe4130d8e2bc840c1fc2561288fa",
+      "sha256": "95d0a0f340777920f3eafc5daad648c8d6d41042947cd276de80d1b799ef4d23",
+      "header": {
+        "frames": 84481,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -22.4,
+      "true_peak_dbfs": -6.8
+    },
+    {
+      "id": "endeA-04",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "a35adeecb2d6eb0a752bdb39cd26192eeacf065ed6a614b637833c75bcc5544a",
+      "source_pcm_sha256": "4663c5fa16a5bd2d22e45bafbf0d4aaf65cd1b509d8e8fa42ad696d9d40bbbab",
+      "sha256": "c508233f2a8890bff0a9b023ec5fe71c8821e83e53f58f4ef20afaec9df86f9c",
+      "header": {
+        "frames": 117120,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -18.9,
+      "true_peak_dbfs": -5.2
+    },
+    {
+      "id": "endeB-01",
+      "speaker": "MIRA",
+      "gain_db": -2.85,
+      "source_float_sha256": "5e046839f5ce9f778b042039eea722140a0cd5d22165c567bd0dfca61f61c2c5",
+      "source_pcm_sha256": "50b089666e2dc8531486ec38fdf696eda9f26ac7db8400dff22440269e38acc3",
+      "sha256": "045cf5c54f21256675a5fc44e69c44e3aeb0d28b947bd6d9f4ee4f5f2afbf82e",
+      "header": {
+        "frames": 153600,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.4,
+      "true_peak_dbfs": -6.4
+    },
+    {
+      "id": "endeB-02",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "407dc46e4208aa2d201069774931183f81e4a97460224865de4b76074790293c",
+      "source_pcm_sha256": "3d4aaf8e37cce23fce45202db7fbd9b5e78b4db60586e268903976bfdf3f5d5b",
+      "sha256": "e6bd14aef19611b91e35e5549ee1f5deffea8ad810547e082233d1bbf7d5f62c",
+      "header": {
+        "frames": 132480,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -18.3,
+      "true_peak_dbfs": -2.0
+    },
+    {
+      "id": "endeB-04",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "dabd12360011f5f23b01772cbd32e2b92ad64e62519ee99ff1630dcdbe4d965b",
+      "source_pcm_sha256": "b46373400353e4c3c4f13d1b34ca0ba82562a9936d43f01d1ff200bf52fc5508",
+      "sha256": "99202813322c493fc6a80d96bb22aa55f9bf53c10b9e0a23015be8d384ed99d0",
+      "header": {
+        "frames": 155520,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -20.0,
+      "true_peak_dbfs": -2.2
+    },
+    {
+      "id": "endeB-06",
+      "speaker": "Alex Plus",
+      "gain_db": 0.35,
+      "source_float_sha256": "2e4a11f299abbe6eedb658799ba47be3d524ae38a9b8ff0ca0d2128728747ebf",
+      "source_pcm_sha256": "14e5dd603879ed3e64f7a47f45df440c682072634759837942053886d9e7effb",
+      "sha256": "60d3cf56cb215c2b902b20bcfa5b5bca95ae89d272864c0d3e5a311cb4b14672",
+      "header": {
+        "frames": 63360,
+        "rate": 24000,
+        "channels": 1,
+        "sample_bytes": 2
+      },
+      "integrated_lufs": -23.0,
+      "true_peak_dbfs": -3.3
+    }
+  ],
+  "auditioned_by_operator": false
+}

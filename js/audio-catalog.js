@@ -1,5 +1,6 @@
 "use strict";
-// Generated asset catalog by Cedric; audio is local Qwen3-TTS batch 004.
+// Generated asset catalog by Cedric; local Qwen3-TTS batch004, same selected voices.
+// Constant speaker gain documented in assets/audio/provenance.json; IDs/durations unchanged.
 const AUDIO_CATALOG = Object.freeze({
   "ankunft-01": {
     "url": "assets/audio/ankunft-01.wav",
