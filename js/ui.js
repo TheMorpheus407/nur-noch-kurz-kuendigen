@@ -720,10 +720,11 @@ const UI = {
 
   /* Bei bewusstem Einschalten: genau die gerade sichtbaren vertonten
      Verfahrenszeilen der tatsächlich aktiven Ansicht in sichtbarer
-     Reihenfolge abspielen (Erfolgsfolge bzw. W3-Einleitung). Keine
-     veraltete Folge, keine neue Runde, keine Dialogansicht im
-     Hintergrund. Stille Zeilen bleiben still; ohne vertonte Zeilen
-     passiert nichts. */
+     Reihenfolge abspielen (Erfolgsfolge). Die W3-Einleitung läuft im
+     Dialogmotor und wird dort zeilenweise bedient — in der reinen
+     Kartenansicht darf keine längst abgeschlossene Einleitungsfolge
+     mehr gestartet werden. Stille Zeilen bleiben still; ohne vertonte
+     Zeilen passiert nichts. */
   playVisibleProcedureAudio() {
     const view = this._procedureView;
     if (!view || !view.rid) {
@@ -735,10 +736,6 @@ const UI = {
     }
     if (view.type === "success" && Array.isArray(w.erfolg)) {
       GameAudio.playSequence(w.erfolg.map((l) => l.id));
-      return true;
-    }
-    if (view.type === "round" && Array.isArray(w.vorher)) {
-      GameAudio.playSequence(w.vorher.map((l) => l.id));
       return true;
     }
     return false;
@@ -987,6 +984,14 @@ const UI = {
     this.rememberFocus();
     this.els.procedurePanel.hidden = false;
     this.trackOpen("procedure");
+    if (this._dialogue) {
+      /* W3-Einleitung läuft im Dialogmotor: das Dialogpanel muss nach
+         dem gesamten Öffnungsvorgang das oberste aktive Panel sein —
+         das trackOpen("procedure") oben darf es nicht verdecken. */
+      this.trackOpen("dialogue");
+      this.els.btnDialogueNext.focus();
+      return;
+    }
     const firstBtn = this.els.procedureBody.querySelector("button");
     (firstBtn || this.els.btnProcedureClose).focus();
   },
@@ -1050,32 +1055,26 @@ const UI = {
         UI_TEXTS.resolvedPrefix + " " + s.rounds.resolved.join(", ")));
     }
 
-    /* W3: vor der Behauptung das kurze tatsächliche Gespräch (vorher). */
-    if (Array.isArray(w.vorher)) {
+    /* W3: vor der Behauptung das kurze tatsächliche Gespräch (vorher)
+       — nacheinander im bestehenden Dialogmotor: eine Zeile mit
+       passendem Portrait und Replay, manuelles Weiter (kein
+       Sequenzmotor, kein Auto-Weiter, Originalzeilen/IDs/Reihenfolge
+       unverändert). Erst nach dem geschlossenen Dialog erscheinen die
+       unveränderte Behauptung und die Kartenauswahl. Eine falsche
+       Karte rendert diese Ansicht (playIntro=false) und öffnet die
+       Einleitung NICHT erneut. */
+    if (Array.isArray(w.vorher) && playIntro) {
       body.appendChild(this.make("p", "claim-by", UI_TEXTS.vorherLabel));
-      for (const line of w.vorher) {
-        this.safeLog(line.speaker, line.text, line.id);
-        const el = this.make("div", "dialogue-line");
-        const portrait = this.makeSpeakerPortrait(line.speaker, line.id);
-        if (portrait) {
-          el.appendChild(portrait);
+      this.openDialogue({
+        title: w.titel,
+        steps: this.buildSteps(w.vorher),
+        onDone: () => {
+          this.renderRound(rid, body, false);
+          const firstBtn = this.els.procedureBody.querySelector("button");
+          (firstBtn || this.els.btnProcedureClose).focus();
         }
-        el.append(
-          this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
-          this.make("p", "dialogue-text", line.text)
-        );
-        /* Vertonte Einleitungszeile: klare Wiederholfunktion; stille
-           Zeilen und fehlende Katalog-IDs bleiben ohne Button. */
-        if (GameAudio.hasLine(line.id)) {
-          el.appendChild(this.makeReplayButton(line.id, "Zeile wiederholen"));
-        }
-        body.appendChild(el);
-      }
-      if (playIntro) {
-        /* W3-Einleitung: bei aktivierten Stimmen in sichtbarer
-           Reihenfolge abspielen; stille Zeilen bleiben still. */
-        GameAudio.playSequence(w.vorher.map((l) => l.id));
-      }
+      });
+      return;
     }
 
     /* Offene Aussage mit Sprecher. */
