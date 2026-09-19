@@ -314,7 +314,8 @@ const UI = {
       ["dialogue", this.els.dialoguePanel],
       ["evidence", this.els.evidencePanel],
       ["log", this.els.logPanel],
-      ["procedure", this.els.procedurePanel]
+      ["procedure", this.els.procedurePanel],
+      ["ending", this.els.endingPanel]
     ];
     for (const [id, el] of panels) {
       if (!el || el.hidden) {
@@ -409,6 +410,7 @@ const UI = {
     this.els.procedurePanel.hidden = true;
     this.els.endingPanel.hidden = true;
     this.els.hotspotInfo.hidden = true;
+    this.removeEndingView();
     this.syncActivePanel();
   },
 
@@ -457,6 +459,12 @@ const UI = {
         this._failedRoomImageUrl === roomArt.url);
     } else {
       this.els.stage.classList.add("stage--list");
+    }
+
+    /* Bestehende Endansicht (A/B) nicht bei einem Zwischenrender ersetzen —
+       sie wird nur durch closeAllPanels/Laden/Checkpoint/Neustart entfernt. */
+    if (this.els.stage.querySelector(".ending-view")) {
+      return;
     }
 
     const hotspotsEl = this.els.stageHotspots;
@@ -1266,6 +1274,9 @@ const UI = {
        die Endwahl ist erst nach geladenem Entscheidungspunkt wieder offen. */
     this.trackClose("procedure");
     this.els.procedurePanel.hidden = true;
+    /* Sichtbares Endmotiv in der Bühne: A = Abwesenheit, B = privates
+       Gegenüber. Reine UI-Darstellung, kein State, kein Ton. */
+    this.applyEndingView(endingId);
     this.openDialogue({
       title: e.titel,
       steps: steps,
@@ -1291,10 +1302,48 @@ const UI = {
     body.appendChild(actions);
 
     this.renderWorld();
+    this.applyEndingView(endingId);
     this.els.endingPanel.hidden = false;
     this.syncActivePanel();
     this.setStatus(UI_TEXTS.ended);
     btn.focus();
+  },
+
+  /* ---------- Sichtbares Endmotiv in der Bühne (nur UI-lokal) ----------
+   * Ende A: ruhige dunkle, leere Terminalfläche — Abwesenheit von
+   *   Alex Plus, ohne Plus-Portrait, ohne Störanimation oder Ton.
+   * Ende B: schlichtes privates Gerätefenster mit dem tatsächlichen
+   *   Plus-Portrait (makeSpeakerPortrait, Original-ID) und der
+   *   ungesprochenen Beschriftung „Privates Gerät“; keine
+   *   NEBENBEI-Marke, kein neues Raum-Vollbild, keine neue Bilddatei.
+   * Fehlt das Portrait, bleibt das beschriftete Fenster stehen —
+   * Text und Bedienung blockieren nicht. */
+  applyEndingView(endingId) {
+    this.removeEndingView();
+    const stage = this.els.stage;
+    const view = this.make("div", "ending-view ending-view--" + endingId);
+    view.setAttribute("aria-hidden", "true");
+    if (endingId === "A") {
+      view.appendChild(this.make("div", "ending-absence", "—"));
+    } else {
+      const device = this.make("div", "ending-device");
+      device.appendChild(this.make("span", "ending-device-label", "Privates Gerät"));
+      const portrait = this.makeSpeakerPortrait("Alex Plus", null);
+      if (portrait) {
+        portrait.classList.add("ending-portrait");
+        device.appendChild(portrait);
+      }
+      device.appendChild(this.make("span", "ending-device-caption", "Ohne Logo, ohne Abo"));
+      view.appendChild(device);
+    }
+    stage.appendChild(view);
+  },
+
+  removeEndingView() {
+    const view = this.els.stage.querySelector(".ending-view");
+    if (view) {
+      view.remove();
+    }
   },
 
   /* ---------- Speichern / Laden / Entscheidungspunkt / Neustart ---------- */

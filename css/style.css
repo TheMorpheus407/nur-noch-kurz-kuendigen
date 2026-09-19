@@ -802,6 +802,83 @@ blockquote.claim {
   flex-wrap: wrap;
 }
 
+/* ---------- Sichtbares Endmotiv in der Bühne (A/B) ----------
+   Reine Darstellungsklassen: sie entstehen nur über
+   UI.applyEndingView und werden von closeAllPanels (Laden,
+   Checkpoint, Neustart) entfernt. Kein State, kein Ton,
+   keine Animation. */
+.ending-view {
+  display: none;
+}
+
+.game:has(.ending-view) .stage-bg {
+  display: none;
+}
+
+.game:has(.ending-view) .stage-hotspots {
+  display: none;
+}
+
+.game:has(.ending-view) .ending-view {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  min-height: 300px;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+/* Ende A: ruhige dunkle, leere Terminalfläche — Abwesenheit,
+   kein Plus-Portrait, keine Störanimation, kein Blinken. */
+.ending-view--A {
+  background:
+    linear-gradient(rgba(246, 241, 228, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 241, 228, 0.05) 1px, transparent 1px),
+    var(--ink);
+  background-size: 28px 28px, 28px 28px, auto;
+}
+
+.ending-absence {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: rgba(246, 241, 228, 0.4);
+}
+
+/* Ende B: schlichtes privates Gerätefenster, keine NEBENBEI-Marke. */
+.ending-device {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  max-width: 100%;
+  width: min(260px, 100%);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+.ending-device-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+
+.ending-portrait {
+  width: 150px;
+  height: 150px;
+  max-height: 150px;
+}
+
+.ending-device-caption {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
 /* ---------- Aktionen und Sekundärmenü ---------- */
 
 .toolbar {
@@ -1053,6 +1130,24 @@ blockquote.claim {
   }
 
   .speaker-portrait {
+    width: 112px;
+    height: 112px;
+    max-height: 112px;
+  }
+
+  /* Gerätefenster: Portrait bleibt innerhalb des Fensters,
+     kein horizontaler Überlauf bei 320px. */
+  .ending-view {
+    min-height: 240px;
+    padding: 0.65rem;
+  }
+
+  .ending-device {
+    width: min(200px, 100%);
+    padding: 0.6rem;
+  }
+
+  .ending-portrait {
     width: 112px;
     height: 112px;
     max-height: 112px;
