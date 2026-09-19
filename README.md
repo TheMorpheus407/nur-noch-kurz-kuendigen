@@ -1,227 +1,60 @@
 # Nur noch kurz kündigen
 
-Vollständige lokale Textfassung (Graphic-Novel-Textprototyp) eines
-Retrofuturistischen Kundencenters: Alex will das Abo für seinen digitalen
-Doppelgänger „Alex Plus“ kündigen und muss im Widerspruchsverfahren
-NEBENBEI-7 beweisen, dass er der Kunde ist und nicht das Zusatzprodukt.
+Du willst das Abo für deinen digitalen Doppelgänger kündigen. Der Kundenservice
+hat Rückfragen. Dein Doppelgänger auch. Und der Ficus weiß mehr, als er sollte.
 
-- Deutsch, komplett offline, keine externen Skripte/CDNs/Pakete/Schriften,
-  keine Telemetrie, keine Netzwerkzugriffe, keine Live-Modellaufrufe.
-- Keine Bilder: bewusste Text-/CSS-Platzhalter (keine Emoji-Figuren,
-  keine SVG-Figuren). Dieser Stand wird später mit lokalen Krea-Assets
-  bebildert.
-- Lokale Stimmen: 45 vorproduzierte Qwen3-TTS-WAV-Dateien (Batch 004)
-  für vertonte Dialogzeilen; Zuordnung ausschließlich über die stabilen
-  Zeilen-IDs aus `js/audio-catalog.js`. Stimmen starten ausgeschaltet;
-  keine neuen Stimmen erzeugt, keine Ersatzstimmen, keine
-  Geschwindigkeitsänderung.
-- Drei NPCs (MIRA, Alex Plus, Rolf); Alex ist die stille Spielerrolle mit
-  sichtbaren Texten. Alle Geschichten und Beweise sind echte sichtbare Texte.
-- Alle Firmen, Verfahren und Regeln sind fiktiv.
+Ein kurzes deutsches Point-and-Click-Spiel im Graphic-Novel-Stil: zwei Räume,
+drei Widersprüche und zwei Enden.
 
-## Starten
+## Spielen
 
-**Einfachster Start:** `index.html` direkt im Browser öffnen
-(Doppelklick bzw. Datei über `file://`). Klassische lokale Scripts, keine
-Module, keine fetch-Abhängigkeiten — läuft ohne Server.
+Das vollständige Spielpaket herunterladen, entpacken und `index.html` im Browser
+öffnen. Die Ordner `assets`, `css` und `js` müssen daneben liegen bleiben.
+Mit **Stimmen an** aktivierst du die vorbereiteten Dialogstimmen.
 
-**Optionale lokale Servervariante** (im Projektverzeichnis):
+Du brauchst zum Spielen keine KI-Modelle, keine KI-Grafikkarte und keine
+Internetverbindung. Code, Bilder und Stimmen liegen im Paket. Das Spiel führt
+keine Modellinferenz aus und verwendet keine externen Skripte oder Schriftarten.
 
-```bash
+Die beschrifteten Orte in den Räumen führen zu Gesprächen und Beweisen.
+Gefundene Karten bleiben im Beweisordner. Das Widerspruchsverfahren öffnest du
+über die Werkzeugleiste. Dialoge lassen sich mit **Weiter** lesen; **Escape**
+schließt das zuletzt geöffnete Panel. Alle Aktionen sind auch per Tastatur
+erreichbar.
+
+**Speichern** und **Stand laden** verwenden den Browserspeicher. Falls dieser
+blockiert ist, weist das Spiel auf die nur temporäre Speicherung hin. Nach dem
+Ende führt **Zum Entscheidungspunkt** zur anderen möglichen Wahl zurück.
+
+Optional kannst du im Spielordner einen lokalen Server starten:
+
+```sh
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Dann öffnen: http://127.0.0.1:8000/
+Danach im Browser `http://127.0.0.1:8000/` öffnen.
 
-## Bedienung (Spielfluss)
+## Herstellung
 
-1. **Ankunft:** Beim Start spielt die Ankunftsszene ab. Dialoge laufen über
-   klare **Weiter**/**Schließen**-Schaltflächen, sind jederzeit wieder
-   aufrufbar (NPCs) und im **Verlauf** nachlesbar.
-2. **Räume:** Empfang und Vorführraum, je vier gut sichtbare
-   Hotspot-Schaltflächen (Gespräch/Fundstelle), Raumname, kurze Beschreibung
-   und Besuchsmarkierung in der Raumnavigation. Der Vorführraum ist erst
-   nach dem Fund von E2 freigegeben — kein verstecktes Pixelraten.
-3. **Funde:** Beweiskarten E1–E5 werden an ihren Fundstellen jeweils genau
-   einmal in den **Beweisordner** vergeben; dort steht ihr vollständiger
-   Text. Nach E2 sind alle übrigen Funde frei erreichbar.
-4. **Widerspruchsverfahren** (nach E2, über die Werkzeugleiste):
-   - Runde W1: Behauptung „persönliche Bestätigung um 09:01“ → Karte **E2**
-   - Runde Rundenfolge W1→W2→W3; W2: „Satz stammt vom Assistenten“ → **E3**
-   - W3: erst kurzes tatsächliches Gespräch, dann „ohne Abo kein
-   Weiterbetrieb“ → **E4**
-   - Falsche Karte → passende Rückmeldung, Runde bleibt offen;
-     wiederholte Klicks lösen keine nächste Runde versehentlich mit.
-   - **Weiter untersuchen** ist in jeder Runde zugänglich, ohne
-     Fortschrittsverlust; Rückkehr führt zur richtigen offenen Runde.
-   - Nach W1 behauptet MIRA bei Wiederbesuch die widerlegte persönliche
-     Verlängerung nicht mehr als Tatsache (vorhandener W1-Folgetext).
-   - Nach W2 sind die abgeschaltete Bindungsroutine und die freigegebene
-     Kündigung sichtbar (u. a. Konsole, MIRA, Alex Plus); wiederholte
-     NPC-Besuche behaupten keine neue aktive Bindung oder gesperrte Kündigung.
-   - W3 erschließt die zusätzliche Exportoption — keine neue Kündigungshürde.
-5. **Entscheidung** (nach W3): Beide Optionen wörtlich beschriftet —
-   „Kündigen und Kopie löschen.“ bzw. „Kündigen und Kopie mitnehmen.“ —
-   jeweils mit vollständigem Enddialog.
-   - Ende A: Zwischen Abschlussmeldung und MIRAs Zufriedenheitsfrage
-     ein bewusster Weiter-Schritt (Lesemoment). Danach ist die Löschung
-     abgeschlossen: Alex Plus erscheint nicht wieder als aktiver Avatar.
-   - Beide Enden bieten **„Zum Entscheidungspunkt“** und ermöglichen so die
-     andere Wahl. Kein automatischer Neustart am Ende.
+Begleitprojekt zu einem gesponserten Video für The Morpheus mit ALTERNATE,
+AMD und Samsung. Auftrag und kreative
+Entscheidungen: Cedric. Cedric bediente die Werkzeuge, formulierte die
+Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
 
-## Speichern, Laden, Entscheidungspunkt, Neustart
+- Spielcode und Dialogdaten entstanden in tatsächlich protokollierten lokalen
+  Qwen3.8-27B-Läufen. Cedric ergänzte dokumentierte direkte Korrekturen an
+  Speicherrandfällen, Darstellung, Syntax, Audioauswahl und mobilem Bildlayout
+  (019d). Die Git-Historie
+  unterscheidet diese Beiträge.
+- Die fünf Spielbilder entstanden mit lokalem Krea 2 Turbo FP8. MIRA und
+  Alex Plus sind ausgewählte Ausschnitte aus Figurenbögen; Rolf stammt direkt
+  aus dem Vorführraum. Diese festen Grafiken verwenden **keine Charakter-LoRA**.
+  Bildherkunft und Prüfsummen stehen in `assets/art/provenance.json`.
+- Die 45 vorbereiteten Sprachdateien stammen aus lokalem Qwen3-TTS mit den von
+  Cedric gewählten Stimmreferenzen MIRA B, Alex Plus A und Rolf. Alex als
+  Spielerfigur bleibt stumm. Alternative Enden sind enthalten; die summierte
+  Audiodauer entspricht deshalb keiner gemessenen Spielzeit.
 
-- **Speichern / Stand laden** (Werkzeugleiste) über die State-Methoden mit
-  verständlichen Erfolgs-/Fehlermeldungen.
-- **Temporäre Speicherung:** Ist `localStorage` blockiert oder fehlerhaft
-  (z. B. Quota), wird automatisch ein RAM-Speicher für dieselbe Sitzung
-  genutzt; die UI zeigt die Einschränkung klar an. Speicherblockade oder
-  ungültige Daten lassen das Spiel nicht abstürzen; ungültige gespeicherte
-  Daten werden abgelehnt, der laufende Stand bleibt erhalten.
-- **Entscheidungspunkt:** Wird unmittelbar nach Runde W3 (vor der Endwahl)
-  automatisch gesichert und ist über „Zum Entscheidungspunkt“ ladbar —
-  auch nach beiden Enden. Damit bleibt die andere Endwahl erreichbar.
-  Ist `localStorage` blockiert, liegt der Checkpoint nur im
-  Sitzungs-RAM; die UI meldet das ehrlich (automatischer Checkpoint und
-  Entscheidungsansicht) und verspricht keine Wiederherstellung nach
-  Schließen/Neuladen.
-- **Stand laden:** Lädt den gespeicherten Stand; ist der geladene Stand
-  bereits beendet (A oder B), wird das passende Endpanel mit
-  „Zum Entscheidungspunkt“ wieder angezeigt — ohne neu zu entscheiden
-  oder den Stand zurückzusetzen.
-- **Neustart** erst nach echter Bestätigung; Abbrechen erhält den
-  Fortschritt. Der Neustart betrifft nur den Spielzustand (die eigenen
-  beiden Speicherslots), nie allgemeine Browserdaten. Beim normalen
-  Seitenstart wird bewusst **nicht** `GameState.reset()` aufgerufen — die
-  Initialisierung ist nicht destruktiv und lässt gespeicherte Slots erhalten.
-
-## Stimmen (lokale TTS)
-
-- **Tonumschalter:** Der Werkzeugleisten-Button **„Stimmen an“ /
-  „Stimmen aus“** (mit `aria-pressed`) schaltet die lokalen Stimmen um.
-  Stimmen beginnen **ausgeschaltet**; Audio startet nur auf aktive
-  Nutzerhandlung — Browser-Autoplay-Sperren werden nicht umgangen.
-- **Abdeckung:** Vertonte Zeilen sind über ihre stabile Zeilen-ID in
-  `js/audio-catalog.js` mit ihrer WAV-Datei verknüpft (MIRA, Alex Plus,
-  Rolf). Fehlende IDs (z. B. `miranachw2-05`, `miraNachW1-01`) und die
-  stillen Alex-Zeilen sind normale stille Textschritte — es wird nie ein
-  Ersatzclip abgespielt.
-- **Ablauf:** Pro sichtbarem Dialogschritt spielt die zugehörige Zeile;
-  W3-Einleitung und erfolgreiche Beweisrunden laufen in sichtbarer
-  Reihenfolge. „Weiter“, Schließen, Escape, Raum-/Panelwechsel, Laden,
-  Entscheidungspunkt und bestätigter Neustart stoppen laufende Sprache
-  und verwerfen wartende Clips. Auch der Wechsel auf eine stille oder
-  fehlende Dialogzeile und jeder Verfahrensübergang (Erfolg → nächste
-  Runde, Runde → Erfolgsansicht) stoppen die vorherige Stimme sofort und
-  verwerfen die wartende Folge. Höchstens ein Audioelement spielt
-  gleichzeitig; `preload="none"` — keine der 45 Dateien wird beim
-  Seitenstart geladen.
-- **Einschalten im Verfahren:** Wird „Stimmen an“ in einer sichtbaren
-  Verfahrensansicht gedrückt, starten die dort sichtbaren vertonten
-  Zeilen in sichtbarer Reihenfolge (Erfolgsfolge bzw. W3-Einleitung) —
-  keine veraltete Folge, keine neue Runde, keine Dialogansicht im
-  Hintergrund. Ausschalten stoppt sofort und leert die Queue.
-- **ended-Guard:** Ein `ended`-Ereignis führt die Folge nur weiter, wenn
-  es ein echtes Ende des tatsächlich aktuellen Clips ist (Element,
-  Quelle und Medienzustand passen); ein künstlich injiziertes oder
-  verspätetes Ereignis (z. B. QA-Fixture per `dispatchEvent`) wird
-  ignoriert.
-- **Wiederholen:** Vertonte Zeilen im Dialog, im Verlauf und an den
-  sichtbaren vertonten Verfahrenszeilen (Erfolgsfolgen, W3-Einleitung)
-  haben eine klare, tastaturbedienbare Wiederhol- bzw. „Anhören“-
-  Schaltfläche; stille Zeilen und fehlende Katalog-IDs bekommen keine.
-  Das Öffnen des Verlaufs selbst spielt keine Historie ab.
-- **Fehler:** Fehlende Dateien, nicht unterstütztes Audio oder
-  abgelehntes `play()` geben einen kurzen Statushinweis; der Text bleibt
-  vollständig bedienbar, es gibt keine Fehlerdialoge oder Abwürfe.
-
-## Tastatur und schmale Fenster
-
-- Alle Aktionen sind echte, erreichbare Buttons mit sichtbarem Fokus;
-  Fokusführung beim Öffnen/Schließen der Panels.
-- **Escape** schließt das zuletzt geöffnete schließbare Panel in der
-  tatsächlichen Öffnungsreihenfolge (Dialog/Verfahren/Ordner/Verlauf)
-  ohne Fortschrittsverlust; der Fokus kehrt zu einem erreichbaren Punkt
-  zurück. Keine Mauspflicht.
-- Layout für 320 px bis Desktop: Textumbrüche und breite Klickziele;
-  Text wird nicht durch `overflow:hidden` kaschiert; Beweisordner und
-  Verlauf auch auf schmalem Fenster bedienbar.
-- Leeres eingebettetes Favicon bleibt erhalten (kein `/favicon.ico`-404).
-
-## Dateien
-
-- `index.html` — Struktur, deutsche Beschriftungen, Tastaturzugriff,
-  leerer eingebetteter Favicon-Verweis
-- `css/style.css` — Graphic-Novel-Palette (Creme #EEE7D8, Petrol #28666A,
-  Pflaume #51364F, Koralle #EF806D, dunkle Kontur #25232B),
-  Formular-/Registerflächen, schmales Layout
-- `js/content.js` — alle Texte, Karten, Dialoge, Runden, Enden
-- `js/state.js` — Zustand, Regeln, Speichern/Laden, Validierung
-- `js/audio-catalog.js` — Katalog der 45 lokalen WAV-Dateien
-  (Zeilen-ID → url/speaker/duration); Operator-Kopie, unverändert
-- `js/audio.js` — kleiner Audio-Baustein: Umschalter, Einzel- und
-  Sequenz-Abspielung, Stopp, kurze Fehlerhinweise (klassisches Skript,
-  `preload="none"`, file://)
-- `js/ui.js` — Rendering, Dialogmotor, Hotspots, Verfahren, Enden,
-  Speichern/Laden, Tastatur, Stimmen-Anbindung
-- `js/main.js` — Start (nicht destruktive Initialisierung, `UI.init()`)
-
-## Ausgeführte Prüfung
-
-- `node --check` auf allen `js/*.js`-Dateien (Syntaxprüfung) — für diesen
-  Stand nach der Audio-Bedienungsreparatur tatsächlich ausgeführt; das
-  ist **ausschließlich** eine Syntaxprüfung, kein Browser- oder
-  Funktionstest.
-
-## Unabhängige Browserbefunde (Grundlage, keine Abnahme durch diese Reparatur)
-
-- Die drei hier korrigierten Bedienfehler (Escape schließt das zuletzt
-  geöffnete Panel; Endpanel nach Laden eines beendeten Stands; ehrliche
-  Checkpoint-Meldung bei blockiertem `localStorage`) beruhen auf
-  eigenständigen Browserbeobachtungen (Chromium/Firefox) über die
-  vollständigen Wege W1→W2→W3 und beide Enden.
-- Fünf Audio-Bedienbefunde (Chromium HTTP/`file://`, Firefox `file://`)
-  bildeten die Grundlage der jetzt eingesetzten Audio-Reparaturen:
-  A01 laufende Stimme unter einer stillen Zeile (ankunft-01→02),
-  A02 nicht verworfene W1-Folge unter W2 nach „Weiter“, A03 fehlende
-  Replay-Schaltflächen an sichtbaren vertonten Verfahrenszeilen, A04 kein
-  Start der sichtbaren Folge bei „Stimmen an“ in der Erfolgsansicht,
-  A05 künstlich injiziertes `ended`-Ereignis (QA-Fixture per
-  `dispatchEvent`, ausdrücklich kein natürliches Browserereignis)
-  schaltet die neue Folge vorzeitig weiter.
-- Diese Reparatur wurde **nicht** erneut in einem Browser abgenommen;
-  ob die Korrekturen im Browser wie beschrieben greifen, ist eine
-  separate Browserprüfung.
-
-## Nicht abgenommene Teile / offene Punkte
-
-- Die frühere Mikro-Browserprüfung (Empfangsraum-Ausschnitt) und die
-  29 bestandenen unabhängigen State-VM-Fixtures sind **keine**
-  Browserabnahme der jetzt vollständigen Oberfläche.
-- Noch keine Kunst: keine Bilder, keine erfundenen Bild-Assets; die
-  Bebilderung folgt mit lokalen Krea-Assets. Der Ton besteht aus den
-  45 lokalen WAV-Dateien (Batch 004) — keine neuen Stimmen erzeugt.
-- Die Audio-Anbindung — einschließlich der jetzt eingesetzten
-  Reparaturen zu A01–A05 — wurde **nicht** in einem Browser abgenommen
-  (keine Hörabnahme); `node --check` ist ausschließlich eine
-  Syntaxprüfung, kein Browser- oder Funktionstest. Die unabhängige
-  Browser-Nachprüfung und Hörabnahme dieser fünf Befunde steht noch aus.
-
-
-## Tatsächliche Herstellung
-
-Spielcode: protokollierte lokale Qwen3.8-27B-Läufe mit dokumentierten direkten
-Korrekturen von Cedric an Speicherrandfällen (014a), Darstellung (016a), einem
-Syntaxkomma (018a) und der Audioauswahl bei gleichzeitig offenen Panels (018c).
-018c nutzt die bereits vorhandene Öffnungsreihenfolge: Beim Einschalten folgt
-die Sprache dem zuletzt geöffneten Dialog oder Verfahren; Ordner und Verlauf
-starten dabei keine darunterliegenden Gespräche. Diese Ergänzung stammt von
-Cedric und erhält eine eigene Browser-Nachprüfung.
-
-Auftrag und kreative Entscheidungen: Cedric / The Morpheus. Aufgabenstellung,
-Werkzeugbedienung, Prüfung, Assetkopien und Metadaten: Cedric
-(externe Unterstützung). Bilddateien: lokales Krea 2 Turbo FP8. Stimmen:
-lokales Qwen3-TTS mit den ausgewählten Referenzen MIRA B, Alex Plus A und Rolf.
-Die Spielgrafiken verwenden keinen Charakter-LoRA. Modellgewichte gehören
-nicht zum Spiel; die Originalprompts, Ausgaben und Reparaturen bleiben in der
-Produktionsdokumentation erhalten.
+Die Modellinferenz lief auf dem Testrechner. Cedric unterstützte die Bedienung
+und Prüfung extern. Modellgewichte und private Produktionsprotokolle sind
+nicht Teil dieses Repositories. Alle Firmen und Verfahren im Spiel sind fiktiv.
