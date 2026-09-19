@@ -204,13 +204,32 @@ const UI = {
      „Alex“ (stumm) erhält kein Portrait. Fehlende Daten: null,
      die Zeile rendert unverändert weiter. Bildladefehler: das
      kaputte Bild wird ausgeblendet, der Dialog bleibt lauffähig.
-     Je Figur genau ein Bild, ohne Emotionen/Filter/Ausschnitte. */
-  makeSpeakerPortrait(speaker) {
-    const portraits = (typeof ART_ASSETS !== "undefined" && ART_ASSETS &&
-      ART_ASSETS.portraits) ? ART_ASSETS.portraits : null;
-    const p = (portraits && typeof speaker === "string" &&
+     Standard: ein Bild pro Figur; bei passendem portraitByLine-Eintrag
+     (exakter speaker + gültiges Ausdrucks-Bild) das Ausdrucks-Bild.
+     Ohne Emotionen/Filter/Ausschnitte. */
+  makeSpeakerPortrait(speaker, lineId) {
+    const art = (typeof ART_ASSETS !== "undefined" && ART_ASSETS) ? ART_ASSETS : null;
+    const portraits = (art && art.portraits) ? art.portraits : null;
+    let p = (portraits && typeof speaker === "string" &&
       Object.prototype.hasOwnProperty.call(portraits, speaker)) ?
       portraits[speaker] : null;
+    /* Passender portraitByLine-Eintrag (eigene Schlüssel, exakter
+       speaker, gültiges Ausdrucks-Bild) ersetzt das Standardportrait. */
+    if (art && typeof lineId === "string" && lineId.length > 0 &&
+        art.portraitByLine &&
+        Object.prototype.hasOwnProperty.call(art.portraitByLine, lineId)) {
+      const mapping = art.portraitByLine[lineId];
+      if (mapping && mapping.speaker === speaker &&
+          typeof mapping.expression === "string" &&
+          art.expressions &&
+          Object.prototype.hasOwnProperty.call(art.expressions, speaker) &&
+          Object.prototype.hasOwnProperty.call(art.expressions[speaker], mapping.expression)) {
+        const candidate = art.expressions[speaker][mapping.expression];
+        if (candidate && typeof candidate.url === "string" && candidate.url.length > 0) {
+          p = candidate;
+        }
+      }
+    }
     if (!p || typeof p.url !== "string" || p.url.length === 0) {
       return null;
     }
@@ -695,7 +714,7 @@ const UI = {
     if (step.kind === "line") {
       this.safeLog(step.speaker, step.text, step.id);
       const line = this.make("div", "dialogue-line");
-      const portrait = this.makeSpeakerPortrait(step.speaker);
+      const portrait = this.makeSpeakerPortrait(step.speaker, step.id);
       if (portrait) {
         line.appendChild(portrait);
       }
@@ -934,7 +953,7 @@ const UI = {
       for (const line of w.vorher) {
         this.safeLog(line.speaker, line.text, line.id);
         const el = this.make("div", "dialogue-line");
-        const portrait = this.makeSpeakerPortrait(line.speaker);
+        const portrait = this.makeSpeakerPortrait(line.speaker, line.id);
         if (portrait) {
           el.appendChild(portrait);
         }
@@ -1043,7 +1062,7 @@ const UI = {
     for (const line of w.erfolg) {
       this.safeLog(line.speaker, line.text, line.id);
       const el = this.make("div", "dialogue-line");
-      const portrait = this.makeSpeakerPortrait(line.speaker);
+      const portrait = this.makeSpeakerPortrait(line.speaker, line.id);
       if (portrait) {
         el.appendChild(portrait);
       }
