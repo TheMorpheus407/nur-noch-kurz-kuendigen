@@ -1,5 +1,5 @@
 "use strict";
-// Operator asset metadata; images: local Krea 2 Turbo FP8.
+// Operator asset metadata; images: local Krea 2 Turbo FP8; separate character LoRAs where documented.
 const ART_ASSETS = Object.freeze({
   "rooms": {
     "empfang": {
@@ -83,6 +83,18 @@ const ART_ASSETS = Object.freeze({
         "width": 1024,
         "height": 1024
       }
+    },
+    "Alex Plus": {
+      "worried": {
+        "url": "assets/art/alex-plus-worried.png",
+        "width": 1024,
+        "height": 1024
+      },
+      "relieved": {
+        "url": "assets/art/alex-plus-relieved.png",
+        "width": 1024,
+        "height": 1024
+      }
     }
   },
   "portraitByLine": {
@@ -105,6 +117,50 @@ const ART_ASSETS = Object.freeze({
     "w2-01": {
       "speaker": "MIRA",
       "expression": "surprised"
+    },
+    "w2-03": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "alexplusnachw2-01": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "alexplusnachw2-02": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "alexplusnachw2-04": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "alexplusnachw2-05": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "alexplusnachw2-07": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "w3v-02": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "endeA-02": {
+      "speaker": "Alex Plus",
+      "expression": "worried"
+    },
+    "endeB-02": {
+      "speaker": "Alex Plus",
+      "expression": "relieved"
+    },
+    "endeB-04": {
+      "speaker": "Alex Plus",
+      "expression": "relieved"
+    },
+    "endeB-06": {
+      "speaker": "Alex Plus",
+      "expression": "relieved"
     }
   }
 });

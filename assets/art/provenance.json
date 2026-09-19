@@ -5,7 +5,7 @@
   "selection_and_crops": "Cedric; rectangular pixel-preserving crops and byte-identical copies",
   "lora_applied": true,
   "emotion_variants": true,
-  "note": "MIRA and Alex Plus are selected character-sheet crops. Rolf is cropped from the selected room to retain identical plant pixels. All originals and generation evidence remain in the production archive. Mixed collection: the five original room/neutral images have no LoRA; three additional MIRA expression PNGs use the locally trained RAW400 adapter with Turbo FP8. Top-level lora_applied and emotion_variants mean that such images are included, not that every image uses LoRA. All eight are fixed offline assets; per-file flags identify the actual provenance.",
+  "note": "Mixed collection: five original room/neutral images have no LoRA; three MIRA and two Alex Plus expression PNGs use their separate locally trained Krea 2 RAW400 adapters with Turbo FP8. The original confident Alex Plus remains the default. All ten PNGs are fixed offline assets. Per-file flags and adapter hashes describe actual usage; top-level flags mean such assets are included.",
   "files": [
     {
       "file": "mira-neutral.png",
@@ -109,6 +109,40 @@
       "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b",
       "expression": "surprised",
       "transform": "None; byte-identical PNG including original generation metadata."
+    },
+    {
+      "file": "alex-plus-worried.png",
+      "source": "setup/lora/evidence/006_alex_plus_character.prepared/evaluation-operator/p2_vulnerable.step400_strength1_attempt_001/p2_vulnerable.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "e0b353d554e67a6bf23c61a71c6b2489663dcc82eb10461dd98536d151e61db7",
+      "bytes": 926519,
+      "size": [
+        1024,
+        1024
+      ],
+      "lora_applied": true,
+      "character": "Alex Plus",
+      "adapter": "alex-plus-raw-character-001.safetensors",
+      "adapter_sha256": "38b8e4c772e512ffc9dc26face13e86e4239c5269ea95fa9be243a35858eb1ab",
+      "expression": "worried",
+      "transform": "None; byte-identical original PNG including generation metadata."
+    },
+    {
+      "file": "alex-plus-relieved.png",
+      "source": "setup/lora/evidence/006_alex_plus_character.prepared/evaluation-operator/p3_relieved.step400_strength1_attempt_001/p3_relieved.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "bef7efef0c1ee5a3a51e5b86725e03bf84a4bbfac0c7fd8e04ce28c6fa275978",
+      "bytes": 921809,
+      "size": [
+        1024,
+        1024
+      ],
+      "lora_applied": true,
+      "character": "Alex Plus",
+      "adapter": "alex-plus-raw-character-001.safetensors",
+      "adapter_sha256": "38b8e4c772e512ffc9dc26face13e86e4239c5269ea95fa9be243a35858eb1ab",
+      "expression": "relieved",
+      "transform": "None; byte-identical original PNG including generation metadata."
     }
   ]
 }
