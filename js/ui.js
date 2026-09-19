@@ -69,6 +69,7 @@ const UI = {
   els: {},
   _dialogue: null,        /* aktive Dialogfolge: {steps, index, onDone} */
   _procedureView: null,   /* aktive Verfahrensansicht: {type, rid} */
+  _failedRoomImageUrl: null, /* bekannter Ladefehler der aktuellen Raumgrafik */
   _focusReturn: null,     /* Element, auf das der Fokus beim Schließen zurückgeht */
   _openStack: [],         /* geöffnete schließbare Panels, zuletzt oben (Escape) */
   lastAdvanceAt: 0,
@@ -121,6 +122,11 @@ const UI = {
       btnRestart: $("btn-restart"),
       btnAudio: $("btn-audio")
     };
+
+    /* Echte Ladefehler nutzen dieselben Hotspot-Buttons als beschriftete
+       Liste. Ein normaler Neurender darf diesen Zustand nicht vergessen. */
+    this.els.sceneBg.addEventListener("load", () => this.updateRoomImageFallback());
+    this.els.sceneBg.addEventListener("error", () => this.updateRoomImageFallback());
 
     /* Raumwechsel */
     for (const btn of this.els.roomButtons) {
@@ -447,7 +453,8 @@ const UI = {
       }
       this.els.sceneBg.setAttribute("width", String(roomArt.width));
       this.els.sceneBg.setAttribute("height", String(roomArt.height));
-      this.els.stage.classList.remove("stage--list");
+      this.els.stage.classList.toggle("stage--list",
+        this._failedRoomImageUrl === roomArt.url);
     } else {
       this.els.stage.classList.add("stage--list");
     }
@@ -502,6 +509,21 @@ const UI = {
     }
   },
 
+  updateRoomImageFallback() {
+    const img = this.els.sceneBg;
+    const src = img.getAttribute("src");
+    const art = typeof ART_ASSETS !== "undefined" ? ART_ASSETS : null;
+    const roomArt = art && art.rooms && art.rooms[GameState.get().room];
+    /* Nur das tatsächlich aktuelle und fertig geladene/fehlgeschlagene
+       Bild beurteilen, keine alte Antwort während eines Raumwechsels. */
+    if (!roomArt || src !== roomArt.url || !img.complete) {
+      return;
+    }
+    const failed = img.naturalWidth === 0;
+    this._failedRoomImageUrl = failed ? src : null;
+    this.els.stage.classList.toggle("stage--list", failed);
+  },
+
   /* ---------- Raumwechsel ---------- */
 
   openRoom(roomId) {
@@ -524,6 +546,9 @@ const UI = {
       return;
     }
     this.stopAudio();
+    this.els.hotspotInfo.hidden = true;
+    this.els.hotspotInfoLabel.textContent = "";
+    this.els.hotspotInfoText.textContent = "";
     this.renderWorld();
     this.setStatus(CONTENT.rooms[roomId].name + ". Vier Punkte sind in der Szene sichtbar.");
   },
