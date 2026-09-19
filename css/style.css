@@ -74,7 +74,10 @@ main {
   font: inherit;
   max-width: 100%;
 }
-.hotspot:hover { border-color: var(--scene-ink); }
+button.hotspot:hover {
+  background: #4a5263;
+  border-color: var(--scene-ink);
+}
 .hotspot:focus-visible {
   outline: 3px solid #ffd76a;
   outline-offset: 2px;
