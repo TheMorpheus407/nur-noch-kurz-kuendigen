@@ -199,6 +199,37 @@ const UI = {
     return el;
   },
 
+  /* Sprecher-Portrait: exakte Sprechernamen aus ART_ASSETS.portraits
+     („MIRA“, „Alex Plus“, „Rolf“). Keine Teilstring-Erkennung —
+     „Alex“ (stumm) erhält kein Portrait. Fehlende Daten: null,
+     die Zeile rendert unverändert weiter. Bildladefehler: das
+     kaputte Bild wird ausgeblendet, der Dialog bleibt lauffähig.
+     Je Figur genau ein Bild, ohne Emotionen/Filter/Ausschnitte. */
+  makeSpeakerPortrait(speaker) {
+    const portraits = (typeof ART_ASSETS !== "undefined" && ART_ASSETS &&
+      ART_ASSETS.portraits) ? ART_ASSETS.portraits : null;
+    const p = (portraits && typeof speaker === "string" &&
+      Object.prototype.hasOwnProperty.call(portraits, speaker)) ?
+      portraits[speaker] : null;
+    if (!p || typeof p.url !== "string" || p.url.length === 0) {
+      return null;
+    }
+    const img = document.createElement("img");
+    img.className = "speaker-portrait";
+    img.setAttribute("alt", "");
+    img.setAttribute("src", p.url);
+    if (typeof p.width === "number" && Number.isFinite(p.width)) {
+      img.setAttribute("width", String(p.width));
+    }
+    if (typeof p.height === "number" && Number.isFinite(p.height)) {
+      img.setAttribute("height", String(p.height));
+    }
+    img.addEventListener("error", () => {
+      img.hidden = true;
+    });
+    return img;
+  },
+
   rememberFocus() {
     this._focusReturn = document.activeElement;
   },
@@ -664,6 +695,10 @@ const UI = {
     if (step.kind === "line") {
       this.safeLog(step.speaker, step.text, step.id);
       const line = this.make("div", "dialogue-line");
+      const portrait = this.makeSpeakerPortrait(step.speaker);
+      if (portrait) {
+        line.appendChild(portrait);
+      }
       line.append(
         this.make("span", "dialogue-speaker" + this.speakerClass(step.speaker), step.speaker),
         this.make("p", "dialogue-text", step.text)
@@ -899,6 +934,10 @@ const UI = {
       for (const line of w.vorher) {
         this.safeLog(line.speaker, line.text, line.id);
         const el = this.make("div", "dialogue-line");
+        const portrait = this.makeSpeakerPortrait(line.speaker);
+        if (portrait) {
+          el.appendChild(portrait);
+        }
         el.append(
           this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
           this.make("p", "dialogue-text", line.text)
@@ -1004,6 +1043,10 @@ const UI = {
     for (const line of w.erfolg) {
       this.safeLog(line.speaker, line.text, line.id);
       const el = this.make("div", "dialogue-line");
+      const portrait = this.makeSpeakerPortrait(line.speaker);
+      if (portrait) {
+        el.appendChild(portrait);
+      }
       el.append(
         this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
         this.make("p", "dialogue-text", line.text)
