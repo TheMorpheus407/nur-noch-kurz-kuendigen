@@ -1,6 +1,6 @@
 # Nur noch kurz kündigen
 
-**Arbeitsfassung – Qualitätsüberarbeitung läuft, keine finale Abnahme.** Eigene Charakter-LoRAs für MIRA und Alex Plus sind trainiert und ausgewählte Ausdrucksbilder eingebaut. Rolfs eigener Lauf ist noch in Arbeit. Bühne, Dialogführung und beide Enden wurden überarbeitet; die vollständige Hörabnahme steht aus. Dieses Repository wird privat gepflegt.
+**Überarbeitete Arbeitsfassung zur Durchsicht, keine finale Abnahme.** MIRA, Alex Plus und Rolf haben jeweils eine eigene lokal trainierte Charakter-LoRA; ausgewählte Bilder sind eingebaut. Bühne, Dialogführung, Rätselpräsentation und beide Enden wurden überarbeitet. Die vollständige Hörabnahme steht aus. Dieses Repository wird privat gepflegt.
 
 Du willst das Abo für deinen digitalen Doppelgänger kündigen. Der Kundenservice
 hat Rückfragen. Dein Doppelgänger auch. Und der Ficus weiß mehr, als er sollte.
@@ -49,6 +49,8 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
 - Spielcode und Dialogdaten entstanden in tatsächlich protokollierten lokalen
   Qwen3.8-27B-Läufen. Cedric ergänzte dokumentierte direkte Korrekturen an
   Speicherrandfällen, Darstellung, Syntax, Audioauswahl und Bühnenlayout.
+  Auch die abschließende Straffung von NPC-Nachgesprächen und des W2-Pflichtwegs
+  ist gesondert als direkte Kuration durch Cedric dokumentiert.
   Der Qwen-Auftrag für die Endinszenierung erreichte nach seiner Syntaxprüfung
   die Rundengrenze. Sein ursprünglicher Teilstand und die anschließenden
   Korrekturen von Cedric an Zeitpunkt, Portraitdarstellung und schmalen Ansichten
@@ -63,9 +65,13 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
   Krea 2 Turbo FP8 und jeweils einer eigenen auf Krea 2 RAW trainierten
   Charakter-LoRA. Die Trainingssätze dieser beiden Figuren bestehen jeweils
   aus vier Ausschnitten eines einzelnen Figurenbogens; die gewählten Bilder
-  sind kein Nachweis beliebiger zuverlässiger Posen. Alle zehn Bilder sind
-  feste PNGs. Bildherkunft, Adapter und Prüfsummen stehen in
-  `assets/art/provenance.json`.
+  sind kein Nachweis beliebiger zuverlässiger Posen. Rolf erhielt einen eigenen
+  Adapter aus vier vollständigen, getrennt erzeugten Krea-Bildern. Eine ausgewählte
+  neue Ganzansicht ersetzt sein altes Gesprächsportrait; angeschnittene und doppelte
+  Pflanzenansichten wurden verworfen. Auch Rolfs Pose bleibt weitgehend aufrecht.
+  Der alte Raumcrop bleibt als Original enthalten, wird als Portrait jedoch nicht
+  mehr verwendet. Alle elf Bilder sind feste PNGs. Bildherkunft, Adapter und
+  Prüfsummen stehen in `assets/art/provenance.json`.
 - Die 45 vorbereiteten Sprachdateien stammen aus lokalem Qwen3-TTS mit den von
   Cedric gewählten Stimmreferenzen MIRA B, Alex Plus A und Rolf. Alex als
   Spielerfigur bleibt stumm. Alternative Enden sind enthalten; die summierte
