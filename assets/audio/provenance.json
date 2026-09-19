@@ -5,7 +5,7 @@
     "Alex Plus": "Alex Plus A",
     "Rolf": "original selected voice"
   },
-  "processing": "Local CPU postproduction: constant gain per speaker, PCM16, no duration change",
+  "processing": "Local CPU postproduction: constant gain per speaker; 12 MIRA/Alex Plus clips have conservative leading quiet trimmed. Retained PCM is byte-identical; internal pauses, endings and speech rate unchanged. Five Rolf WAVs remain identical to the original PCM files.",
   "gains_db": {
     "MIRA": -2.85,
     "Alex Plus": 0.35,
@@ -19,15 +19,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "0748f1fb9e7db5f2d93be309259ac27c3c2b8c010f510305732f6a365a480b41",
       "source_pcm_sha256": "f133988a8cd6c7e9a312f2fa3bbced9e348f9513357a882b5f871cc227c60d5a",
-      "sha256": "c61991210a3b9f59d0a343fa40d782164adc9c2a0a6be997f3565c3dc82c48cb",
+      "sha256": "8550a6cd0d5b948b80c24ac44261ad7e036f9cf966ef627421dd0456ec93301f",
       "header": {
-        "frames": 140160,
+        "frames": 130238,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -20.2,
-      "true_peak_dbfs": -4.8
+      "integrated_lufs": -20.47,
+      "true_peak_dbfs": -4.77,
+      "before_leading_trim": {
+        "sha256": "c61991210a3b9f59d0a343fa40d782164adc9c2a0a6be997f3565c3dc82c48cb",
+        "header": {
+          "frames": 140160,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -20.2,
+        "true_peak_dbfs": -4.8
+      },
+      "leading_trim": {
+        "removed_frames": 9922,
+        "removed_seconds": 0.41341666666666665,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "ankunft-03",
@@ -99,15 +118,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "11f2cd03afd3cfed679c7137e9f11749780db2bbed93ffb2d0e54d349816a95b",
       "source_pcm_sha256": "f64df93c4e1c0e7f1341a4cb74d71496e303ce5fb7f58df61db94df57c094a0e",
-      "sha256": "ed3e24555d4051e507f108ecb9774109133b98659aed7a2e762ab3b9982e6ca6",
+      "sha256": "0925b71e39b65a6a9d034dec8971309e5b37bef6d999422761b77f5dadf02973",
       "header": {
-        "frames": 136320,
+        "frames": 127645,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -21.9,
-      "true_peak_dbfs": -5.9
+      "integrated_lufs": -22.36,
+      "true_peak_dbfs": -5.89,
+      "before_leading_trim": {
+        "sha256": "ed3e24555d4051e507f108ecb9774109133b98659aed7a2e762ab3b9982e6ca6",
+        "header": {
+          "frames": 136320,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -21.9,
+        "true_peak_dbfs": -5.9
+      },
+      "leading_trim": {
+        "removed_frames": 8675,
+        "removed_seconds": 0.3614583333333333,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "ankunft-10",
@@ -147,15 +185,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "bf1fcde93a52fc393d10ef4dcf4c564031ec0e671bca6c8c9bc8c39ec60e9dea",
       "source_pcm_sha256": "5cec894c2ae156e56332056712a8545811beddf0ec6797db76f24779a27ec1bd",
-      "sha256": "1eacb3ab652bd9ff4d4e77b16cb908d3e18f30521bf0736e5f610b698e51c9f9",
+      "sha256": "524629c4b852fbb9dd22dbb08f3140e519b73641ae077e02251699040999404d",
       "header": {
-        "frames": 120960,
+        "frames": 112043,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -19.2,
-      "true_peak_dbfs": -3.4
+      "integrated_lufs": -19.11,
+      "true_peak_dbfs": -3.4,
+      "before_leading_trim": {
+        "sha256": "1eacb3ab652bd9ff4d4e77b16cb908d3e18f30521bf0736e5f610b698e51c9f9",
+        "header": {
+          "frames": 120960,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -19.2,
+        "true_peak_dbfs": -3.4
+      },
+      "leading_trim": {
+        "removed_frames": 8917,
+        "removed_seconds": 0.37154166666666666,
+        "max_absolute_pcm16_removed": 4,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "mira-04",
@@ -195,15 +252,34 @@
       "gain_db": 0.35,
       "source_float_sha256": "c2a8ca7d5593c580d2f178e2e95c4b8e2983516393c3a265cdc3db0201259f5f",
       "source_pcm_sha256": "a920a524c440b3bea2afbd04cad22af92b1e4e7058822f8c62812dbd35b9f05d",
-      "sha256": "a0aee7930e26a9f60ca5ca5a72a6a13a93928affc962a4c5755e4b3478dc5804",
+      "sha256": "0452e901a11000056294ee7d421aa41142e957778eed531b8c895a89dbd7069e",
       "header": {
-        "frames": 132480,
+        "frames": 125467,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -20.9,
-      "true_peak_dbfs": -1.6
+      "integrated_lufs": -20.91,
+      "true_peak_dbfs": -1.56,
+      "before_leading_trim": {
+        "sha256": "a0aee7930e26a9f60ca5ca5a72a6a13a93928affc962a4c5755e4b3478dc5804",
+        "header": {
+          "frames": 132480,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -20.9,
+        "true_peak_dbfs": -1.6
+      },
+      "leading_trim": {
+        "removed_frames": 7013,
+        "removed_seconds": 0.29220833333333335,
+        "max_absolute_pcm16_removed": 11,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "alexplus-03",
@@ -211,15 +287,34 @@
       "gain_db": 0.35,
       "source_float_sha256": "781029fd54c76258ba325abc03f0effbb579a453fab9e3d1c841b29866638cf1",
       "source_pcm_sha256": "c529542b486113e8cc27358c2d9b13d100644ba8b0a63c2ced4757240d60271d",
-      "sha256": "fcd76e59f843b7b962ef0451483a9ae69cb9204d449d3e0e693c8f29918cae74",
+      "sha256": "d180fe36ef6ccc14f9670932281031bfbce85fd971d924cedc5f7dc6a9556dbe",
       "header": {
-        "frames": 140160,
+        "frames": 128100,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -19.5,
-      "true_peak_dbfs": -2.5
+      "integrated_lufs": -19.66,
+      "true_peak_dbfs": -2.53,
+      "before_leading_trim": {
+        "sha256": "fcd76e59f843b7b962ef0451483a9ae69cb9204d449d3e0e693c8f29918cae74",
+        "header": {
+          "frames": 140160,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -19.5,
+        "true_peak_dbfs": -2.5
+      },
+      "leading_trim": {
+        "removed_frames": 12060,
+        "removed_seconds": 0.5025,
+        "max_absolute_pcm16_removed": 3,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "alexplus-05",
@@ -323,15 +418,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "4bcb4da116d1596930c7d31e3eb43eedb9ddb77a353b3be92601259f109547bf",
       "source_pcm_sha256": "cfaa93b4ef8aeba8e87295194cb7ce248ba69fcaf2b31fcff20a0ae64c6630b2",
-      "sha256": "ff063be44fca66676e4e878f77a8ddc4abf96cd6854aeb85bd65e0f9f29562a1",
+      "sha256": "35493a67d172437b1bfe99c0b3306f8a09007f41643a4574b9e4809882ae1060",
       "header": {
-        "frames": 190080,
+        "frames": 169791,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -20.2,
-      "true_peak_dbfs": -4.7
+      "integrated_lufs": -20.36,
+      "true_peak_dbfs": -4.68,
+      "before_leading_trim": {
+        "sha256": "ff063be44fca66676e4e878f77a8ddc4abf96cd6854aeb85bd65e0f9f29562a1",
+        "header": {
+          "frames": 190080,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -20.2,
+        "true_peak_dbfs": -4.7
+      },
+      "leading_trim": {
+        "removed_frames": 20289,
+        "removed_seconds": 0.845375,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "miranachw2-02",
@@ -483,15 +597,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "d7454722bb41da9cae8c3d3e15e7a7bb41e09cf3a106c3259830d31cd61bd0e8",
       "source_pcm_sha256": "0e992b235683ba1743b8033748ed4dce712e07f8a9172c3a6f017f68f22cd948",
-      "sha256": "0152b3b874bc381f1c990bcb1b81d1bc90a422a78197b29e41812610dc753f0f",
+      "sha256": "c859eab14a0e5064de78e5b7245871a9322deff93652027b2120d509a73e0515",
       "header": {
-        "frames": 203520,
+        "frames": 196228,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -20.3,
-      "true_peak_dbfs": -5.3
+      "integrated_lufs": -20.74,
+      "true_peak_dbfs": -5.33,
+      "before_leading_trim": {
+        "sha256": "0152b3b874bc381f1c990bcb1b81d1bc90a422a78197b29e41812610dc753f0f",
+        "header": {
+          "frames": 203520,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -20.3,
+        "true_peak_dbfs": -5.3
+      },
+      "leading_trim": {
+        "removed_frames": 7292,
+        "removed_seconds": 0.30383333333333334,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "w2-02",
@@ -499,15 +632,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "bc7e4e071ae44974945a13dfd65cea63c229a26ceb9e39de919ab70c4e704018",
       "source_pcm_sha256": "06f49f47b5568f9c1521d48bc2f8c6bd39d3730b80b1ecc0557dc14390560e99",
-      "sha256": "d0877a485554aef217e1c9a0e52023ed17327a21fc23a64a10f453dbca715d61",
+      "sha256": "49cf6f908e143660f1aae34c534cb53ee122837fe940bf0c5d5cd6d65b47e2bc",
       "header": {
-        "frames": 122880,
+        "frames": 115641,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -21.9,
-      "true_peak_dbfs": -6.3
+      "integrated_lufs": -22.0,
+      "true_peak_dbfs": -6.31,
+      "before_leading_trim": {
+        "sha256": "d0877a485554aef217e1c9a0e52023ed17327a21fc23a64a10f453dbca715d61",
+        "header": {
+          "frames": 122880,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -21.9,
+        "true_peak_dbfs": -6.3
+      },
+      "leading_trim": {
+        "removed_frames": 7239,
+        "removed_seconds": 0.301625,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "w2-03",
@@ -531,15 +683,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "27ae0ebd6dc01dca5535a920ff5e4757db3473bb40ce6f979281bf7e964ace99",
       "source_pcm_sha256": "993cd2a3f86c592868adda81314835c984bed2cedc5771ef925d284bb9e9b468",
-      "sha256": "a14ac620f4e2cb9e6cc65900749715aeda3c5dd3e0d50100ff81e191c2753702",
+      "sha256": "761066be6ccb4e0b57cb25bcdfcfd4200c4f656a01fdaac4b4fd23cff2791e01",
       "header": {
-        "frames": 142080,
+        "frames": 133929,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -21.1,
-      "true_peak_dbfs": -6.5
+      "integrated_lufs": -21.32,
+      "true_peak_dbfs": -6.45,
+      "before_leading_trim": {
+        "sha256": "a14ac620f4e2cb9e6cc65900749715aeda3c5dd3e0d50100ff81e191c2753702",
+        "header": {
+          "frames": 142080,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -21.1,
+        "true_peak_dbfs": -6.5
+      },
+      "leading_trim": {
+        "removed_frames": 8151,
+        "removed_seconds": 0.339625,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "w3v-01",
@@ -563,15 +734,34 @@
       "gain_db": 0.35,
       "source_float_sha256": "bac1419aa28714c7d3c2b1b6d1f462214fd196d9a59a450c9a5ef8c17846a765",
       "source_pcm_sha256": "fab4ade19b2591097f0c4f2026000ffbb714259891d4f7739cb6371fddef9a31",
-      "sha256": "f3eb3beaa70fa336620b5f0c1962d86411226561b6cb5725173405fa162d8479",
+      "sha256": "488a9f5560e9e00076c97183daaced572bd5fe5ff3f4ed343f18b51e09aeab43",
       "header": {
-        "frames": 103680,
+        "frames": 94761,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -20.5,
-      "true_peak_dbfs": -3.5
+      "integrated_lufs": -20.2,
+      "true_peak_dbfs": -3.54,
+      "before_leading_trim": {
+        "sha256": "f3eb3beaa70fa336620b5f0c1962d86411226561b6cb5725173405fa162d8479",
+        "header": {
+          "frames": 103680,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -20.5,
+        "true_peak_dbfs": -3.5
+      },
+      "leading_trim": {
+        "removed_frames": 8919,
+        "removed_seconds": 0.371625,
+        "max_absolute_pcm16_removed": 3,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "w3-01",
@@ -659,15 +849,34 @@
       "gain_db": -2.85,
       "source_float_sha256": "a35adeecb2d6eb0a752bdb39cd26192eeacf065ed6a614b637833c75bcc5544a",
       "source_pcm_sha256": "4663c5fa16a5bd2d22e45bafbf0d4aaf65cd1b509d8e8fa42ad696d9d40bbbab",
-      "sha256": "c508233f2a8890bff0a9b023ec5fe71c8821e83e53f58f4ef20afaec9df86f9c",
+      "sha256": "2bef4ad6faafde945365676961eba0d636a1305fc106cf45d52f56a5caa9b281",
       "header": {
-        "frames": 117120,
+        "frames": 106522,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -18.9,
-      "true_peak_dbfs": -5.2
+      "integrated_lufs": -19.22,
+      "true_peak_dbfs": -5.21,
+      "before_leading_trim": {
+        "sha256": "c508233f2a8890bff0a9b023ec5fe71c8821e83e53f58f4ef20afaec9df86f9c",
+        "header": {
+          "frames": 117120,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -18.9,
+        "true_peak_dbfs": -5.2
+      },
+      "leading_trim": {
+        "removed_frames": 10598,
+        "removed_seconds": 0.4415833333333333,
+        "max_absolute_pcm16_removed": 2,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     },
     {
       "id": "endeB-01",
@@ -723,16 +932,36 @@
       "gain_db": 0.35,
       "source_float_sha256": "2e4a11f299abbe6eedb658799ba47be3d524ae38a9b8ff0ca0d2128728747ebf",
       "source_pcm_sha256": "14e5dd603879ed3e64f7a47f45df440c682072634759837942053886d9e7effb",
-      "sha256": "60d3cf56cb215c2b902b20bcfa5b5bca95ae89d272864c0d3e5a311cb4b14672",
+      "sha256": "2d073bb9cb7255184471c902864a8c9258e9193b7d31584cdd462552c429ba3d",
       "header": {
-        "frames": 63360,
+        "frames": 53815,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -23.0,
-      "true_peak_dbfs": -3.3
+      "integrated_lufs": -22.78,
+      "true_peak_dbfs": -3.31,
+      "before_leading_trim": {
+        "sha256": "60d3cf56cb215c2b902b20bcfa5b5bca95ae89d272864c0d3e5a311cb4b14672",
+        "header": {
+          "frames": 63360,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -23.0,
+        "true_peak_dbfs": -3.3
+      },
+      "leading_trim": {
+        "removed_frames": 9545,
+        "removed_seconds": 0.39770833333333333,
+        "max_absolute_pcm16_removed": 3,
+        "retained_preroll_frames": 3840,
+        "remaining_pcm_byte_identical": true,
+        "speech_rate_changed": false
+      }
     }
   ],
-  "auditioned_by_operator": false
+  "auditioned_by_operator": false,
+  "loudness_measurement": "FFmpeg loudnorm input measurements of the actual final files, not normalization output"
 }

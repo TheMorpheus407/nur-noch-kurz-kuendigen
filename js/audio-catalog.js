@@ -1,11 +1,10 @@
 "use strict";
-// Generated asset catalog by Cedric; local Qwen3-TTS batch004, same selected voices.
-// Constant speaker gain documented in assets/audio/provenance.json; IDs/durations unchanged.
+// Asset metadata; local Qwen3-TTS batch004, approved voices, gain and leading-quiet edits in provenance.
 const AUDIO_CATALOG = Object.freeze({
   "ankunft-01": {
     "url": "assets/audio/ankunft-01.wav",
     "speaker": "MIRA",
-    "duration": 5.84
+    "duration": 5.426583333333333
   },
   "ankunft-03": {
     "url": "assets/audio/ankunft-03.wav",
@@ -30,7 +29,7 @@ const AUDIO_CATALOG = Object.freeze({
   "ankunft-08": {
     "url": "assets/audio/ankunft-08.wav",
     "speaker": "MIRA",
-    "duration": 5.68
+    "duration": 5.3185416666666665
   },
   "ankunft-10": {
     "url": "assets/audio/ankunft-10.wav",
@@ -45,7 +44,7 @@ const AUDIO_CATALOG = Object.freeze({
   "mira-03": {
     "url": "assets/audio/mira-03.wav",
     "speaker": "MIRA",
-    "duration": 5.04
+    "duration": 4.668458333333334
   },
   "mira-04": {
     "url": "assets/audio/mira-04.wav",
@@ -60,12 +59,12 @@ const AUDIO_CATALOG = Object.freeze({
   "alexplus-01": {
     "url": "assets/audio/alexplus-01.wav",
     "speaker": "Alex Plus",
-    "duration": 5.52
+    "duration": 5.227791666666667
   },
   "alexplus-03": {
     "url": "assets/audio/alexplus-03.wav",
     "speaker": "Alex Plus",
-    "duration": 5.84
+    "duration": 5.3375
   },
   "alexplus-05": {
     "url": "assets/audio/alexplus-05.wav",
@@ -100,7 +99,7 @@ const AUDIO_CATALOG = Object.freeze({
   "miranachw2-01": {
     "url": "assets/audio/miranachw2-01.wav",
     "speaker": "MIRA",
-    "duration": 7.92
+    "duration": 7.074625
   },
   "miranachw2-02": {
     "url": "assets/audio/miranachw2-02.wav",
@@ -150,12 +149,12 @@ const AUDIO_CATALOG = Object.freeze({
   "w2-01": {
     "url": "assets/audio/w2-01.wav",
     "speaker": "MIRA",
-    "duration": 8.48
+    "duration": 8.176166666666667
   },
   "w2-02": {
     "url": "assets/audio/w2-02.wav",
     "speaker": "MIRA",
-    "duration": 5.12
+    "duration": 4.818375
   },
   "w2-03": {
     "url": "assets/audio/w2-03.wav",
@@ -165,7 +164,7 @@ const AUDIO_CATALOG = Object.freeze({
   "w2-04": {
     "url": "assets/audio/w2-04.wav",
     "speaker": "MIRA",
-    "duration": 5.92
+    "duration": 5.580375
   },
   "w3v-01": {
     "url": "assets/audio/w3v-01.wav",
@@ -175,7 +174,7 @@ const AUDIO_CATALOG = Object.freeze({
   "w3v-02": {
     "url": "assets/audio/w3v-02.wav",
     "speaker": "Alex Plus",
-    "duration": 4.32
+    "duration": 3.948375
   },
   "w3-01": {
     "url": "assets/audio/w3-01.wav",
@@ -205,7 +204,7 @@ const AUDIO_CATALOG = Object.freeze({
   "endeA-04": {
     "url": "assets/audio/endeA-04.wav",
     "speaker": "MIRA",
-    "duration": 4.88
+    "duration": 4.438416666666667
   },
   "endeB-01": {
     "url": "assets/audio/endeB-01.wav",
@@ -225,6 +224,6 @@ const AUDIO_CATALOG = Object.freeze({
   "endeB-06": {
     "url": "assets/audio/endeB-06.wav",
     "speaker": "Alex Plus",
-    "duration": 2.64
+    "duration": 2.2422916666666666
   }
 });
