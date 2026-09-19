@@ -3,9 +3,9 @@
   "model_repository": "Comfy-Org/Krea-2",
   "model_revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
   "selection_and_crops": "Cedric; rectangular pixel-preserving crops and byte-identical copies",
-  "lora_applied": false,
-  "emotion_variants": false,
-  "note": "MIRA and Alex Plus are selected character-sheet crops. Rolf is cropped from the selected room to retain identical plant pixels. All originals and generation evidence remain in the production archive.",
+  "lora_applied": true,
+  "emotion_variants": true,
+  "note": "MIRA and Alex Plus are selected character-sheet crops. Rolf is cropped from the selected room to retain identical plant pixels. All originals and generation evidence remain in the production archive. Mixed collection: the five original room/neutral images have no LoRA; three additional MIRA expression PNGs use the locally trained RAW400 adapter with Turbo FP8. Top-level lora_applied and emotion_variants mean that such images are included, not that every image uses LoRA. All eight are fixed offline assets; per-file flags identify the actual provenance.",
   "files": [
     {
       "file": "mira-neutral.png",
@@ -15,7 +15,8 @@
         1008,
         976
       ],
-      "bytes": 764613
+      "bytes": 764613,
+      "lora_applied": false
     },
     {
       "file": "alex-plus-neutral.png",
@@ -25,7 +26,8 @@
         968,
         944
       ],
-      "bytes": 742407
+      "bytes": 742407,
+      "lora_applied": false
     },
     {
       "file": "rolf-room.png",
@@ -35,7 +37,8 @@
         392,
         824
       ],
-      "bytes": 345143
+      "bytes": 345143,
+      "lora_applied": false
     },
     {
       "file": "empfang.png",
@@ -45,7 +48,8 @@
         2048,
         1152
       ],
-      "bytes": 2072380
+      "bytes": 2072380,
+      "lora_applied": false
     },
     {
       "file": "vorfuehr.png",
@@ -55,7 +59,56 @@
         2048,
         1152
       ],
-      "bytes": 2401473
+      "bytes": 2401473,
+      "lora_applied": false
+    },
+    {
+      "file": "mira-smile.png",
+      "source": "art/krea/008_mira_retrained_eval/p4_smile.step400_strength1_attempt_001/p4_smile.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "53e1b48dbfa42dc41289d1265bc7c55413197338c1c7ac08eed5c55479689e22",
+      "size": [
+        1024,
+        1024
+      ],
+      "bytes": 904279,
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b",
+      "expression": "smile",
+      "transform": "None; byte-identical PNG including original generation metadata."
+    },
+    {
+      "file": "mira-skeptical.png",
+      "source": "art/krea/008_mira_retrained_eval/p2_skeptical.step400_strength1_attempt_001/p2_skeptical.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "4057f08d3bb0fc5c260699f690cb7bff27e607b099b376eac5cfaec6826cb339",
+      "size": [
+        1024,
+        1024
+      ],
+      "bytes": 887448,
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b",
+      "expression": "skeptical",
+      "transform": "None; byte-identical PNG including original generation metadata."
+    },
+    {
+      "file": "mira-surprised.png",
+      "source": "art/krea/008_mira_retrained_eval/p3_surprised.step400_strength1_attempt_001/p3_surprised.step400_strength1_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "f83b8e5acd43674c6c0f3bb9f926b1dd322774778c270c000fa9327562c3c105",
+      "size": [
+        1024,
+        1024
+      ],
+      "bytes": 1006136,
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b",
+      "expression": "surprised",
+      "transform": "None; byte-identical PNG including original generation metadata."
     }
   ]
 }

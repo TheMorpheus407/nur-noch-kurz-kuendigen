@@ -65,5 +65,46 @@ const ART_ASSETS = Object.freeze({
       "width": 392,
       "height": 824
     }
+  },
+  "expressions": {
+    "MIRA": {
+      "smile": {
+        "url": "assets/art/mira-smile.png",
+        "width": 1024,
+        "height": 1024
+      },
+      "skeptical": {
+        "url": "assets/art/mira-skeptical.png",
+        "width": 1024,
+        "height": 1024
+      },
+      "surprised": {
+        "url": "assets/art/mira-surprised.png",
+        "width": 1024,
+        "height": 1024
+      }
+    }
+  },
+  "portraitByLine": {
+    "ankunft-01": {
+      "speaker": "MIRA",
+      "expression": "smile"
+    },
+    "endeA-04": {
+      "speaker": "MIRA",
+      "expression": "smile"
+    },
+    "ankunft-08": {
+      "speaker": "MIRA",
+      "expression": "skeptical"
+    },
+    "mira-04": {
+      "speaker": "MIRA",
+      "expression": "skeptical"
+    },
+    "w2-01": {
+      "speaker": "MIRA",
+      "expression": "surprised"
+    }
   }
 });

@@ -46,10 +46,13 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
   Speicherrandfällen, Darstellung, Syntax, Audioauswahl und mobilem Bildlayout
   (019d). Die Git-Historie
   unterscheidet diese Beiträge.
-- Die fünf Spielbilder entstanden mit lokalem Krea 2 Turbo FP8. MIRA und
-  Alex Plus sind ausgewählte Ausschnitte aus Figurenbögen; Rolf stammt direkt
-  aus dem Vorführraum. Diese festen Grafiken verwenden **keine Charakter-LoRA**.
-  Bildherkunft und Prüfsummen stehen in `assets/art/provenance.json`.
+- Die fünf bisherigen Spielbilder entstanden mit lokalem Krea 2 Turbo FP8.
+  MIRA und Alex Plus sind ausgewählte Ausschnitte aus Figurenbögen; Rolf stammt
+  direkt aus dem Vorführraum. Diese fünf Grafiken verwenden keine Charakter-LoRA.
+  Drei zusätzliche MIRA-Ausdrucksbilder (Lächeln, Skepsis und Überraschung)
+  entstanden lokal mit Krea 2 Turbo FP8 und einer auf Krea 2 RAW trainierten
+  Charakter-LoRA. Alle acht Bilder sind feste PNGs. Bildherkunft und Prüfsummen
+  stehen in `assets/art/provenance.json`.
 - Die 45 vorbereiteten Sprachdateien stammen aus lokalem Qwen3-TTS mit den von
   Cedric gewählten Stimmreferenzen MIRA B, Alex Plus A und Rolf. Alex als
   Spielerfigur bleibt stumm. Alternative Enden sind enthalten; die summierte
