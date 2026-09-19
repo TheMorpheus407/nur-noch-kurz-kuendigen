@@ -811,6 +811,18 @@ blockquote.claim {
   display: none;
 }
 
+.stage:has(> .ending-view) {
+  min-height: 300px;
+  aspect-ratio: 16 / 9;
+}
+
+.game:has(.ending-view) .room-info,
+.game:has(.ending-view) .hotspot-info,
+.game:has(.ending-view) .stage-col > .status,
+.game:has(.ending-view) .progress {
+  display: none;
+}
+
 .game:has(.ending-view) .stage-bg {
   display: none;
 }
@@ -824,7 +836,6 @@ blockquote.claim {
   place-items: center;
   position: absolute;
   inset: 0;
-  min-height: 300px;
   padding: 1rem;
   overflow: hidden;
 }
@@ -1137,8 +1148,12 @@ blockquote.claim {
 
   /* Gerätefenster: Portrait bleibt innerhalb des Fensters,
      kein horizontaler Überlauf bei 320px. */
-  .ending-view {
+  .stage:has(> .ending-view) {
     min-height: 240px;
+    aspect-ratio: auto;
+  }
+
+  .game:has(.ending-view) .ending-view {
     padding: 0.65rem;
   }
 

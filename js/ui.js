@@ -376,7 +376,7 @@ const UI = {
     } else {
       this.els.progressLine.textContent =
         "Widersprüche gelöst: " + n + " von 3" +
-        (n === 3 ? " — Entscheidung möglich." : "");
+        (n === 3 ? (s.ended ? " — abgeschlossen." : " — Entscheidung möglich.") : "");
     }
 
     let label;
@@ -459,12 +459,6 @@ const UI = {
         this._failedRoomImageUrl === roomArt.url);
     } else {
       this.els.stage.classList.add("stage--list");
-    }
-
-    /* Bestehende Endansicht (A/B) nicht bei einem Zwischenrender ersetzen —
-       sie wird nur durch closeAllPanels/Laden/Checkpoint/Neustart entfernt. */
-    if (this.els.stage.querySelector(".ending-view")) {
-      return;
     }
 
     const hotspotsEl = this.els.stageHotspots;
@@ -785,6 +779,7 @@ const UI = {
     this._dialogue = {
       steps: opts.steps,
       index: 0,
+      endingId: opts.endingId || null,
       onDone: opts.onDone || null
     };
     this.els.dialogueTitle.textContent = opts.title;
@@ -814,7 +809,9 @@ const UI = {
     if (step.kind === "line") {
       this.safeLog(step.speaker, step.text, step.id);
       const line = this.make("div", "dialogue-line");
-      const portrait = this.makeSpeakerPortrait(step.speaker, step.id);
+      const privatePlus = d.endingId === "B" && step.speaker === "Alex Plus";
+      const portrait = privatePlus ? this.makePrivateDevice(step.id) :
+        this.makeSpeakerPortrait(step.speaker, step.id);
       if (portrait) {
         line.appendChild(portrait);
       }
@@ -840,6 +837,9 @@ const UI = {
          Zufriedenheitsfrage): eigener Schritt, eigener Weiter-Klick.
          Die bewusste Pause bleibt stumm und stoppt laufende Sprache. */
       this.stopAudio();
+      if (d.endingId === "A") {
+        this.applyEndingView("A");
+      }
       body.appendChild(this.make("div", "dialogue-pause", "· · ·"));
     }
 
@@ -1274,12 +1274,14 @@ const UI = {
        die Endwahl ist erst nach geladenem Entscheidungspunkt wieder offen. */
     this.trackClose("procedure");
     this.els.procedurePanel.hidden = true;
-    /* Sichtbares Endmotiv in der Bühne: A = Abwesenheit, B = privates
-       Gegenüber. Reine UI-Darstellung, kein State, kein Ton. */
-    this.applyEndingView(endingId);
+    /* Abwesenheit erst im echten Pausenschritt; das private Gegenüber
+       während des Dialogs nur beim jeweiligen Plus-Beitrag zeigen. */
+    this.removeEndingView();
+    this.setStatus(UI_TEXTS.ended);
     this.openDialogue({
       title: e.titel,
       steps: steps,
+      endingId: endingId,
       onDone: () => this.showEndingPanel(endingId)
     });
   },
@@ -1290,12 +1292,9 @@ const UI = {
 
     const body = this.els.endingBody;
     body.textContent = "";
-    body.appendChild(this.make("p", "ending-note", UI_TEXTS.endingNote));
-
     const actions = this.make("div", "ending-actions");
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "primary";
     btn.textContent = "Zum Entscheidungspunkt";
     btn.addEventListener("click", () => this.doCheckpoint());
     actions.appendChild(btn);
@@ -1326,17 +1325,23 @@ const UI = {
     if (endingId === "A") {
       view.appendChild(this.make("div", "ending-absence", "—"));
     } else {
-      const device = this.make("div", "ending-device");
-      device.appendChild(this.make("span", "ending-device-label", "Privates Gerät"));
-      const portrait = this.makeSpeakerPortrait("Alex Plus", null);
-      if (portrait) {
-        portrait.classList.add("ending-portrait");
-        device.appendChild(portrait);
-      }
-      device.appendChild(this.make("span", "ending-device-caption", "Ohne Logo, ohne Abo"));
-      view.appendChild(device);
+      view.appendChild(this.makePrivateDevice("endeB-06"));
     }
     stage.appendChild(view);
+  },
+
+  /* Derselbe Rahmen wird pro Plus-Zeile oder einmal im Schlussbild
+     verwendet. Die Original-ID erhält die Ausdruckswahl des Bildkatalogs. */
+  makePrivateDevice(lineId) {
+    const device = this.make("div", "ending-device");
+    device.appendChild(this.make("span", "ending-device-label", "Privates Gerät"));
+    const portrait = this.makeSpeakerPortrait("Alex Plus", lineId);
+    if (portrait) {
+      portrait.classList.add("ending-portrait");
+      device.appendChild(portrait);
+    }
+    device.appendChild(this.make("span", "ending-device-caption", "Ohne Logo, ohne Abo"));
+    return device;
   },
 
   removeEndingView() {
