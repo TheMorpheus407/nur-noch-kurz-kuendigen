@@ -1,5 +1,7 @@
 # Nur noch kurz kündigen
 
+**Arbeitsfassung – Qualitätsüberarbeitung läuft, keine finale Abnahme.** Die bisherigen Tests bestätigen technische Funktion. Figureninszenierung, weitere eigene Charakter-LoRAs für Alex Plus und Rolf sowie Spielpolish werden überarbeitet. Dieses Repository wird privat gepflegt.
+
 Du willst das Abo für deinen digitalen Doppelgänger kündigen. Der Kundenservice
 hat Rückfragen. Dein Doppelgänger auch. Und der Ficus weiß mehr, als er sollte.
 
