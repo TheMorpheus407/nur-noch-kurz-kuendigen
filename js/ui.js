@@ -980,12 +980,15 @@ const UI = {
 
   openProcedure() {
     this.stopAudio();
+    const previousDialogue = this._dialogue;
     this.renderProcedure();
     this.rememberFocus();
     this.els.procedurePanel.hidden = false;
     this.trackOpen("procedure");
-    if (this._dialogue) {
-      /* W3-Einleitung läuft im Dialogmotor: das Dialogpanel muss nach
+    if (this._dialogue && this._dialogue !== previousDialogue) {
+      /* Nur die hier neu gestartete W3-Einleitung erhält Vorrang.
+         Ein zuvor offenes NPC-Gespräch darf das bewusst gewählte
+         Verfahren nicht verdecken. Das neue Dialogpanel muss nach
          dem gesamten Öffnungsvorgang das oberste aktive Panel sein —
          das trackOpen("procedure") oben darf es nicht verdecken. */
       this.trackOpen("dialogue");
