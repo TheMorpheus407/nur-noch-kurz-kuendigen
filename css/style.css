@@ -716,6 +716,13 @@ blockquote.claim {
   overflow-wrap: break-word;
 }
 
+/* Programmgesteuerter Fokus auf der Rückmeldung (tabindex=-1):
+   klar sichtbar, ohne die übrigen Fokusregeln zu verändern. */
+.feedback-box:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .success-box {
   border: 2px solid var(--ink);
   border-left: 5px solid var(--petrol);

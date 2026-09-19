@@ -620,9 +620,14 @@ const UI = {
       return;
     }
 
-    /* Rolf */
+    /* Rolf: Die Exporthinweis-Zeile (rolf-07) erscheint erst, wenn W2
+       abgeschlossen ist — bis dahin endet das Gespräch kohärent mit
+       rolf-06. CONTENT bleibt unverändert; hier wird nur eine
+       abgeleitete Zeilenliste verwendet. */
     const d = CONTENT.dialogues.rolf;
-    this.openDialogue({ title: d.titel, steps: this.buildSteps(d.lines) });
+    const w2done = s.rounds.resolved.includes("W2");
+    const rolfLines = w2done ? d.lines : d.lines.filter((l) => l.id !== "rolf-07");
+    this.openDialogue({ title: d.titel, steps: this.buildSteps(rolfLines) });
   },
 
   /* MIRA je nach Verfahrensstand:
@@ -891,7 +896,7 @@ const UI = {
       article.append(
         this.make("h3", null, card.title),
         this.make("p", null, card.text),
-        this.make("p", "card-meta", "Quelle: " + card.quelle + " — " + card.rolle)
+        this.make("p", "card-meta", "Quelle: " + card.quelle)
       );
       list.appendChild(article);
     }
@@ -999,7 +1004,7 @@ const UI = {
     }
   },
 
-  renderRound(rid, body, playIntro = true) {
+  renderRound(rid, body, playIntro = true, feedback = null) {
     body.textContent = "";
     const s = GameState.get();
     const w = CONTENT.contradictions[rid];
@@ -1044,6 +1049,19 @@ const UI = {
     body.appendChild(this.make("p", "claim-by", UI_TEXTS.claimBy));
     body.appendChild(this.make("blockquote", "claim", w.claim));
 
+    /* Falsche Karte: genau eine Rückmeldung direkt nach der Behauptung
+       und vor der Kartenauswahl — nicht am Ende der Kartenliste.
+       Programmgesteuert fokussierbar (tabindex=-1) und verständlich
+       benannt; renderRound ersetzt den Inhalt, daher keine Duplikate
+       bei Mehrfachklick. */
+    if (feedback) {
+      const box = this.make("div", "feedback-box", feedback);
+      box.id = "procedure-feedback";
+      box.tabIndex = -1;
+      box.setAttribute("aria-label", "Rückmeldung zur vorgelegten Karte");
+      body.appendChild(box);
+    }
+
     /* Kartenwahl: nur tatsächlich gefundene Karten. */
     body.appendChild(this.make("p", null, UI_TEXTS.cardPickLabel));
     const cards = GameState.cardList();
@@ -1055,7 +1073,7 @@ const UI = {
       const text = this.make("span", "card-pick-text");
       text.append(
         this.make("strong", null, card.title),
-        this.make("p", null, card.rolle)
+        this.make("p", null, card.text)
       );
       btn.appendChild(text);
       btn.addEventListener("click", () => this.presentCard(rid, cardId));
@@ -1097,12 +1115,18 @@ const UI = {
     }
 
     /* Passende falsche Rückmeldung (aus content.js), Runde bleibt offen.
-       Die sichtbare Einleitung wird dabei NICHT erneut abgespielt. */
-    this.renderRound(rid, body, false);
-    const box = this.make("div", "feedback-box",
-      res.feedback || "Diese Karte trägt die Runde nicht.");
-    body.appendChild(box);
-    this.setStatus(res.feedback || "Diese Karte trägt die Runde nicht.");
+       Die sichtbare Einleitung wird dabei NICHT erneut abgespielt.
+       Die Rückmeldung erscheint direkt nach der Behauptung, vor der
+       Kartenauswahl; der Fokus geht dorthin, die nächste Karte bleibt
+       per Tab erreichbar (keine Fokusfalle, keine automatische Wahl). */
+    const feedbackText = res.feedback || "Diese Karte trägt die Runde nicht.";
+    this.renderRound(rid, body, false, feedbackText);
+    const box = body.querySelector("#procedure-feedback");
+    if (box) {
+      box.scrollIntoView({ block: "nearest" });
+      box.focus({ preventScroll: true });
+    }
+    this.setStatus(feedbackText);
   },
 
   renderSuccess(rid, body) {
