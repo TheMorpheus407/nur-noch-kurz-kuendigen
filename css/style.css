@@ -1,10 +1,11 @@
 /* =====================================================================
-   Nur noch kurz kündigen — Textprototyp
+   Nur noch kurz kündigen — Grafiken angebunden
    Graphic-Novel-Palette:
      Creme  #EEE7D8 · Petrol #28666A · Pflaume #51364F
      Koralle #EF806D · dunkle Kontur #25232B
    Retrofuturistisches Kundencenter: klare Formular-/Registerflächen,
-   breite dunkle Konturen. Reine Text-/CSS-Platzhalter, keine Bilder.
+   breite dunkle Konturen. Bühne mit Bild (16:9, ohne Beschnitt),
+   absolute Hotspots an den Bildankern, Dialogportraits (contain).
    ===================================================================== */
 
 :root {
@@ -71,7 +72,7 @@ body {
 /* ---------- Kopf ---------- */
 
 .page-head {
-  max-width: 52rem;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 1.25rem 1rem 0.75rem;
 }
@@ -111,7 +112,7 @@ body {
 /* ---------- Grundraster ---------- */
 
 main {
-  max-width: 52rem;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 0.5rem 1rem 2.5rem;
 }
@@ -210,36 +211,54 @@ main {
 
 /* ---------- Szene / Hotspots ---------- */
 
-.scene {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
+/* Bühne: volles 16:9, Bild vollständig und unverzerrt (kein cover/Beschnitt) */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   margin-bottom: 1rem;
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 5px 5px 0 var(--ink);
+  overflow: hidden;
 }
 
+.stage-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Hotspots: absolute Buttons an den Inline-Bildankern (left/top in %) */
 .hotspot {
+  position: absolute;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.35rem;
-  min-height: 84px;
-  padding: 0.7rem 0.9rem 0.8rem;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding: 0.45rem 0.8rem 0.5rem;
   font: inherit;
   text-align: left;
   color: var(--ink);
   background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 9px;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
   overflow-wrap: break-word;
+  /* Zentrierung auf den Bildanker; Hover/Active bauen darauf auf */
+  transform: translate(-50%, -50%);
 }
 
 /* Registerlaschen oben auf jedem Hotspot: rein dekorative CSS-Streifen */
 .hotspot::before {
   content: "";
   display: block;
-  height: 8px;
+  height: 6px;
   border-radius: 3px;
   background: repeating-linear-gradient(
     90deg,
@@ -249,17 +268,17 @@ main {
     var(--cream) 30px 38px
   );
   border: 1px solid var(--ink);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .hotspot:hover {
   background: #E9E0CB;
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 var(--ink);
+  transform: translate(calc(-50% - 1px), calc(-50% - 1px));
+  box-shadow: 4px 4px 0 var(--ink);
 }
 
 .hotspot:active {
-  transform: translate(2px, 2px);
+  transform: translate(calc(-50% + 2px), calc(-50% + 2px));
   box-shadow: 1px 1px 0 var(--ink);
 }
 
@@ -270,12 +289,12 @@ main {
 
 .hotspot .hotspot-label {
   font-weight: 700;
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   line-height: 1.25;
 }
 
 .hotspot .hotspot-kind {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -287,7 +306,6 @@ main {
   background: #DDD5C2;
   color: var(--ink-soft);
   box-shadow: none;
-  transform: none;
   cursor: not-allowed;
 }
 
@@ -380,7 +398,32 @@ main {
 }
 
 .dialogue-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
   margin: 0 0 0.4rem;
+}
+
+/* Portrait: vollständig, natürliche Proportionen, keine Verzerrung/Filter */
+.speaker-portrait {
+  flex: 0 0 auto;
+  width: 112px;
+  height: 112px;
+  max-height: 112px;
+  object-fit: contain;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+
+/* Bildfehler: JS setzt hidden — trotz aller Display-Regeln unsichtbar */
+.speaker-portrait[hidden] {
+  display: none !important;
+}
+
+/* Zeile ohne Portrait: keine leere Bildspalte, kein zusätzlicher Abstand */
+.dialogue-line:not(:has(.speaker-portrait:not([hidden]))) {
+  gap: 0;
 }
 
 .dialogue-speaker {
@@ -510,12 +553,15 @@ button[aria-disabled="true"] {
   color: var(--cream);
 }
 
+/* Replay-Button direkt in der Dialog-/Verfahrenszeile */
 .audio-replay {
+  flex: 0 0 auto;
+  align-self: flex-start;
   min-height: 0;
   padding: 0.15rem 0.7rem;
   font-size: 0.85rem;
   font-weight: 600;
-  margin: 0.2rem 0 0.2rem 0.4rem;
+  margin: 0;
 }
 
 /* ---------- Beweisordner ---------- */
@@ -738,13 +784,44 @@ blockquote.claim {
   margin: 0 0.2rem;
 }
 
+/* ---------- Schmale Fenster: Bühne wird statische Hotspot-Liste ---------- */
+
+@media (max-width: 720px) {
+  .stage {
+    aspect-ratio: auto;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .stage--list .stage-bg {
+    display: none;
+  }
+
+  .stage--list {
+    padding: 0.6rem;
+  }
+
+  /* dieselben vier Buttons, jetzt im normalen Fluss untereinander */
+  .stage--list .hotspot {
+    position: static;
+    width: 100%;
+    min-height: 56px;
+    transform: none;
+  }
+
+  .stage--list .hotspot:hover {
+    transform: none;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .stage--list .hotspot:active {
+    transform: none;
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+}
+
 /* ---------- Schmale Fenster (320px und aufwärts) ---------- */
 
 @media (max-width: 560px) {
-  .scene {
-    grid-template-columns: 1fr;
-  }
-
   .room-nav {
     flex-direction: column;
     align-items: stretch;
@@ -756,6 +833,23 @@ blockquote.claim {
 
   .panel {
     padding: 0.85rem 0.9rem;
+  }
+
+  /* Dialog: Portrait über dem Text, Replay darunter */
+  .dialogue-line {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .speaker-portrait {
+    width: 92px;
+    height: 92px;
+    max-height: 92px;
+  }
+
+  .audio-replay {
+    align-self: auto;
   }
 
   .toolbar {
