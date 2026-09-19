@@ -839,7 +839,15 @@ const UI = {
     }
 
     const last = d.index >= d.steps.length - 1;
-    this.els.btnDialogueNext.textContent = last ? "Schließen" : "Weiter";
+    /* Nur Darstellung: bei der aktuellen Zeile w2-02 (W2-Erfolgs-
+       moment) lautet der Weiter-Button „Abschaltung bestätigen“ —
+       keine zusätzliche State-Aktion, W2 ist bereits durch den
+       vorhandenen presentEvidence-Aufruf gelöst. */
+    let nextLabel = last ? "Schließen" : "Weiter";
+    if (!last && step.id === "w2-02") {
+      nextLabel = "Abschaltung bestätigen";
+    }
+    this.els.btnDialogueNext.textContent = nextLabel;
   },
 
   advanceDialogue() {
@@ -1119,7 +1127,7 @@ const UI = {
     const body = this.els.procedureBody;
 
     if (res.ok) {
-      this.renderSuccess(rid, body);
+      this.renderSuccess(rid);
       this.updateProgress();
       if (res.checkpoint && res.checkpoint.ok) {
         if (res.checkpoint.storage === "memory") {
@@ -1154,67 +1162,46 @@ const UI = {
     this.setStatus(feedbackText);
   },
 
-  renderSuccess(rid, body) {
-    /* Übergang in die Erfolgsansicht: laufende/wartende Sprache der
-       vorherigen Ansicht verwirfen, bevor die neue Ansicht gilt. */
+  renderSuccess(rid) {
+    /* Erfolgsreaktion als einzelne Dialogmomente auf dem bestehenden
+       Dialogmotor: pro Moment nur die aktuelle Zeile, passendes
+       Portrait, vorhandener Replay-Button, nur manuelles Weiter.
+       Keine playSequence, kein Auto-Weiter, keine w.folge-Box. */
     this.stopAudio();
-    body.textContent = "";
     const w = CONTENT.contradictions[rid];
-    this._procedureView = { type: "success", rid: rid };
-    this.els.procedureTitle.textContent = w.titel;
 
-    body.appendChild(this.make("p", "badge", "Runde abgeschlossen"));
-
-    /* Vorher-Dialog (W3) gehört zum Verlauf, falls er noch fehlt. */
-    if (Array.isArray(w.vorher)) {
-      for (const line of w.vorher) {
-        this.safeLog(line.speaker, line.text, line.id);
+    /* Unveränderte CONTENT-Zeilen. Für W2 folgen unmittelbar nach
+       w2-04 die beiden vorhandenen alexPlusNachW2-Zeilen (bestehende
+       Objekte, in dieser Reihenfolge); CONTENT-Arrays bleiben
+       unverändert. */
+    const lines = w.erfolg.slice();
+    if (rid === "W2") {
+      const nachW2 = CONTENT.dialogues.alexPlusNachW2.lines;
+      const extra = ["alexplusnachw2-02", "alexplusnachw2-05"]
+        .map((id) => nachW2.find((l) => l.id === id))
+        .filter(Boolean);
+      const i = lines.findIndex((l) => l.id === "w2-04");
+      if (i >= 0) {
+        lines.splice(i + 1, 0, ...extra);
+      } else {
+        lines.push(...extra);
       }
     }
 
-    /* Folgedialog mit Sprecher. */
-    for (const line of w.erfolg) {
-      this.safeLog(line.speaker, line.text, line.id);
-      const el = this.make("div", "dialogue-line");
-      const portrait = this.makeSpeakerPortrait(line.speaker, line.id);
-      if (portrait) {
-        el.appendChild(portrait);
+    /* Abschluss (letzter Schritt, Schließen oder Escape): kontrolliert
+       zur folgenden aktuellen Verfahrensansicht (nach W3 zur
+       vorhandenen Endwahl) mit sichtbarem Fokus. Die alten Karten
+       werden ersetzt und bleiben nicht klickbar; der gelöste
+       Fortschritt bleibt bestehen. */
+    this.openDialogue({
+      title: w.titel,
+      steps: this.buildSteps(lines),
+      onDone: () => {
+        this.renderProcedure();
+        const firstBtn = this.els.procedureBody.querySelector("button");
+        (firstBtn || this.els.btnProcedureClose).focus();
       }
-      el.append(
-        this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
-        this.make("p", "dialogue-text", line.text)
-      );
-      /* Vertonte Erfolgszeile: klare Wiederholfunktion; stille Zeilen
-         (z. B. Alex) und fehlende Katalog-IDs bleiben ohne Button. */
-      if (GameAudio.hasLine(line.id)) {
-        el.appendChild(this.makeReplayButton(line.id, "Zeile wiederholen"));
-      }
-      body.appendChild(el);
-    }
-
-    /* Erfolgreiche Beweisrunde: bei aktivierten Stimmen in sichtbarer
-       Reihenfolge abspielen; danach bestimmt der Spieler das Tempo. */
-    GameAudio.playSequence(w.erfolg.map((l) => l.id));
-
-    body.appendChild(this.make("div", "success-box", w.folge));
-
-    const actions = this.make("div", "panel-actions");
-    const weiter = document.createElement("button");
-    weiter.type = "button";
-    weiter.className = "primary";
-    weiter.textContent = "Weiter";
-    weiter.addEventListener("click", () => {
-      this.renderProcedure();
-      const firstBtn = this.els.procedureBody.querySelector("button");
-      (firstBtn || this.els.btnProcedureClose).focus();
     });
-    const untersuchen = document.createElement("button");
-    untersuchen.type = "button";
-    untersuchen.className = "ghost";
-    untersuchen.textContent = CONTENT.labels.weiterUntersuchen;
-    untersuchen.addEventListener("click", () => this.closeProcedure());
-    actions.append(weiter, untersuchen);
-    body.appendChild(actions);
   },
 
   /* ---------- Entscheidung und Enden ---------- */
