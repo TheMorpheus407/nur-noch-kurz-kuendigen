@@ -1,0 +1,230 @@
+/* Nur noch kurz kündigen — technische Probe */
+
+:root {
+  --bg: #f4f1ea;
+  --ink: #22272e;
+  --panel: #ffffff;
+  --line: #c9c2b4;
+  --accent: #2f5d50;
+  --accent-ink: #ffffff;
+  --danger: #8a3030;
+  --scene-bg: #3a4150;
+  --scene-ink: #e8ecf2;
+  --card-bg: #eef3ee;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+.skip-link:focus { left: 0.5rem; }
+
+.page-head {
+  padding: 1rem 1.5rem 0.5rem;
+}
+.page-head h1 { margin: 0; font-size: 1.6rem; }
+.subtitle { margin: 0.25rem 0 0; color: #5a6068; }
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+/* Szene */
+.scene {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 220px;
+  background: var(--scene-bg);
+  border-radius: 10px;
+  padding: 2rem 1rem 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hotspot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  color: var(--scene-ink);
+  font: inherit;
+}
+.hotspot:hover { border-color: var(--scene-ink); }
+.hotspot:focus-visible {
+  outline: 3px solid #ffd76a;
+  outline-offset: 2px;
+}
+
+.hotspot-label { font-weight: 600; }
+
+/* Platzhalterfiguren (reines CSS, keine Bilder) */
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.figure .head {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #7f93ad;
+}
+.figure .body {
+  width: 64px;
+  height: 78px;
+  border-radius: 14px 14px 6px 6px;
+  background: #7f93ad;
+}
+
+.terminal {
+  position: relative;
+  width: 110px;
+  height: 92px;
+  background: #232a36;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+.terminal .screen {
+  width: 84px;
+  height: 50px;
+  background: #9fd3a8;
+  border-radius: 3px;
+}
+.terminal .base {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 16px;
+  background: #232a36;
+}
+
+/* Status und Fortschritt */
+.status {
+  min-height: 1.5rem;
+  font-weight: 600;
+}
+.progress {
+  color: #5a6068;
+  font-size: 0.95rem;
+}
+
+/* Panels */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+.panel[hidden] { display: none; }
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.panel-head h2 { margin: 0; font-size: 1.15rem; }
+
+.dialogue-text {
+  font-size: 1.05rem;
+  margin: 0.75rem 0;
+}
+
+.panel-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+/* Buttons */
+button {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+button:hover { background: #f0ede5; }
+button:focus-visible {
+  outline: 3px solid #b45309;
+  outline-offset: 2px;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+button.primary:hover { background: #254a40; }
+button.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+button.danger:hover { background: #f7ecec; }
+
+/* Beweiskarten */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+.card h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.card p { margin: 0; }
+
+/* Widerspruch */
+.claim-by { margin: 0.75rem 0 0.25rem; font-weight: 600; }
+blockquote {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid var(--line);
+  background: #faf8f3;
+  font-style: italic;
+}
+.badge {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.9rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
