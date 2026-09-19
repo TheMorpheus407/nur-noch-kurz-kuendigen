@@ -21,10 +21,13 @@ keine Modellinferenz aus und verwendet keine externen Skripte oder Schriftarten.
 Die markierten Orte in den Räumen führen zu Gesprächen und Beweisen.
 Ihre Namen erscheinen bei Zeigerkontakt oder Tastaturfokus; auf schmalen
 Bildschirmen stehen sie in einer beschrifteten Liste.
-Gefundene Karten bleiben im Beweisordner. Das Widerspruchsverfahren öffnest du
-über die Werkzeugleiste. Dialoge lassen sich mit **Weiter** lesen; **Escape**
-schließt das zuletzt geöffnete Panel. Alle Aktionen sind auch per Tastatur
-erreichbar.
+Gefundene Karten bleiben im Beweisordner. Ein erneuter Klick auf ihre Fundstelle
+öffnet direkt das zugehörige Dokument. Das Widerspruchsverfahren öffnest du
+über die Werkzeugleiste. Dialoge lassen sich mit **Weiter** lesen.
+**Überspringen** beendet die restliche Szene; **Escape** hat bei einem geöffneten
+Dialog denselben Effekt, bei anderen Panels schließt es das zuletzt geöffnete.
+Alle Aktionen sind auch per Tastatur erreichbar. Ein bestätigter **Neustart**
+beginnt wieder mit der Ankunftsszene.
 
 Unter **Weitere Aktionen** findest du Verlauf, **Speichern** und **Stand laden**.
 Speichern verwendet den Browserspeicher. Falls dieser
@@ -50,7 +53,11 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
   Qwen3.8-27B-Läufen. Cedric ergänzte dokumentierte direkte Korrekturen an
   Speicherrandfällen, Darstellung, Syntax, Audioauswahl und Bühnenlayout.
   Auch die abschließende Straffung von NPC-Nachgesprächen und des W2-Pflichtwegs
-  ist gesondert als direkte Kuration durch Cedric dokumentiert.
+  ist gesondert als direkte Kuration durch Cedric dokumentiert. Ein weiterer lokaler
+  Qwen-Lauf reparierte Dokumentwiederbesuche und den Ankunftsdialog nach Neustart
+  und beschriftete die Überspringfunktion. Die anschließende Korrektur
+  abgeschnittener Figurenlabels, eine ungesprochene Pausenmeldung und diese
+  Bedienhilfe stammen getrennt von Cedric.
   Der Qwen-Auftrag für die Endinszenierung erreichte nach seiner Syntaxprüfung
   die Rundengrenze. Sein ursprünglicher Teilstand und die anschließenden
   Korrekturen von Cedric an Zeitpunkt, Portraitdarstellung und schmalen Ansichten

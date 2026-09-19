@@ -383,7 +383,7 @@ const CONTENT = {
   status: {
     start: "Empfangsraum. Klicken Sie auf MIRA oder das Auskunftsterminal.",
     dialogClosed: "Gespräch mit MIRA beendet. Sie können es jederzeit erneut lesen.",
-    contradictionCancelled: "Widerspruchsverfahren abgebrochen. Kein Fortschritt verloren.",
+    contradictionCancelled: "Verfahren pausiert. Beweise und gelöste Widersprüche bleiben erhalten.",
     contradictionClosed: "Verfahren 1 ist abgeschlossen.",
     restarted: "Neustart abgeschlossen. Der Spielstand ist zurückgesetzt."
   },

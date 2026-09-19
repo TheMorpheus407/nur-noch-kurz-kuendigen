@@ -1049,6 +1049,19 @@ blockquote.claim {
     text-align: center;
     font-weight: 700;
   }
+
+  /* Fix V01: In beiden Räumen liegen erster/letzter Marker außen.
+     Nur ihre Hinweisbox zum Bildinneren ausrichten; Anker bleiben gleich. */
+  .stage:not(.stage--list) .hotspot:is(:first-child, :last-child)::after {
+    transform: none;
+  }
+  .stage:not(.stage--list) .hotspot:first-child::after {
+    left: 0;
+  }
+  .stage:not(.stage--list) .hotspot:last-child::after {
+    left: auto;
+    right: 0;
+  }
 }
 
 @media (max-width: 900px) {
