@@ -823,6 +823,16 @@ blockquote.claim {
   display: none;
 }
 
+/* Der bestätigte Schlussdialog braucht keine alten Fundstellen,
+   Raumhinweise oder sichtbaren Interaktionsmarker neben der Figur. */
+.game:has(.dialogue--ending:not([hidden])) .stage-hotspots,
+.game:has(.dialogue--ending:not([hidden])) .room-info,
+.game:has(.dialogue--ending:not([hidden])) .hotspot-info,
+.game:has(.dialogue--ending:not([hidden])) .stage-col > .status,
+.game:has(.dialogue--ending:not([hidden])) .progress {
+  display: none;
+}
+
 .game:has(.ending-view) .stage-bg {
   display: none;
 }

@@ -405,6 +405,7 @@ const UI = {
     this._dialogue = null;
     this._openStack.length = 0;
     this.els.dialoguePanel.hidden = true;
+    this.els.dialoguePanel.classList.remove("dialogue--ending");
     this.els.evidencePanel.hidden = true;
     this.els.logPanel.hidden = true;
     this.els.procedurePanel.hidden = true;
@@ -783,6 +784,7 @@ const UI = {
       onDone: opts.onDone || null
     };
     this.els.dialogueTitle.textContent = opts.title;
+    this.els.dialoguePanel.classList.toggle("dialogue--ending", !!opts.endingId);
     this.rememberFocus();
     this.els.dialoguePanel.hidden = false;
     this.trackOpen("dialogue");
@@ -882,6 +884,7 @@ const UI = {
     this._dialogue = null;
     this.trackClose("dialogue");
     this.els.dialoguePanel.hidden = true;
+    this.els.dialoguePanel.classList.remove("dialogue--ending");
     this.restoreFocus(document.body);
     if (d && d.onDone) {
       d.onDone();
