@@ -206,3 +206,22 @@ Dann öffnen: http://127.0.0.1:8000/
   (keine Hörabnahme); `node --check` ist ausschließlich eine
   Syntaxprüfung, kein Browser- oder Funktionstest. Die unabhängige
   Browser-Nachprüfung und Hörabnahme dieser fünf Befunde steht noch aus.
+
+
+## Tatsächliche Herstellung
+
+Spielcode: protokollierte lokale Qwen3.8-27B-Läufe mit dokumentierten direkten
+Korrekturen von Cedric an Speicherrandfällen (014a), Darstellung (016a), einem
+Syntaxkomma (018a) und der Audioauswahl bei gleichzeitig offenen Panels (018c).
+018c nutzt die bereits vorhandene Öffnungsreihenfolge: Beim Einschalten folgt
+die Sprache dem zuletzt geöffneten Dialog oder Verfahren; Ordner und Verlauf
+starten dabei keine darunterliegenden Gespräche. Diese Ergänzung stammt von
+Cedric und erhält eine eigene Browser-Nachprüfung.
+
+Auftrag und kreative Entscheidungen: Cedric / The Morpheus. Aufgabenstellung,
+Werkzeugbedienung, Prüfung, Assetkopien und Metadaten: Cedric
+(externe Unterstützung). Bilddateien: lokales Krea 2 Turbo FP8. Stimmen:
+lokales Qwen3-TTS mit den ausgewählten Referenzen MIRA B, Alex Plus A und Rolf.
+Die Spielgrafiken verwenden keinen Charakter-LoRA. Modellgewichte gehören
+nicht zum Spiel; die Originalprompts, Ausgaben und Reparaturen bleiben in der
+Produktionsdokumentation erhalten.

@@ -512,12 +512,15 @@ const UI = {
     this.els.btnAudio.textContent = on ? "Stimmen aus" : "Stimmen an";
     this.els.btnAudio.setAttribute("aria-pressed", on ? "true" : "false");
     if (on) {
-      const step = this.currentDialogueStep();
-      if (step && step.kind === "line" && GameAudio.hasLine(step.id)) {
-        GameAudio.playLine(step.id);
-      } else if (this.els.procedurePanel.hidden === false &&
-                 this.playVisibleProcedureAudio()) {
-        /* sichtbare vertonte Verfahrenszeilen, keine veraltete Folge */
+      /* Fix018c: Audio folgt wie Escape dem zuletzt geöffneten Panel. */
+      const activePanel = this._openStack[this._openStack.length - 1];
+      if (activePanel === "procedure" && !this.els.procedurePanel.hidden) {
+        this.playVisibleProcedureAudio();
+      } else if (activePanel === "dialogue" && !this.els.dialoguePanel.hidden) {
+        const step = this.currentDialogueStep();
+        if (step && step.kind === "line" && GameAudio.hasLine(step.id)) {
+          GameAudio.playLine(step.id);
+        }
       }
       this.setStatus(UI_TEXTS.audioOn);
     } else {
