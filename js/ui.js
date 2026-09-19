@@ -54,6 +54,9 @@ const UI_TEXTS = {
   endingConfirm: "Diese Entscheidung ist für diesen Spielstand endgültig. Der Entscheidungspunkt bleibt ladbar. Bestätigen?",
   endingNote: "Das Ende ist für diesen Spielstand abgeschlossen. Über „Zum Entscheidungspunkt“ können Sie zum gesicherten Stand zurückkehren und die andere Option wählen.",
   noLog: "Noch keine Gesprächszeilen im Verlauf.",
+  audioOn: "Stimmen an: vertonte Zeilen werden gesprochen.",
+  audioOff: "Stimmen aus: laufende Sprache gestoppt.",
+  audioOffHint: "Stimmen sind ausgeschaltet — „Stimmen an“ schaltet sie ein."
   miraNachW1Titel: "MIRA — Stand des Vorgangs",
   procedureLocked: "Zuerst eine Beweiskarte finden: das Auskunftsterminal im Empfang.",
   cardPickLabel: "Beweiskarte aus dem Ordner wählen und vorlegen:",
@@ -111,7 +114,8 @@ const UI = {
       btnSave: $("btn-save"),
       btnLoad: $("btn-load"),
       btnCheckpoint: $("btn-checkpoint"),
-      btnRestart: $("btn-restart")
+      btnRestart: $("btn-restart"),
+      btnAudio: $("btn-audio")
     };
 
     /* Raumwechsel */
@@ -134,6 +138,11 @@ const UI = {
     /* Widerspruchsverfahren */
     this.els.btnProcedure.addEventListener("click", () => this.openProcedure());
     this.els.btnProcedureClose.addEventListener("click", () => this.closeProcedure());
+
+    /* Stimmen: Master-Umschalter, beginnt bewusst ausgeschaltet */
+    GameAudio.init();
+    GameAudio.setNoticeHandler((text) => this.setStatus(text));
+    this.els.btnAudio.addEventListener("click", () => this.toggleAudio());
 
     /* Speichern / Laden / Entscheidungspunkt / Neustart */
     this.els.btnSave.addEventListener("click", () => this.doSave());
@@ -269,6 +278,7 @@ const UI = {
   },
 
   closeAllPanels() {
+    this.stopAudio();
     this._dialogue = null;
     this._openStack.length = 0;
     this.els.dialoguePanel.hidden = true;
@@ -352,6 +362,7 @@ const UI = {
       }
       return;
     }
+    this.stopAudio();
     this.renderWorld();
     this.setStatus(CONTENT.rooms[roomId].name + ". Vier Punkte sind in der Szene sichtbar.");
   },
@@ -478,6 +489,55 @@ const UI = {
     return CONTENT.dialogues.mira;
   },
 
+  /* ---------- Stimmen (lokale TTS-Dateien, js/audio.js) ---------- */
+
+  currentDialogueStep() {
+    const d = this._dialogue;
+    return d ? d.steps[d.index] : null;
+  },
+
+  /* Laufende Sprache stoppen und wartende Clips verwerfen. */
+  stopAudio() {
+    GameAudio.stop();
+  },
+
+  /* Master-Umschalter. Bei Einschalten spielt die gerade sichtbare
+     vertonte Dialogzeile; bei Ausschalten stoppt alles sofort. */
+  toggleAudio() {
+    const on = GameAudio.toggle();
+    this.els.btnAudio.textContent = on ? "Stimmen aus" : "Stimmen an";
+    this.els.btnAudio.setAttribute("aria-pressed", on ? "true" : "false");
+    if (on) {
+      const step = this.currentDialogueStep();
+      if (step && step.kind === "line" && GameAudio.hasLine(step.id)) {
+        GameAudio.playLine(step.id);
+      }
+      this.setStatus(UI_TEXTS.audioOn);
+    } else {
+      this.setStatus(UI_TEXTS.audioOff);
+    }
+  },
+
+  /* Bewusst angeklickte Zeile wieder abspielen (Dialog oder Verlauf).
+     Bei ausgeschalteten Stimmen: kurzer Hinweis statt Audio. */
+  replayLine(id) {
+    if (!GameAudio.isEnabled()) {
+      this.setStatus(UI_TEXTS.audioOffHint);
+      return;
+    }
+    GameAudio.playLine(id);
+  },
+
+  /* Kleine Wiederhol-Schaltfläche für eine vertonte Zeile. */
+  makeReplayButton(id, label) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "audio-replay ghost";
+    btn.textContent = label;
+    btn.addEventListener("click", () => this.replayLine(id));
+    return btn;
+  },
+
   /* ---------- Dialogmotor (Weiter / Schließen) ---------- */
 
   buildSteps(lines) {
@@ -490,6 +550,7 @@ const UI = {
   },
 
   openDialogue(opts) {
+    this.stopAudio();
     this._dialogue = {
       steps: opts.steps,
       index: 0,
@@ -527,9 +588,18 @@ const UI = {
         this.make("p", "dialogue-text", step.text)
       );
       body.appendChild(line);
+      /* Vertonte Zeile: bei aktivierten Stimmen die zugehörige Datei
+         abspielen + klare Wiederholfunktion. Stille Zeilen (z. B. Alex)
+         bleiben sichtbar und ohne Ton. */
+      if (GameAudio.hasLine(step.id)) {
+        body.appendChild(this.makeReplayButton(step.id, "Zeile wiederholen"));
+        GameAudio.playLine(step.id);
+      }
     } else {
       /* Bewusster Lesemoment (z. B. Ende A zwischen Löschung und
-         Zufriedenheitsfrage): eigener Schritt, eigener Weiter-Klick. */
+         Zufriedenheitsfrage): eigener Schritt, eigener Weiter-Klick.
+         Die bewusste Pause bleibt stumm und stoppt laufende Sprache. */
+      this.stopAudio();
       body.appendChild(this.make("div", "dialogue-pause", "· · ·"));
     }
 
@@ -559,6 +629,7 @@ const UI = {
   /* Schließen (Button, Escape oder letzter Schritt): ohne Fortschritts-
      verlust; bei Enddialogen schließt der Abschluss das Ende ab. */
   finishDialogue() {
+    this.stopAudio();
     const d = this._dialogue;
     this._dialogue = null;
     this.trackClose("dialogue");
@@ -584,6 +655,7 @@ const UI = {
   /* ---------- Beweisordner ---------- */
 
   openEvidence() {
+    this.stopAudio();
     this.renderEvidenceList();
     this.rememberFocus();
     this.els.evidencePanel.hidden = false;
@@ -592,6 +664,7 @@ const UI = {
   },
 
   closeEvidence() {
+    this.stopAudio();
     this.trackClose("evidence");
     this.els.evidencePanel.hidden = true;
     this.restoreFocus(this.els.btnEvidence);
@@ -622,6 +695,7 @@ const UI = {
   /* ---------- Verlauf ---------- */
 
   openLog() {
+    this.stopAudio();
     this.renderLog();
     this.rememberFocus();
     this.els.logPanel.hidden = false;
@@ -630,6 +704,7 @@ const UI = {
   },
 
   closeLog() {
+    this.stopAudio();
     this.trackClose("log");
     this.els.logPanel.hidden = true;
     this.restoreFocus(this.els.btnLog);
@@ -652,6 +727,11 @@ const UI = {
         this.make("span", "log-speaker", line.speaker + " — "),
         document.createTextNode(line.text)
       );
+      /* Nur vertonte Zeilen erhalten eine Wiederholfunktion; das Öffnen
+         des Verlaufs selbst spielt keine Historie ab. */
+      if (GameAudio.hasLine(line.id)) {
+        li.appendChild(this.makeReplayButton(line.id, "Anhören"));
+      }
       list.appendChild(li);
     }
   },
@@ -659,6 +739,7 @@ const UI = {
   /* ---------- Widerspruchsverfahren ---------- */
 
   openProcedure() {
+    this.stopAudio();
     this.renderProcedure();
     this.rememberFocus();
     this.els.procedurePanel.hidden = false;
@@ -668,6 +749,7 @@ const UI = {
   },
 
   closeProcedure() {
+    this.stopAudio();
     this.trackClose("procedure");
     this.els.procedurePanel.hidden = true;
     this.restoreFocus(this.els.btnProcedure);
@@ -707,7 +789,7 @@ const UI = {
     }
   },
 
-  renderRound(rid, body) {
+  renderRound(rid, body, playIntro = true) {
     body.textContent = "";
     const s = GameState.get();
     const w = CONTENT.contradictions[rid];
@@ -730,6 +812,11 @@ const UI = {
           this.make("p", "dialogue-text", line.text)
         );
         body.appendChild(el);
+      }
+      if (playIntro) {
+        /* W3-Einleitung: bei aktivierten Stimmen in sichtbarer
+           Reihenfolge abspielen; stille Zeilen bleiben still. */
+        GameAudio.playSequence(w.vorher.map((l) => l.id));
       }
     }
 
@@ -789,8 +876,9 @@ const UI = {
       return;
     }
 
-    /* Passende falsche Rückmeldung (aus content.js), Runde bleibt offen. */
-    this.renderRound(rid, body);
+    /* Passende falsche Rückmeldung (aus content.js), Runde bleibt offen.
+       Die sichtbare Einleitung wird dabei NICHT erneut abgespielt. */
+    this.renderRound(rid, body, false);
     const box = this.make("div", "feedback-box",
       res.feedback || "Diese Karte trägt die Runde nicht.");
     body.appendChild(box);
@@ -821,6 +909,10 @@ const UI = {
       );
       body.appendChild(el);
     }
+
+    /* Erfolgreiche Beweisrunde: bei aktivierten Stimmen in sichtbarer
+       Reihenfolge abspielen; danach bestimmt der Spieler das Tempo. */
+    GameAudio.playSequence(w.erfolg.map((l) => l.id));
 
     body.appendChild(this.make("div", "success-box", w.folge));
 

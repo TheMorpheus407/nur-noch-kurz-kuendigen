@@ -488,6 +488,36 @@ button[aria-disabled="true"] {
   cursor: not-allowed;
 }
 
+/* ---------- Stimmen (Audio) ---------- */
+
+#btn-audio {
+  font-weight: 700;
+  background: var(--coral);
+}
+
+#btn-audio:hover {
+  background: var(--coral-dark);
+  color: var(--cream);
+}
+
+#btn-audio[aria-pressed="true"] {
+  background: var(--petrol);
+  color: var(--cream);
+}
+
+#btn-audio[aria-pressed="true"]:hover {
+  background: var(--petrol-dark);
+  color: var(--cream);
+}
+
+.audio-replay {
+  min-height: 0;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0.2rem 0.4rem;
+}
+
 /* ---------- Beweisordner ---------- */
 
 .card {

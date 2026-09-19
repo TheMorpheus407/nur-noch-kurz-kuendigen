@@ -7,9 +7,14 @@ NEBENBEI-7 beweisen, dass er der Kunde ist und nicht das Zusatzprodukt.
 
 - Deutsch, komplett offline, keine externen Skripte/CDNs/Pakete/Schriften,
   keine Telemetrie, keine Netzwerkzugriffe, keine Live-Modellaufrufe.
-- Keine Bilder und keine Sprachdateien: bewusste Text-/CSS-Platzhalter
-  (keine Emoji-Figuren, keine SVG-Figuren). Dieser Stand wird später mit
-  lokalen Krea-Assets bebildert.
+- Keine Bilder: bewusste Text-/CSS-Platzhalter (keine Emoji-Figuren,
+  keine SVG-Figuren). Dieser Stand wird später mit lokalen Krea-Assets
+  bebildert.
+- Lokale Stimmen: 45 vorproduzierte Qwen3-TTS-WAV-Dateien (Batch 004)
+  für vertonte Dialogzeilen; Zuordnung ausschließlich über die stabilen
+  Zeilen-IDs aus `js/audio-catalog.js`. Stimmen starten ausgeschaltet;
+  keine neuen Stimmen erzeugt, keine Ersatzstimmen, keine
+  Geschwindigkeitsänderung.
 - Drei NPCs (MIRA, Alex Plus, Rolf); Alex ist die stille Spielerrolle mit
   sichtbaren Texten. Alle Geschichten und Beweise sind echte sichtbare Texte.
 - Alle Firmen, Verfahren und Regeln sind fiktiv.
@@ -90,6 +95,31 @@ Dann öffnen: http://127.0.0.1:8000/
   Seitenstart wird bewusst **nicht** `GameState.reset()` aufgerufen — die
   Initialisierung ist nicht destruktiv und lässt gespeicherte Slots erhalten.
 
+## Stimmen (lokale TTS)
+
+- **Tonumschalter:** Der Werkzeugleisten-Button **„Stimmen an“ /
+  „Stimmen aus“** (mit `aria-pressed`) schaltet die lokalen Stimmen um.
+  Stimmen beginnen **ausgeschaltet**; Audio startet nur auf aktive
+  Nutzerhandlung — Browser-Autoplay-Sperren werden nicht umgangen.
+- **Abdeckung:** Vertonte Zeilen sind über ihre stabile Zeilen-ID in
+  `js/audio-catalog.js` mit ihrer WAV-Datei verknüpft (MIRA, Alex Plus,
+  Rolf). Fehlende IDs (z. B. `miranachw2-05`, `miraNachW1-01`) und die
+  stillen Alex-Zeilen sind normale stille Textschritte — es wird nie ein
+  Ersatzclip abgespielt.
+- **Ablauf:** Pro sichtbarem Dialogschritt spielt die zugehörige Zeile;
+  W3-Einleitung und erfolgreiche Beweisrunden laufen in sichtbarer
+  Reihenfolge. „Weiter“, Schließen, Escape, Raum-/Panelwechsel, Laden,
+  Entscheidungspunkt und bestätigter Neustart stoppen laufende Sprache
+  und verwerfen wartende Clips. Höchstens ein Audioelement spielt
+  gleichzeitig; `preload="none"` — keine der 45 Dateien wird beim
+  Seitenstart geladen.
+- **Wiederholen:** Vertonte Zeilen im Dialog und im Verlauf haben eine
+  klare Wiederhol- bzw. „Anhören“-Schaltfläche; das Öffnen des Verlaufs
+  selbst spielt keine Historie ab.
+- **Fehler:** Fehlende Dateien, nicht unterstütztes Audio oder
+  abgelehntes `play()` geben einen kurzen Statushinweis; der Text bleibt
+  vollständig bedienbar, es gibt keine Fehlerdialoge oder Abwürfe.
+
 ## Tastatur und schmale Fenster
 
 - Alle Aktionen sind echte, erreichbare Buttons mit sichtbarem Fokus;
@@ -112,8 +142,13 @@ Dann öffnen: http://127.0.0.1:8000/
   Formular-/Registerflächen, schmales Layout
 - `js/content.js` — alle Texte, Karten, Dialoge, Runden, Enden
 - `js/state.js` — Zustand, Regeln, Speichern/Laden, Validierung
+- `js/audio-catalog.js` — Katalog der 45 lokalen WAV-Dateien
+  (Zeilen-ID → url/speaker/duration); Operator-Kopie, unverändert
+- `js/audio.js` — kleiner Audio-Baustein: Umschalter, Einzel- und
+  Sequenz-Abspielung, Stopp, kurze Fehlerhinweise (klassisches Skript,
+  `preload="none"`, file://)
 - `js/ui.js` — Rendering, Dialogmotor, Hotspots, Verfahren, Enden,
-  Speichern/Laden, Tastatur
+  Speichern/Laden, Tastatur, Stimmen-Anbindung
 - `js/main.js` — Start (nicht destruktive Initialisierung, `UI.init()`)
 
 ## Ausgeführte Prüfung
@@ -138,7 +173,9 @@ Dann öffnen: http://127.0.0.1:8000/
 - Die frühere Mikro-Browserprüfung (Empfangsraum-Ausschnitt) und die
   29 bestandenen unabhängigen State-VM-Fixtures sind **keine**
   Browserabnahme der jetzt vollständigen Oberfläche.
-- Noch keine Kunst und kein Ton: keine Bilder, keine Sprachdateien,
-  keine erfundenen Assets. Dialogzeilen tragen stabile IDs als
-  spätere Audio-Anknüpfung; die Bebilderung folgt mit lokalen
-  Krea-Assets.
+- Noch keine Kunst: keine Bilder, keine erfundenen Bild-Assets; die
+  Bebilderung folgt mit lokalen Krea-Assets. Der Ton besteht aus den
+  45 lokalen WAV-Dateien (Batch 004) — keine neuen Stimmen erzeugt.
+- Die Audio-Anbindung wurde **nicht** in einem Browser abgenommen
+  (keine Hörabnahme); `node --check` ist ausschließlich eine
+  Syntaxprüfung, kein Browser- oder Funktionstest.
