@@ -1,250 +1,746 @@
-/* Nur noch kurz kündigen — technische Probe */
+/* =====================================================================
+   Nur noch kurz kündigen — Textprototyp
+   Graphic-Novel-Palette:
+     Creme  #EEE7D8 · Petrol #28666A · Pflaume #51364F
+     Koralle #EF806D · dunkle Kontur #25232B
+   Retrofuturistisches Kundencenter: klare Formular-/Registerflächen,
+   breite dunkle Konturen. Reine Text-/CSS-Platzhalter, keine Bilder.
+   ===================================================================== */
 
 :root {
-  --bg: #f4f1ea;
-  --ink: #22272e;
-  --panel: #ffffff;
-  --line: #c9c2b4;
-  --accent: #2f5d50;
-  --accent-ink: #ffffff;
-  --danger: #8a3030;
-  --scene-bg: #3a4150;
-  --scene-ink: #e8ecf2;
-  --card-bg: #eef3ee;
+  --cream: #EEE7D8;
+  --paper: #F6F1E4;
+  --petrol: #28666A;
+  --petrol-dark: #1E4F52;
+  --plum: #51364F;
+  --plum-dark: #3D2940;
+  --coral: #EF806D;
+  --coral-dark: #D96A57;
+  --ink: #25232B;
+  --ink-soft: #4A4653;
+  --focus: #EF806D;
+  --focus-on-dark: #EEE7D8;
 }
 
 * { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
   font-family: system-ui, "Segoe UI", Arial, sans-serif;
   color: var(--ink);
-  background: var(--bg);
-  line-height: 1.5;
+  background: var(--cream);
+  line-height: 1.55;
+  /* dezente Registerstruktur im Hintergrund, rein dekorativ */
+  background-image:
+    linear-gradient(rgba(37, 35, 43, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 35, 43, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
+
+/* ---------- Zugänglichkeit ---------- */
 
 .skip-link {
   position: absolute;
   left: -9999px;
   top: 0;
   background: var(--ink);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  z-index: 10;
+  color: var(--cream);
+  padding: 0.6rem 1.1rem;
+  z-index: 20;
+  font-weight: 700;
 }
-.skip-link:focus { left: 0.5rem; }
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---------- Kopf ---------- */
 
 .page-head {
-  padding: 1rem 1.5rem 0.5rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 0.75rem;
 }
-.page-head h1 { margin: 0; font-size: 1.6rem; }
-.subtitle { margin: 0.25rem 0 0; color: #5a6068; }
+
+.kicker {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  line-height: 1.15;
+  color: var(--ink);
+  /* Stempelkante wie ein Aktenkopf */
+  border-bottom: 4px solid var(--ink);
+  display: inline-block;
+  padding-bottom: 0.2rem;
+}
+
+.subtitle {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+  color: var(--petrol-dark);
+}
+
+.disclaimer {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- Grundraster ---------- */
 
 main {
-  max-width: 44rem;
+  max-width: 52rem;
   margin: 0 auto;
-  padding: 0 1rem 2rem;
+  padding: 0.5rem 1rem 2.5rem;
 }
 
-/* Szene */
-.scene {
+/* ---------- Raumnavigation ---------- */
+
+.room-nav {
   display: flex;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
-  align-items: flex-end;
-  justify-content: center;
-  min-height: 220px;
-  background: var(--scene-bg);
+  margin: 0.75rem 0;
+}
+
+.room-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
   border-radius: 10px;
-  padding: 2rem 1rem 2.5rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.room-btn:hover {
+  background: #E9E0CB;
+}
+
+.room-btn[aria-current="true"] {
+  background: var(--petrol);
+  color: var(--cream);
+}
+
+.room-btn[aria-current="true"]:hover {
+  background: var(--petrol-dark);
+  color: var(--cream);
+}
+
+.room-btn[aria-disabled="true"] {
+  background: #DDD5C2;
+  color: var(--ink-soft);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.room-btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.room-btn[aria-current="true"]:focus-visible {
+  outline-color: var(--focus-on-dark);
+}
+
+/* Besuchsmarkierung: gefüllter Punkt = Raum bereits betreten */
+.room-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: transparent;
+  flex: 0 0 auto;
+}
+.room-btn.visited .room-mark {
+  background: currentColor;
+}
+
+/* ---------- Rauminfo ---------- */
+
+.room-info {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 0.8rem 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.room-info h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.2rem;
+  color: var(--plum);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.room-info p {
+  margin: 0;
+}
+
+/* ---------- Szene / Hotspots ---------- */
+
+.scene {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
   margin-bottom: 1rem;
 }
 
 .hotspot {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  background: transparent;
-  border: 2px solid transparent;
-  border-radius: 10px;
-  padding: 0.75rem 1.25rem;
-  cursor: pointer;
-  color: var(--scene-ink);
+  align-items: stretch;
+  gap: 0.35rem;
+  min-height: 84px;
+  padding: 0.7rem 0.9rem 0.8rem;
   font: inherit;
-  max-width: 100%;
-}
-button.hotspot:hover {
-  background: #4a5263;
-  border-color: var(--scene-ink);
-}
-.hotspot:focus-visible {
-  outline: 3px solid #ffd76a;
-  outline-offset: 2px;
-}
-
-.hotspot-label { font-weight: 600; text-align: center; }
-
-/* Platzhalterfiguren (reines CSS, keine Bilder) */
-.figure {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.figure .head {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #7f93ad;
-}
-.figure .body {
-  width: 64px;
-  height: 78px;
-  border-radius: 14px 14px 6px 6px;
-  background: #7f93ad;
+  text-align: left;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow-wrap: break-word;
 }
 
-.terminal {
-  position: relative;
-  width: 110px;
-  height: 92px;
-  background: #232a36;
-  border-radius: 6px;
-  display: flex;
-  justify-content: center;
-  padding-top: 10px;
-}
-.terminal .screen {
-  width: 84px;
-  height: 50px;
-  background: #9fd3a8;
+/* Registerlaschen oben auf jedem Hotspot: rein dekorative CSS-Streifen */
+.hotspot::before {
+  content: "";
+  display: block;
+  height: 8px;
   border-radius: 3px;
-}
-.terminal .base {
-  position: absolute;
-  bottom: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 44px;
-  height: 16px;
-  background: #232a36;
-}
-
-/* Schmale Fenster: Szenen-Buttons gestapelt, kompakterer Rand */
-@media (max-width: 480px) {
-  .scene {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    padding: 1.25rem 0.75rem 2rem;
-  }
-  .hotspot {
-    flex-direction: row;
-    justify-content: flex-start;
-    padding: 0.5rem 0.75rem;
-  }
+  background: repeating-linear-gradient(
+    90deg,
+    var(--petrol) 0 14px,
+    var(--cream) 14px 22px,
+    var(--coral) 22px 30px,
+    var(--cream) 30px 38px
+  );
+  border: 1px solid var(--ink);
+  margin-bottom: 0.35rem;
 }
 
-/* Status und Fortschritt */
+.hotspot:hover {
+  background: #E9E0CB;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.hotspot:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.hotspot:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.hotspot .hotspot-label {
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.hotspot .hotspot-kind {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--plum);
+}
+
+.hotspot.is-locked,
+.hotspot[aria-disabled="true"] {
+  background: #DDD5C2;
+  color: var(--ink-soft);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.hotspot.is-locked::before,
+.hotspot[aria-disabled="true"]::before {
+  background: repeating-linear-gradient(90deg, #B9AF9B 0 14px, #D8CFBB 14px 28px);
+}
+
+/* ---------- Fundstellen-Info ---------- */
+
+.hotspot-info {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-left: 10px solid var(--petrol);
+  border-radius: 10px;
+  padding: 0.8rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.hotspot-info h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  color: var(--petrol-dark);
+}
+
+.hotspot-info p {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+/* ---------- Status und Fortschritt ---------- */
+
 .status {
   min-height: 1.5rem;
-  font-weight: 600;
-}
-.progress {
-  color: #5a6068;
-  font-size: 0.95rem;
+  margin: 0.25rem 0;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-/* Panels */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin: 1rem 0;
+.progress {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--plum);
 }
+
+/* ---------- Panels (Formular-/Registerflächen) ---------- */
+
+.panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  margin: 1rem 0;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
 .panel[hidden] { display: none; }
 
 .panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-}
-.panel-head h2 { margin: 0; font-size: 1.15rem; }
-
-.dialogue-text {
-  font-size: 1.05rem;
-  margin: 0.75rem 0;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
 }
 
-.panel-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-
-/* Buttons */
-button {
-  font: inherit;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: #fff;
-  color: var(--ink);
-  cursor: pointer;
-}
-button:hover { background: #f0ede5; }
-button:focus-visible {
-  outline: 3px solid #b45309;
-  outline-offset: 2px;
-}
-button.primary {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
-}
-button.primary:hover { background: #254a40; }
-button.danger {
-  color: var(--danger);
-  border-color: var(--danger);
-}
-button.danger:hover { background: #f7ecec; }
-
-/* Beweiskarten */
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--line);
-  border-left: 5px solid var(--accent);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin: 0.75rem 0;
-}
-.card h3 { margin: 0 0 0.4rem; font-size: 1rem; }
-.card p { margin: 0; }
-
-/* Widerspruch */
-.claim-by { margin: 0.75rem 0 0.25rem; font-weight: 600; }
-blockquote {
-  margin: 0 0 0.75rem;
-  padding: 0.5rem 1rem;
-  border-left: 4px solid var(--line);
-  background: #faf8f3;
-  font-style: italic;
-}
-.badge {
-  display: inline-block;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 700;
-  border-radius: 999px;
-  padding: 0.2rem 0.9rem;
-  margin: 0.25rem 0 0.5rem;
+.panel-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--plum);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.toolbar {
+.panel-actions {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 1.5rem;
+  margin-top: 0.9rem;
+}
+
+/* ---------- Dialog ---------- */
+
+.dialogue-body {
+  min-height: 4.5rem;
+}
+
+.dialogue-line {
+  margin: 0 0 0.4rem;
+}
+
+.dialogue-speaker {
+  display: inline-block;
+  background: var(--petrol);
+  color: var(--cream);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.15rem 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.dialogue-speaker.is-alex {
+  background: var(--plum);
+}
+
+.dialogue-speaker.is-alexplus {
+  background: var(--coral-dark);
+  color: var(--cream);
+}
+
+.dialogue-text {
+  font-size: 1.05rem;
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+/* Bewusster Lesemoment (z. B. zwischen Löschung und Zufriedenheitsfrage) */
+.dialogue-pause {
+  margin: 0.5rem 0;
+  padding: 1.1rem 0;
+  text-align: center;
+  font-size: 1.6rem;
+  letter-spacing: 0.6em;
+  color: var(--plum);
+  border-top: 2px dashed var(--ink);
+  border-bottom: 2px dashed var(--ink);
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  font: inherit;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  overflow-wrap: break-word;
+}
+
+button:hover {
+  background: #E9E0CB;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button.primary {
+  background: var(--petrol);
+  color: var(--cream);
+  border-color: var(--ink);
+  font-weight: 700;
+}
+
+button.primary:hover {
+  background: var(--petrol-dark);
+  color: var(--cream);
+}
+
+button.primary:focus-visible {
+  outline-color: var(--focus-on-dark);
+}
+
+button.danger {
+  background: var(--coral);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+button.danger:hover {
+  background: var(--coral-dark);
+  color: var(--cream);
+}
+
+button.ghost {
+  background: transparent;
+}
+
+button.ghost:hover {
+  background: #E9E0CB;
+}
+
+button[aria-disabled="true"] {
+  background: #DDD5C2;
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+/* ---------- Beweisordner ---------- */
+
+.card {
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--coral);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.8rem 0;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--plum);
+}
+
+.card p {
+  margin: 0 0 0.35rem;
+  overflow-wrap: break-word;
+}
+
+.card .card-meta {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.evidence-empty,
+.log-empty {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* ---------- Verlauf ---------- */
+
+.log-list {
+  margin: 0;
+  padding-left: 1.4rem;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+.log-list li {
+  margin: 0 0 0.7rem;
+  overflow-wrap: break-word;
+}
+
+.log-speaker {
+  font-weight: 700;
+  color: var(--petrol-dark);
+}
+
+/* ---------- Widerspruchsverfahren ---------- */
+
+.round-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--plum);
+}
+
+.claim-by {
+  margin: 0.75rem 0 0.3rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+blockquote.claim {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 1rem;
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--petrol);
+  background: var(--cream);
+  border-radius: 8px;
+  font-size: 1.05rem;
+  overflow-wrap: break-word;
+}
+
+.card-pick {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin: 0.6rem 0;
+}
+
+.card-pick .card-pick-text {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.card-pick .card-pick-text strong {
+  display: block;
+  color: var(--plum);
+}
+
+.card-pick .card-pick-text p {
+  margin: 0.2rem 0 0;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  overflow-wrap: break-word;
+}
+
+.feedback-box {
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--coral);
+  background: #F7E4DE;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin: 0.8rem 0;
+  overflow-wrap: break-word;
+}
+
+.success-box {
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--petrol);
+  background: #DFE9E4;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin: 0.8rem 0;
+  overflow-wrap: break-word;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--petrol);
+  color: var(--cream);
+  border: 2px solid var(--ink);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.badge.is-done {
+  background: var(--plum);
+}
+
+/* ---------- Entscheidung ---------- */
+
+.decision-prompt {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.decision-options {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0 0 0.5rem;
+}
+
+.decision-options button {
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 0.8rem 1rem;
+  text-align: left;
+}
+
+.decision-options button[data-ending="A"] {
+  background: var(--plum);
+  color: var(--cream);
+}
+
+.decision-options button[data-ending="A"]:hover {
+  background: var(--plum-dark);
+  color: var(--cream);
+}
+
+.decision-options button[data-ending="B"] {
+  background: var(--coral);
+  color: var(--ink);
+}
+
+.decision-options button[data-ending="B"]:hover {
+  background: var(--coral-dark);
+  color: var(--cream);
+}
+
+/* ---------- Abschluss ---------- */
+
+.ending-note {
+  margin: 0 0 0.9rem;
+  overflow-wrap: break-word;
+}
+
+.ending-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ---------- Werkzeugleiste ---------- */
+
+.toolbar {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 1.75rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--line);
+  border-top: 3px solid var(--ink);
+}
+
+.toolbar-sep {
+  width: 3px;
+  align-self: stretch;
+  background: var(--ink);
+  border-radius: 2px;
+  margin: 0 0.2rem;
+}
+
+/* ---------- Schmale Fenster (320px und aufwärts) ---------- */
+
+@media (max-width: 560px) {
+  .scene {
+    grid-template-columns: 1fr;
+  }
+
+  .room-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .room-btn {
+    justify-content: space-between;
+  }
+
+  .panel {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-sep {
+    width: auto;
+    height: 3px;
+    margin: 0.1rem 0;
+  }
+
+  .card-pick {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

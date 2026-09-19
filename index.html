@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nur noch kurz kündigen — technische Probe</title>
+  <title>Nur noch kurz kündigen</title>
   <!-- ausdrücklich leerer eingebetteter Favicon-Verweis: verhindert /favicon.ico-404 ohne zusätzliche Datei -->
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
@@ -12,42 +12,56 @@
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
   <header class="page-head">
+    <p class="kicker">Kundencenter NEBENBEI · Verfahren NEBENBEI-7</p>
     <h1>Nur noch kurz kündigen</h1>
-    <p class="subtitle">Technische Probefassung — Empfangsraum</p>
+    <p class="subtitle">Textprototyp — Retrofuturistisches Kundencenter</p>
+    <p class="disclaimer" id="disclaimer"></p>
   </header>
 
   <main id="main">
-    <section class="scene" aria-label="Empfangsraum">
-      <button id="btn-mira" class="hotspot" type="button">
-        <span class="figure" aria-hidden="true">
-          <span class="head"></span>
-          <span class="body"></span>
-        </span>
-        <span class="hotspot-label">MIRA (Gespräch)</span>
+    <!-- Raumnavigation: beide Räume, Besuchsmarkierung, Sperrzustand -->
+    <nav class="room-nav" aria-label="Räume">
+      <button id="room-empfang" class="room-btn" type="button" data-room="empfang">
+        <span class="room-name">Empfang</span>
+        <span class="room-mark" aria-hidden="true"></span>
       </button>
+      <button id="room-vorfuehr" class="room-btn" type="button" data-room="vorfuehr">
+        <span class="room-name">Vorführraum</span>
+        <span class="room-mark" aria-hidden="true"></span>
+      </button>
+    </nav>
 
-      <button id="btn-terminal" class="hotspot" type="button">
-        <span class="terminal" aria-hidden="true">
-          <span class="screen"></span>
-          <span class="base"></span>
-        </span>
-        <span class="hotspot-label">Auskunftsterminal</span>
-      </button>
+    <!-- Aktiver Raum: Name, Beschreibung, Besuchsmarkierung -->
+    <section class="room-info" aria-label="Raum">
+      <h2 id="room-name"></h2>
+      <p id="room-desc"></p>
+    </section>
+
+    <!-- Szene: vier gut sichtbare Hotspot-Schaltflächen (werden von ui.js gefüllt) -->
+    <section class="scene" id="scene" aria-label="Szene"></section>
+
+    <!-- Info zur zuletzt besuchten Fundstelle / zum Gesprächspunkt -->
+    <section class="hotspot-info" id="hotspot-info" hidden aria-label="Fundstelle">
+      <h3 id="hotspot-info-label"></h3>
+      <p id="hotspot-info-text"></p>
     </section>
 
     <p id="status-line" class="status" role="status" aria-live="polite"></p>
+    <p id="progress-line" class="progress" role="status" aria-live="polite"></p>
 
-    <section id="dialogue-panel" class="panel" hidden aria-label="Gespräch mit MIRA">
+    <!-- Dialog: Ankunftssequenz, NPC-Gespräche, Folgedialoge, Enden -->
+    <section id="dialogue-panel" class="panel" hidden aria-label="Dialog">
       <div class="panel-head">
-        <h2 id="dialogue-speaker"></h2>
-        <button id="btn-dialogue-close" type="button">Gespräch schließen</button>
+        <h2 id="dialogue-title"></h2>
+        <button id="btn-dialogue-close" type="button">Schließen</button>
       </div>
-      <p id="dialogue-text" class="dialogue-text"></p>
+      <div id="dialogue-body" class="dialogue-body"></div>
       <div class="panel-actions">
         <button id="btn-dialogue-next" class="primary" type="button">Weiter</button>
       </div>
     </section>
 
+    <!-- Beweisordner: gefundene Karten E1–E5 mit vollständigem Text -->
     <section id="evidence-panel" class="panel" hidden aria-label="Beweisordner">
       <div class="panel-head">
         <h2>Beweisordner</h2>
@@ -56,21 +70,42 @@
       <div id="evidence-list"></div>
     </section>
 
-    <section id="contradiction-panel" class="panel" hidden aria-label="Widerspruchsverfahren">
+    <!-- Verlauf: alle gespielten Dialogzeilen, nachlesbar -->
+    <section id="log-panel" class="panel" hidden aria-label="Verlauf">
       <div class="panel-head">
-        <h2>Widerspruchsverfahren 1</h2>
-        <button id="btn-contradiction-close" type="button">Schließen</button>
+        <h2>Verlauf</h2>
+        <button id="btn-log-close" type="button">Verlauf schließen</button>
       </div>
-      <p class="claim-by">Behauptung von MIRA:</p>
-      <blockquote id="contradiction-claim"></blockquote>
-      <div id="contradiction-body"></div>
+      <ol id="log-list" class="log-list"></ol>
     </section>
 
-    <p id="progress-line" class="progress" role="status" aria-live="polite"></p>
+    <!-- Widerspruchsverfahren: offene Runde, Kartenwahl, Entscheidung -->
+    <section id="procedure-panel" class="panel" hidden aria-label="Widerspruchsverfahren">
+      <div class="panel-head">
+        <h2 id="procedure-title">Widerspruchsverfahren</h2>
+        <button id="btn-procedure-close" type="button">Schließen</button>
+      </div>
+      <div id="procedure-body"></div>
+    </section>
 
+    <!-- Abschluss nach gewähltem Ende -->
+    <section id="ending-panel" class="panel" hidden aria-label="Abschluss">
+      <div class="panel-head">
+        <h2 id="ending-title"></h2>
+      </div>
+      <div id="ending-body"></div>
+    </section>
+
+    <!-- Werkzeugleiste: Verfahren, Ordner, Verlauf, Speicher, Neustart -->
     <div class="toolbar">
       <button id="btn-evidence" type="button">Beweisordner öffnen</button>
-      <button id="btn-contradiction" type="button">Widerspruchsverfahren</button>
+      <button id="btn-log" type="button">Verlauf öffnen</button>
+      <button id="btn-procedure" type="button">Widerspruchsverfahren</button>
+      <span class="toolbar-sep" aria-hidden="true"></span>
+      <button id="btn-save" type="button">Speichern</button>
+      <button id="btn-load" type="button">Stand laden</button>
+      <button id="btn-checkpoint" type="button">Zum Entscheidungspunkt</button>
+      <span class="toolbar-sep" aria-hidden="true"></span>
       <button id="btn-restart" class="danger" type="button">Neustart</button>
     </div>
   </main>

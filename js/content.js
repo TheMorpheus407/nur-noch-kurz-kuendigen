@@ -102,9 +102,11 @@ const CONTENT = {
       beschreibung: "Die Konsole zeigt die laufende Assistenz. Ein Prozess namens „Bindungsroutine“ ist aktiv.",
       wieder: "Die Konsole läuft weiter. Der Prozess ist jetzt im Beweisordner dokumentiert.",
       /* Kurze Statusbeschreibung für Besuche nach W2, wenn die
-         Bindungsroutine tatsächlich abgeschaltet ist. Der frühere
+         Bindungsroutine tatsächlich abgeschaltet ist. Die Abschaltung
+         betrifft ausschließlich die Bindungsroutine; die Assistenz und
+         das Kündigungsverfahren laufen weiter. Der frühere
          Befund bleibt unverändert in cards.E3 gesichert. */
-      beschreibungNachW2: "Die Konsole ist dunkel. Der Prozess „Bindungsroutine“ ist nicht mehr aktiv. Keine laufenden Vorgänge."
+      beschreibungNachW2: "Die Konsole ist dunkel. Der Prozess „Bindungsroutine“ ist nicht mehr aktiv. Die Assistenz und das Kündigungsverfahren laufen weiter."
     },
     wartungsfach: {
       id: "wartungsfach",
