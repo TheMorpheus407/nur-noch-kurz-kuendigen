@@ -487,6 +487,7 @@ const UI = {
       btn.className = "hotspot";
       btn.setAttribute("aria-label", (isNpc ? "Gespräch: " : "Fundstelle: ") + label);
       btn.dataset.label = label;
+      btn.dataset.id = id;
       if (collected) {
         btn.classList.add("is-collected");
       } else if (visited) {
@@ -587,10 +588,11 @@ const UI = {
       this.renderWorld();
       this.showHotspotInfo(id, true);
       this.setStatus(UI_TEXTS.cardFound(c.card));
-      this.openEvidence();
+      this.openEvidenceCard(id, c.card);
     } else if (c.reason === "already-found") {
       this.showHotspotInfo(id, false);
       this.setStatus(UI_TEXTS.cardAlready);
+      this.openEvidenceCard(id, c.card || this.cardForHotspot(id));
     } else if (c.reason === "locked") {
       this.showHotspotInfo(id, v.firstVisit);
       this.setStatus(UI_TEXTS.notUnlocked);
@@ -862,6 +864,10 @@ const UI = {
       nextLabel = "Abschaltung bestätigen";
     }
     this.els.btnDialogueNext.textContent = nextLabel;
+    /* Kopfbutton: nichtletzter Schritt „Überspringen", letzter
+       „Schließen" (gilt auch für Pausenschritte und Enddialoge).
+       Klick-/Escape-/onDone-Logik bleibt unverändert. */
+    this.els.btnDialogueClose.textContent = last ? "Schließen" : "Überspringen";
   },
 
   advanceDialogue() {
@@ -928,6 +934,46 @@ const UI = {
     this.restoreFocus(this.els.btnEvidence);
   },
 
+  /* Gezieltes Öffnen der Beweisordner-Karte einer Fundstelle: genau die
+     passende vorhandene Karte wird fokussierbar, aktiv fokussiert und in
+     den sichtbaren Scrollbereich gebracht (auch auf kleinem Bildschirm).
+     Fokus-Rückweg geht zur Fundstelle (frische Hotspot-Knoten). */
+  openEvidenceCard(hotspotId, cardId) {
+    this.stopAudio();
+    this.renderEvidenceList();
+    const hotspotBtn = this.els.stageHotspots.querySelector(
+      '[data-id="' + hotspotId + '"]');
+    this._focusReturn = hotspotBtn || document.activeElement;
+    this.els.evidencePanel.hidden = false;
+    this.trackOpen("evidence");
+    const article = this.evidenceArticle(cardId);
+    if (article) {
+      article.tabIndex = -1;
+      article.focus({ preventScroll: true });
+      article.scrollIntoView({ block: "center" });
+      return;
+    }
+    this.els.btnEvidenceClose.focus();
+  },
+
+  /* Passender gerenderte article-Knoten einer Karten-ID, falls vorhanden. */
+  evidenceArticle(cardId) {
+    if (!cardId) {
+      return null;
+    }
+    return this.els.evidenceList.querySelector(
+      'article.card[data-card="' + cardId + '"]');
+  },
+
+  /* Karten-ID einer Fundstelle aus dem vorhandenen Quell-Zuordnungskatalog. */
+  cardForHotspot(id) {
+    if (typeof CARD_SOURCE !== "undefined" &&
+        Object.prototype.hasOwnProperty.call(CARD_SOURCE, id)) {
+      return CARD_SOURCE[id];
+    }
+    return null;
+  },
+
   renderEvidenceList() {
     const list = this.els.evidenceList;
     list.textContent = "";
@@ -941,6 +987,7 @@ const UI = {
     for (const id of cards) {
       const card = CONTENT.cards[id];
       const article = this.make("article", "card");
+      article.dataset.card = id;
       article.append(
         this.make("h3", null, card.title),
         this.make("p", null, card.text),
@@ -1411,6 +1458,14 @@ const UI = {
     }
     GameState.reset();
     this.renderAll();
+    /* Bestätigter Neustart: wie beim echten frischen Start die vorhandene
+     * Ankunftsszene über den bestehenden Dialogmotor beginnen — normaler
+     * Log- und Audiofluss, keine Ersatzzeile, keine doppelte Logeinfügung. */
+    const ankunft = CONTENT.dialogues.ankunft;
+    this.openDialogue({
+      title: ankunft.titel,
+      steps: this.buildSteps(ankunft.lines)
+    });
     this.setStatus(CONTENT.status.restarted);
   }
 };
