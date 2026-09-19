@@ -86,6 +86,9 @@ const UI = {
       roomName: $("room-name"),
       roomDesc: $("room-desc"),
       scene: $("scene"),
+      stage: document.querySelector("#stage"),
+      sceneBg: $("scene-bg"),
+      stageHotspots: $("stage-hotspots"),
       hotspotInfo: $("hotspot-info"),
       hotspotInfoLabel: $("hotspot-info-label"),
       hotspotInfoText: $("hotspot-info-text"),
@@ -317,9 +320,27 @@ const UI = {
     this.els.roomName.textContent = room.name;
     this.els.roomDesc.textContent = room.beschreibung;
 
-    /* Szene: vier gut sichtbare Hotspot-Schaltflächen */
-    const scene = this.els.scene;
-    scene.textContent = "";
+    /* Szene: gezeichneter 16:9-Raum (unbeschnitten) + vier echte
+       Hotspot-Buttons. Anker ausschließlich aus dem Bildkatalog
+       (js/art-catalog.js); ohne Katalog/Daten bleiben die Buttons als
+       gut lesbare Liste bedienbar (stage--list). */
+    const art = (typeof ART_ASSETS !== "undefined" && ART_ASSETS) ? ART_ASSETS : null;
+    const roomArt = (art && art.rooms && art.rooms[s.room]) ? art.rooms[s.room] : null;
+    const anchors = (roomArt && roomArt.hotspots) ? roomArt.hotspots : null;
+
+    if (roomArt && roomArt.url) {
+      if (this.els.sceneBg.getAttribute("src") !== roomArt.url) {
+        this.els.sceneBg.setAttribute("src", roomArt.url);
+      }
+      this.els.sceneBg.setAttribute("width", String(roomArt.width));
+      this.els.sceneBg.setAttribute("height", String(roomArt.height));
+      this.els.stage.classList.remove("stage--list");
+    } else {
+      this.els.stage.classList.add("stage--list");
+    }
+
+    const hotspotsEl = this.els.stageHotspots;
+    hotspotsEl.textContent = "";
     for (const id of room.hotspots) {
       const h = CONTENT.hotspots[id];
       const isNpc = NPC_IDS.includes(id);
@@ -327,9 +348,33 @@ const UI = {
       if (id === "alexPlus" && s.alexPlus !== "active") {
         label += " — offline";
       }
+      /* Bereits besuchte/gesammelte Orte bleiben erkennbar. */
+      const collected = !isNpc &&
+        typeof CARD_SOURCE !== "undefined" &&
+        Object.prototype.hasOwnProperty.call(CARD_SOURCE, id) &&
+        s.cards.includes(CARD_SOURCE[id]);
+      const visited = s.visitedHotspots.includes(id);
+      if (collected) {
+        label += " — im Beweisordner";
+      } else if (visited) {
+        label += " — besucht";
+      }
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "hotspot";
+      if (collected) {
+        btn.classList.add("is-collected");
+      } else if (visited) {
+        btn.classList.add("is-visited");
+      }
+      const anchor = (anchors && anchors[id]) ? anchors[id] : null;
+      if (anchor &&
+          typeof anchor.x === "number" && Number.isFinite(anchor.x) &&
+          typeof anchor.y === "number" && Number.isFinite(anchor.y)) {
+        btn.classList.add("is-placed");
+        btn.style.left = (anchor.x * 100) + "%";
+        btn.style.top = (anchor.y * 100) + "%";
+      }
       btn.append(
         this.make("span", "hotspot-kind", isNpc ? "Gespräch" : "Fundstelle"),
         this.make("span", "hotspot-label", label)
@@ -338,7 +383,7 @@ const UI = {
         btn.setAttribute("aria-disabled", "true");
       }
       btn.addEventListener("click", () => this.onHotspot(id));
-      scene.appendChild(btn);
+      hotspotsEl.appendChild(btn);
     }
   },
 

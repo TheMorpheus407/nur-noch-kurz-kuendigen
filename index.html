@@ -14,7 +14,7 @@
   <header class="page-head">
     <p class="kicker">Kundencenter NEBENBEI · Verfahren NEBENBEI-7</p>
     <h1>Nur noch kurz kündigen</h1>
-    <p class="subtitle">Textprototyp — Retrofuturistisches Kundencenter</p>
+    <p class="subtitle">Graphic Novel — Retrofuturistisches Kundencenter</p>
     <p class="disclaimer" id="disclaimer"></p>
   </header>
 
@@ -37,8 +37,16 @@
       <p id="room-desc"></p>
     </section>
 
-    <!-- Szene: vier gut sichtbare Hotspot-Schaltflächen (werden von ui.js gefüllt) -->
-    <section class="scene" id="scene" aria-label="Szene"></section>
+    <!-- Szene: gezeichneter 16:9-Raum (unbeschnitten) mit den vier
+         beschrifteten Interaktionsorten als echten Buttons; die Anker
+         kommen aus js/art-catalog.js. Schmale Ansichten zeigen das Bild
+         vollständig und die Buttons als gut lesbare Liste darunter. -->
+    <section class="scene" id="scene" aria-label="Szene">
+      <div class="stage" id="stage">
+        <img class="stage-bg" id="scene-bg" alt="" width="2048" height="1152">
+        <div class="stage-hotspots" id="stage-hotspots"></div>
+      </div>
+    </section>
 
     <!-- Info zur zuletzt besuchten Fundstelle / zum Gesprächspunkt -->
     <section class="hotspot-info" id="hotspot-info" hidden aria-label="Fundstelle">
@@ -116,6 +124,7 @@
   <script src="js/state.js"></script>
   <script src="js/audio-catalog.js"></script>
   <script src="js/audio.js"></script>
+  <script src="js/art-catalog.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/main.js"></script>
 </body>
