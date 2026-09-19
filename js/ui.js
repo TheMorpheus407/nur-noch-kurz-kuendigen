@@ -242,6 +242,7 @@ const UI = {
   },
 
   renderWorld() {
+    this.updateProgress();
     const s = GameState.get();
 
     /* Raumnavigation: aktueller Raum, Besuchsmarkierung, Sperrzustand */
@@ -345,6 +346,7 @@ const UI = {
     /* Fundstelle: Karte einmal vergeben, vollständiger Text im Ordner. */
     const c = GameState.collectFrom(id);
     if (c.ok) {
+      this.renderWorld();
       this.showHotspotInfo(id, true);
       this.setStatus(UI_TEXTS.cardFound(c.card));
       this.openEvidence();
@@ -660,6 +662,7 @@ const UI = {
   },
 
   renderRound(rid, body) {
+    body.textContent = "";
     const s = GameState.get();
     const w = CONTENT.contradictions[rid];
     this.els.procedureTitle.textContent = w.titel;
@@ -745,6 +748,7 @@ const UI = {
   },
 
   renderSuccess(rid, body) {
+    body.textContent = "";
     const w = CONTENT.contradictions[rid];
     this.els.procedureTitle.textContent = w.titel;
 
