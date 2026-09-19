@@ -1190,14 +1190,14 @@ const UI = {
     this.stopAudio();
     const w = CONTENT.contradictions[rid];
 
-    /* Unveränderte CONTENT-Zeilen. Für W2 folgen unmittelbar nach
-       w2-04 die beiden vorhandenen alexPlusNachW2-Zeilen (bestehende
-       Objekte, in dieser Reihenfolge); CONTENT-Arrays bleiben
-       unverändert. */
+    /* Nach W2 den persönlichen Wunsch stehen lassen. Die optionale
+       technische Aufzählung bleibt im NPC-Nachgespräch; der Pflichtweg
+       nimmt W3 die Entdeckung der Alternative nicht vorweg.
+       CONTENT-Arrays und Originalaufnahmen bleiben unverändert. */
     const lines = w.erfolg.slice();
     if (rid === "W2") {
       const nachW2 = CONTENT.dialogues.alexPlusNachW2.lines;
-      const extra = ["alexplusnachw2-02", "alexplusnachw2-05"]
+      const extra = ["alexplusnachw2-02"]
         .map((id) => nachW2.find((l) => l.id === id))
         .filter(Boolean);
       const i = lines.findIndex((l) => l.id === "w2-04");
