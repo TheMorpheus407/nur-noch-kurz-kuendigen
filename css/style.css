@@ -49,7 +49,8 @@ main {
 /* Szene */
 .scene {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
   align-items: flex-end;
   justify-content: center;
   min-height: 220px;
@@ -71,6 +72,7 @@ main {
   cursor: pointer;
   color: var(--scene-ink);
   font: inherit;
+  max-width: 100%;
 }
 .hotspot:hover { border-color: var(--scene-ink); }
 .hotspot:focus-visible {
@@ -78,7 +80,7 @@ main {
   outline-offset: 2px;
 }
 
-.hotspot-label { font-weight: 600; }
+.hotspot-label { font-weight: 600; text-align: center; }
 
 /* Platzhalterfiguren (reines CSS, keine Bilder) */
 .figure {
@@ -124,6 +126,21 @@ main {
   width: 44px;
   height: 16px;
   background: #232a36;
+}
+
+/* Schmale Fenster: Szenen-Buttons gestapelt, kompakterer Rand */
+@media (max-width: 480px) {
+  .scene {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 1.25rem 0.75rem 2rem;
+  }
+  .hotspot {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.5rem 0.75rem;
+  }
 }
 
 /* Status und Fortschritt */
