@@ -175,6 +175,27 @@ const UI = {
       }
     });
 
+    /* Sekundärmenü: nach einer darin gewählten Aktion schließen, ohne
+       zusätzliche Spielaktionen auszulösen. Der Fokus bleibt in
+       sichtbaren Elementen — nicht im jetzt geschlossenen Menü. */
+    const menu = document.getElementById("menu-secondary");
+    const menuSummary = menu ? menu.querySelector("summary") : null;
+    if (menu && menuSummary) {
+      menu.addEventListener("click", (event) => {
+        const btn = event.target.closest("button");
+        if (!btn || !menu.contains(btn)) {
+          return;
+        }
+        requestAnimationFrame(() => {
+          menu.open = false;
+          if (document.activeElement === document.body &&
+              document.contains(menuSummary)) {
+            menuSummary.focus();
+          }
+        });
+      });
+    }
+
     this.renderAll();
 
     /* Erster Start: vorhandene Ankunftsszene.
@@ -261,12 +282,39 @@ const UI = {
       this._openStack.splice(i, 1);
     }
     this._openStack.push(panelId);
+    this.syncActivePanel();
   },
 
   trackClose(panelId) {
     const i = this._openStack.lastIndexOf(panelId);
     if (i >= 0) {
       this._openStack.splice(i, 1);
+    }
+    this.syncActivePanel();
+  },
+
+  /* Sichtbare Interaktionsfläche synchronisieren: das Panel an der Spitze
+     des Öffnungsstapels ist aktiv; offene Panels dahinter bleiben
+     sichtbar, werden aber inert (nicht fokussierbar, keine Doppel-
+     bedienung) und visuell zurückgenommen. Der bestehende hidden-
+     Zustand der Panels bleibt unberührt; ohne aktives Panel bleibt
+     alles bedienbar. */
+  syncActivePanel() {
+    const top = this._openStack[this._openStack.length - 1] || null;
+    const active = top || (!this.els.endingPanel.hidden ? "ending" : null);
+    const panels = [
+      ["dialogue", this.els.dialoguePanel],
+      ["evidence", this.els.evidencePanel],
+      ["log", this.els.logPanel],
+      ["procedure", this.els.procedurePanel]
+    ];
+    for (const [id, el] of panels) {
+      if (!el || el.hidden) {
+        continue;
+      }
+      const dimmed = active !== null && active !== id;
+      el.inert = dimmed;
+      el.classList.toggle("panel--dim", dimmed);
     }
   },
 
@@ -341,6 +389,7 @@ const UI = {
     this.els.procedurePanel.hidden = true;
     this.els.endingPanel.hidden = true;
     this.els.hotspotInfo.hidden = true;
+    this.syncActivePanel();
   },
 
   renderWorld() {
@@ -1189,6 +1238,7 @@ const UI = {
 
     this.renderWorld();
     this.els.endingPanel.hidden = false;
+    this.syncActivePanel();
     this.setStatus(UI_TEXTS.ended);
     btn.focus();
   },

@@ -11,112 +11,127 @@
 <body>
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
+  <!-- Kompakter Spielkopf: Titel/NEBENBEI, Raumwechsel, Stimmen -->
   <header class="page-head">
-    <p class="kicker">Kundencenter NEBENBEI · Verfahren NEBENBEI-7</p>
-    <h1>Nur noch kurz kündigen</h1>
-    <p class="subtitle">Graphic Novel — Retrofuturistisches Kundencenter</p>
-    <p class="disclaimer" id="disclaimer"></p>
+    <div class="head-titles">
+      <p class="kicker">Kundencenter NEBENBEI · Verfahren NEBENBEI-7</p>
+      <h1>Nur noch kurz kündigen</h1>
+      <p class="disclaimer" id="disclaimer"></p>
+    </div>
+    <div class="head-controls">
+      <!-- Raumnavigation: beide Räume, Besuchsmarkierung, Sperrzustand -->
+      <nav class="room-nav" aria-label="Räume">
+        <button id="room-empfang" class="room-btn" type="button" data-room="empfang">
+          <span class="room-name">Empfang</span>
+          <span class="room-mark" aria-hidden="true"></span>
+        </button>
+        <button id="room-vorfuehr" class="room-btn" type="button" data-room="vorfuehr">
+          <span class="room-name">Vorführraum</span>
+          <span class="room-mark" aria-hidden="true"></span>
+        </button>
+      </nav>
+      <button id="btn-audio" type="button" aria-pressed="false">Stimmen an</button>
+    </div>
   </header>
 
   <main id="main">
-    <!-- Raumnavigation: beide Räume, Besuchsmarkierung, Sperrzustand -->
-    <nav class="room-nav" aria-label="Räume">
-      <button id="room-empfang" class="room-btn" type="button" data-room="empfang">
-        <span class="room-name">Empfang</span>
-        <span class="room-mark" aria-hidden="true"></span>
-      </button>
-      <button id="room-vorfuehr" class="room-btn" type="button" data-room="vorfuehr">
-        <span class="room-name">Vorführraum</span>
-        <span class="room-mark" aria-hidden="true"></span>
-      </button>
-    </nav>
+    <!-- Bühnen-Layout: Bildseite links, Interaktionsfläche rechts;
+         bei schmalen Ansichten untereinander, Bild vollständig. -->
+    <div class="game">
+      <section class="stage-col" aria-label="Bühne">
+        <!-- Szene: gezeichneter 16:9-Raum (unbeschnitten) mit den
+             beschrifteten Interaktionsorten als echten Buttons; die
+             Anker kommen aus js/art-catalog.js. Schmale Ansichten
+             zeigen das Bild vollständig und die Buttons als gut
+             lesbare Liste darunter. -->
+        <section class="scene" id="scene" aria-label="Szene">
+          <div class="stage" id="stage">
+            <img class="stage-bg" id="scene-bg" alt="" width="2048" height="1152">
+            <div class="stage-hotspots" id="stage-hotspots"></div>
+          </div>
+        </section>
 
-    <!-- Aktiver Raum: Name, Beschreibung, Besuchsmarkierung -->
-    <section class="room-info" aria-label="Raum">
-      <h2 id="room-name"></h2>
-      <p id="room-desc"></p>
-    </section>
+        <!-- Aktiver Raum: Name, Beschreibung (sekundär, kompakt) -->
+        <section class="room-info" aria-label="Raum">
+          <h2 id="room-name"></h2>
+          <p id="room-desc"></p>
+        </section>
 
-    <!-- Szene: gezeichneter 16:9-Raum (unbeschnitten) mit den vier
-         beschrifteten Interaktionsorten als echten Buttons; die Anker
-         kommen aus js/art-catalog.js. Schmale Ansichten zeigen das Bild
-         vollständig und die Buttons als gut lesbare Liste darunter. -->
-    <section class="scene" id="scene" aria-label="Szene">
-      <div class="stage" id="stage">
-        <img class="stage-bg" id="scene-bg" alt="" width="2048" height="1152">
-        <div class="stage-hotspots" id="stage-hotspots"></div>
-      </div>
-    </section>
+        <!-- Info zur zuletzt besuchten Fundstelle / zum Gesprächspunkt -->
+        <section class="hotspot-info" id="hotspot-info" hidden aria-label="Fundstelle">
+          <h3 id="hotspot-info-label"></h3>
+          <p id="hotspot-info-text"></p>
+        </section>
 
-    <!-- Info zur zuletzt besuchten Fundstelle / zum Gesprächspunkt -->
-    <section class="hotspot-info" id="hotspot-info" hidden aria-label="Fundstelle">
-      <h3 id="hotspot-info-label"></h3>
-      <p id="hotspot-info-text"></p>
-    </section>
+        <p id="status-line" class="status" role="status" aria-live="polite"></p>
+        <p id="progress-line" class="progress" role="status" aria-live="polite"></p>
+      </section>
 
-    <p id="status-line" class="status" role="status" aria-live="polite"></p>
-    <p id="progress-line" class="progress" role="status" aria-live="polite"></p>
+      <section class="panel-col" aria-label="Interaktion">
+        <!-- Dialog: Ankunftssequenz, NPC-Gespräche, Folgedialoge, Enden -->
+        <section id="dialogue-panel" class="panel" hidden aria-label="Dialog">
+          <div class="panel-head">
+            <h2 id="dialogue-title"></h2>
+            <button id="btn-dialogue-close" type="button">Schließen</button>
+          </div>
+          <div id="dialogue-body" class="dialogue-body"></div>
+          <div class="panel-actions">
+            <button id="btn-dialogue-next" class="primary" type="button">Weiter</button>
+          </div>
+        </section>
 
-    <!-- Dialog: Ankunftssequenz, NPC-Gespräche, Folgedialoge, Enden -->
-    <section id="dialogue-panel" class="panel" hidden aria-label="Dialog">
-      <div class="panel-head">
-        <h2 id="dialogue-title"></h2>
-        <button id="btn-dialogue-close" type="button">Schließen</button>
-      </div>
-      <div id="dialogue-body" class="dialogue-body"></div>
-      <div class="panel-actions">
-        <button id="btn-dialogue-next" class="primary" type="button">Weiter</button>
-      </div>
-    </section>
+        <!-- Beweisordner: gefundene Karten E1–E5 mit vollständigem Text -->
+        <section id="evidence-panel" class="panel" hidden aria-label="Beweisordner">
+          <div class="panel-head">
+            <h2>Beweisordner</h2>
+            <button id="btn-evidence-close" type="button">Ordner schließen</button>
+          </div>
+          <div id="evidence-list"></div>
+        </section>
 
-    <!-- Beweisordner: gefundene Karten E1–E5 mit vollständigem Text -->
-    <section id="evidence-panel" class="panel" hidden aria-label="Beweisordner">
-      <div class="panel-head">
-        <h2>Beweisordner</h2>
-        <button id="btn-evidence-close" type="button">Ordner schließen</button>
-      </div>
-      <div id="evidence-list"></div>
-    </section>
+        <!-- Verlauf: alle gespielten Dialogzeilen, nachlesbar -->
+        <section id="log-panel" class="panel" hidden aria-label="Verlauf">
+          <div class="panel-head">
+            <h2>Verlauf</h2>
+            <button id="btn-log-close" type="button">Verlauf schließen</button>
+          </div>
+          <ol id="log-list" class="log-list"></ol>
+        </section>
 
-    <!-- Verlauf: alle gespielten Dialogzeilen, nachlesbar -->
-    <section id="log-panel" class="panel" hidden aria-label="Verlauf">
-      <div class="panel-head">
-        <h2>Verlauf</h2>
-        <button id="btn-log-close" type="button">Verlauf schließen</button>
-      </div>
-      <ol id="log-list" class="log-list"></ol>
-    </section>
+        <!-- Widerspruchsverfahren: offene Runde, Kartenwahl, Entscheidung -->
+        <section id="procedure-panel" class="panel" hidden aria-label="Widerspruchsverfahren">
+          <div class="panel-head">
+            <h2 id="procedure-title">Widerspruchsverfahren</h2>
+            <button id="btn-procedure-close" type="button">Schließen</button>
+          </div>
+          <div id="procedure-body"></div>
+        </section>
 
-    <!-- Widerspruchsverfahren: offene Runde, Kartenwahl, Entscheidung -->
-    <section id="procedure-panel" class="panel" hidden aria-label="Widerspruchsverfahren">
-      <div class="panel-head">
-        <h2 id="procedure-title">Widerspruchsverfahren</h2>
-        <button id="btn-procedure-close" type="button">Schließen</button>
-      </div>
-      <div id="procedure-body"></div>
-    </section>
+        <!-- Abschluss nach gewähltem Ende -->
+        <section id="ending-panel" class="panel" hidden aria-label="Abschluss">
+          <div class="panel-head">
+            <h2 id="ending-title"></h2>
+          </div>
+          <div id="ending-body"></div>
+        </section>
 
-    <!-- Abschluss nach gewähltem Ende -->
-    <section id="ending-panel" class="panel" hidden aria-label="Abschluss">
-      <div class="panel-head">
-        <h2 id="ending-title"></h2>
-      </div>
-      <div id="ending-body"></div>
-    </section>
-
-    <!-- Werkzeugleiste: Verfahren, Ordner, Verlauf, Speicher, Neustart -->
-    <div class="toolbar">
-      <button id="btn-audio" type="button" aria-pressed="false">Stimmen an</button>
-      <span class="toolbar-sep" aria-hidden="true"></span>
-      <button id="btn-evidence" type="button">Beweisordner öffnen</button>
-      <button id="btn-log" type="button">Verlauf öffnen</button>
-      <button id="btn-procedure" type="button">Widerspruchsverfahren</button>
-      <span class="toolbar-sep" aria-hidden="true"></span>
-      <button id="btn-save" type="button">Speichern</button>
-      <button id="btn-load" type="button">Stand laden</button>
-      <button id="btn-checkpoint" type="button">Zum Entscheidungspunkt</button>
-      <span class="toolbar-sep" aria-hidden="true"></span>
-      <button id="btn-restart" class="danger" type="button">Neustart</button>
+        <!-- Primäre Aktionen; sekundäre Funktionen im nativen Menü.
+             Alle Button-IDs und Ereignisbindungen bleiben erhalten. -->
+        <div class="toolbar">
+          <button id="btn-evidence" type="button">Beweisordner öffnen</button>
+          <button id="btn-procedure" type="button">Widerspruchsverfahren</button>
+          <details class="menu-secondary" id="menu-secondary">
+            <summary>Weitere Aktionen</summary>
+            <div class="menu-list">
+              <button id="btn-log" type="button">Verlauf öffnen</button>
+              <button id="btn-save" type="button">Speichern</button>
+              <button id="btn-load" type="button">Stand laden</button>
+              <button id="btn-checkpoint" type="button">Zum Entscheidungspunkt</button>
+              <button id="btn-restart" class="danger" type="button">Neustart</button>
+            </div>
+          </details>
+        </div>
+      </section>
     </div>
   </main>
 
