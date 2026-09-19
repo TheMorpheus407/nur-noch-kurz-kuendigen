@@ -644,7 +644,7 @@ const UI = {
       const d = s.rounds.resolved.includes("W2")
         ? CONTENT.dialogues.alexPlusNachW2
         : CONTENT.dialogues.alexPlus;
-      this.openDialogue({ title: d.titel, steps: this.buildSteps(d.lines) });
+      this.openDialogue({ title: CONTENT.dialogues.alexPlus.titel, steps: this.buildSteps(d.lines) });
       return;
     }
 
@@ -667,17 +667,24 @@ const UI = {
   miraDialogue() {
     const s = GameState.get();
     if (s.rounds.resolved.includes("W2")) {
-      return CONTENT.dialogues.miraNachW2;
+      /* Den Stand nennen, dann die Pointe stehen lassen. Die vorhandenen
+         Erklärungen und das unvertonte Formularangebot bleiben im Quelltext,
+         werden hier aber nicht als weitere Gesprächsschritte angehängt. */
+      const d = CONTENT.dialogues.miraNachW2;
+      return {
+        id: d.id,
+        titel: CONTENT.dialogues.mira.titel,
+        lines: d.lines.filter((line) =>
+          line.id === "miranachw2-01" || line.id === "miranachw2-02")
+      };
     }
     if (s.rounds.resolved.includes("W1")) {
       return {
         id: "miraNachW1",
-        titel: UI_TEXTS.miraNachW1Titel,
-        lines: [{
-          id: "miraNachW1-01",
-          speaker: "MIRA",
-          text: CONTENT.contradictions.W1.folge
-        }]
+        titel: CONTENT.dialogues.mira.titel,
+        /* Dieselbe bereits vertonte MIRA-Aussage nennt den nächsten Einwand;
+           kein ungesprochener redaktioneller Folgetext als NPC-Beitrag. */
+        lines: [CONTENT.contradictions.W1.erfolg.find((line) => line.id === "w1-02")]
       };
     }
     return CONTENT.dialogues.mira;
