@@ -9,15 +9,36 @@
  * nie den internen Zustand direkt. Keine DOM-, fetch-, Netzwerk- oder
  * Zufallslogik in dieser Datei; keine substring-Vergleiche von Erzähltext.
  *
+ * INITIALISIERUNG (repariert)
+ *   Eine neue Instanz startet ohne Zustand. Der erste get()-Aufruf (oder
+ *   jede andere Methode) legt FAZIG einen frischen Arbeitsspeicherzustand
+ *   an — NICHT DESTRUKTIV: vorhandene gespeicherte Slots werden dabei
+ *   weder gelesen noch gelöscht. Nur der explizite reset() (UI-
+ *   bestätigter Neustart) entfernt die beiden eigenen Speicherslots und
+ *   die Sitzungs-Einträge im RAM-Fallback. hasSave() und load() sind
+ *   reine Lese-/Übernahmepfade und löschen nie Slots.
+ *
  * SPEICHER
  *   SAVE_VERSION: 2
  *   Eigene localStorage-Keys (wird NIEMALS localStorage.clear() aufgerufen):
  *     "nurNochKurzKundigen.save"        → allgemeiner Spielstand   (Slot "save")
  *     "nurNochKurzKundigen.checkpoint"  → benannter Entscheidungspunkt (Slot "checkpoint")
- *   Fällt localStorage aus (blockiert/fehlend), wird automatisch ein
- *   sicherer RAM-Speicher für dieselbe Sitzung genutzt. Jede save/load-
- *   Rückgabe enthält storage: "local" | "memory" plus warning, damit die
- *   UI die Einschränkung anzeigen kann. Speicherfehler werfen nie.
+ *   Slots werden strikt geprüft: Es werden ausschließlich die beiden
+ *   eigenen STORAGE_KEYS-Schlüssel akzeptiert (explizite
+ *   hasOwnProperty-Prüfung — geerbte Schlüssel wie "constructor" oder
+ *   "__proto__" werden VOR JEGLICHEM Storage-Zugriff abgewiesen).
+ *   Geschrieben/entfernt werden ausschließlich diese beiden eigenen
+ *   Spielkeys.
+ *   Fällt localStorage aus (blockiert/fehlend) oder schlägt ein lokales
+ *   Schreiben fehl (z. B. Quota), wird automatisch ein sicherer
+ *   RAM-Speicher für dieselbe Sitzung genutzt. Ein erfolgreicher
+ *   RAM-Speichernach einem fehlgeschlagenen lokalen Schreiben hat für
+ *   diesen Slot innerhalb derselben Sitzung beim Laden VORRANG — bis
+ *   wieder ein lokales Schreiben gelingt, danach ist der lokale Stand
+ *   der neueste und hat wieder Vorrang (keine dauerhaft veraltete
+ *   RAM-Kopie). Speicherfehler werfen nie. Jede save/load-Rückgabe
+ *   enthält storage: "local" | "memory" plus warning, damit die UI die
+ *   Einschränkung anzeigen kann.
  *
  * REGELN (Kurzform)
  *   - Vor E2: nur Empfang, nur Fund E2 (Auskunftsterminal).
@@ -34,7 +55,27 @@
  *   - Automatischer Checkpoint („Entscheidungspunkt“) bei Freischaltung
  *     der Endwahl; ladbar auch nach beiden Enden.
  *
- * ÖFFENTLICHE METHODEN (für die UI)
+ * LADEN/VALIDIERUNG (repariert)
+ *   Ein gespeicherter Zustand wird nur übernommen, wenn er konsistent ist:
+ *   - Bekannte EIGENE IDs nur (Räume, Hotspots, Karten, Runden, Enden) —
+ *     explizite Own-Key-Prüfung, nie truthy-Tests von Objektzugriffen.
+ *   - Jede gelöste Runde braucht ihre tatsächlich gefundene Beweiskarte
+ *     in cards (W1=E2, W2=E3, W3=E4).
+ *   - Freie Folgefunde (E1, E3, E4, E5) sowie der Vorführraum (aktueller
+ *     Raum oder besuchte Hotspots) setzen voraus, dass E2 gefunden ist.
+ *   - Alle zusammengehörigen Flags/Legacy-Felder passen zur festen
+ *     Rundenfolge (procedureStarted, bindungsroutineAktiv,
+ *     kuendigungFreigegeben, exportFreigegeben, e2Found,
+ *     contradictionResolved, resolvedCount).
+ *   - Ein Endzustand (ended/ending/alexPlus) ist erst nach allen drei
+ *     gelösten Runden zulässig.
+ *   Kaputte Daten werden abgelehnt (reason:"invalid", errors:[...]); der
+ *   bereits laufende gültige Zustand bleibt unangetastet. Nach erfolgreicher
+ *   Prüfung werden ausschließlich die bekannten kanonischen Felder in ein
+ *   neues sauberes Zustandsobjekt übernommen (Arrays/Logeinträge werden
+ *   kopiert) — nicht das beliebige JSON-Objekt direkt als Live-State.
+ *
+ * ÖFFENTLICHE METHODEN (für die UI) — API unverändert
  *   reset()                                → void. Frischer Zustand, eigene
  *                                             Speicherslots gelöscht. Die
  *                                             Bestätigung der Entscheidung
@@ -43,6 +84,8 @@
  *                                             Legacy-Felder e2Found,
  *                                             contradictionResolved,
  *                                             resolvedCount der alten UI).
+ *                                             Lazy, nicht destruktiv:
+ *                                             löscht nie gespeicherte Slots.
  *   enterRoom(roomId)                      → {ok, room?} | {ok:false, reason}
  *   visitHotspot(hotspotId)                → {ok, firstVisit} | {ok:false, reason}
  *   collectFrom(hotspotId)                 → {ok, card, firstFind} |
@@ -99,6 +142,28 @@ const ALEXPLUS_STATES = ["active", "deleted", "exported"];
 
 /* Sitzungs-RAM-Fallback, falls localStorage blockiert/fehlend ist. */
 const _memoryStore = Object.create(null);
+/* Slots, deren zuletzt erfolgreiches Speichern in dieser Sitzung im
+   RAM stattfand (lokales Schreiben fehlgeschlagen, z. B. Quota). Diese
+   haben beim Laden innerhalb der Sitzung Vorrang, bis wieder ein
+   lokales Schreiben gelingt. */
+const _memoryPreferred = Object.create(null);
+
+/* ---------- Strikte ID-/Slot-Prüfung (eigene Schlüssel nur) ----------
+ * Geerbte Eigenschaften (z. B. "constructor", "__proto__") dürfen nie
+ * als ID oder Slot akzeptiert werden: daher explizite hasOwnProperty-
+ * Prüfung, kein truthy-Test von Objektzugriffen. */
+
+function _ownKey(obj, key) {
+  return typeof key === "string" &&
+         Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function _knownRoom(id) { return _ownKey(CONTENT.rooms, id); }
+function _knownHotspot(id) { return _ownKey(CONTENT.hotspots, id); }
+function _knownCard(id) { return _ownKey(CONTENT.cards, id); }
+function _knownRound(id) { return _ownKey(CONTENT.contradictions, id); }
+function _knownEnding(id) { return _ownKey(CONTENT.endings, id); }
+function _knownSlot(slot) { return _ownKey(STORAGE_KEYS, slot); }
 
 /* ---------- Speicher-Helfer (fehlertolerant) ---------- */
 
@@ -116,11 +181,17 @@ function _writeRaw(slot, json) {
   if (ls) {
     try {
       ls.setItem(STORAGE_KEYS[slot], json);
+      /* Lokales Schreiben erfolgreich: lokaler Stand ist wieder der
+         neueste; RAM-Vorrang für diesen Slot entfällt. */
+      delete _memoryPreferred[slot];
       return { storage: "local", warning: null };
     } catch (_) { /* auf RAM-Fallback ausweichen */ }
   }
   try {
     _memoryStore[slot] = json;
+    /* Neuer RAM-Stand nach fehlgeschlagenem/fehlendem lokalem
+       Schreiben: innerhalb der Sitzung beim Laden Vorrang. */
+    _memoryPreferred[slot] = true;
     return {
       storage: "memory",
       warning: "localStorage nicht verfügbar; RAM-Speicher für diese Sitzung genutzt."
@@ -131,6 +202,12 @@ function _writeRaw(slot, json) {
 }
 
 function _readRaw(slot) {
+  /* Sitzungs-RAM-Vorrang: nur wenn für diesen Slot zuletzt im RAM
+     gespeichert wurde UND der RAM-Eintrag vorhanden ist. */
+  if (_memoryPreferred[slot] &&
+      Object.prototype.hasOwnProperty.call(_memoryStore, slot)) {
+    return { value: _memoryStore[slot], storage: "memory" };
+  }
   const ls = _ls();
   if (ls) {
     try {
@@ -171,13 +248,13 @@ function _validate(data) {
     errors.push("version");
   }
 
-  if (typeof data.room !== "string" || !CONTENT.lookup.room(data.room)) {
+  if (typeof data.room !== "string" || !_knownRoom(data.room)) {
     errors.push("room");
   }
-  if (!_isIdArray(data.visitedHotspots, (id) => !!CONTENT.lookup.hotspot(id))) {
+  if (!_isIdArray(data.visitedHotspots, _knownHotspot)) {
     errors.push("visitedHotspots");
   }
-  if (!_isIdArray(data.cards, (id) => !!CONTENT.lookup.card(id))) {
+  if (!_isIdArray(data.cards, _knownCard)) {
     errors.push("cards");
   }
 
@@ -206,13 +283,13 @@ function _validate(data) {
     }
   }
 
-  if (data.ending !== null && !ENDINGS.includes(data.ending)) {
+  if (data.ending !== null && !_knownEnding(data.ending)) {
     errors.push("ending");
   }
   if (data.ended !== (data.ending !== null)) {
     errors.push("ended/ending");
   }
-  if (!ALEXPLUS_STATES.includes(data.alexPlus)) {
+  if (typeof data.alexPlus !== "string" || !ALEXPLUS_STATES.includes(data.alexPlus)) {
     errors.push("alexPlus");
   }
   if (data.ending === "A" && data.alexPlus !== "deleted") {
@@ -228,16 +305,18 @@ function _validate(data) {
   if (!Array.isArray(data.dialogueLog) ||
       !data.dialogueLog.every((l) =>
         l && typeof l === "object" &&
-        typeof l.speaker === "string" && typeof l.speaker !== "undefined" &&
+        typeof l.speaker === "string" &&
         typeof l.text === "string" &&
         (l.id === undefined || typeof l.id === "string"))) {
     errors.push("dialogueLog");
   }
 
-  /* Konsistenz zwischen Feldern (unmögliche Endzustände ablehnen). */
+  /* Konsistenz zwischen Feldern (unmögliche Zustände ablehnen). */
   const cards = Array.isArray(data.cards) ? data.cards : [];
+  const visited = Array.isArray(data.visitedHotspots) ? data.visitedHotspots : [];
   const resolved = (data.rounds && Array.isArray(data.rounds.resolved))
     ? data.rounds.resolved : [];
+
   if (typeof data.procedureStarted === "boolean" &&
       data.procedureStarted !== cards.includes("E2")) {
     errors.push("procedureStarted/konsistenz");
@@ -255,6 +334,33 @@ function _validate(data) {
     errors.push("bindungsroutineAktiv/konsistenz");
   }
 
+  /* Jede gelöste Runde braucht ihre tatsächlich gefundene Beweiskarte. */
+  for (const r of resolved) {
+    const need = CORRECT_CARD[r];
+    if (need !== undefined && !cards.includes(need)) {
+      errors.push("evidence/" + r);
+    }
+  }
+
+  /* Freie Folgefunde und der Vorführraum setzen E2 voraus. */
+  const hasE2 = cards.includes("E2");
+  if (!hasE2) {
+    if (["E1", "E3", "E4", "E5"].some((c) => cards.includes(c))) {
+      errors.push("cards-before-e2");
+    }
+    if (data.room === "vorfuehr") {
+      errors.push("room-before-e2");
+    }
+    if (visited.some((h) => _knownHotspot(h) && CONTENT.hotspots[h].room === "vorfuehr")) {
+      errors.push("hotspot-before-e2");
+    }
+  }
+
+  /* Ein Endzustand ist erst nach allen drei gelösten Runden zulässig. */
+  if (data.ended && resolved.length !== ROUND_ORDER.length) {
+    errors.push("ended-without-rounds");
+  }
+
   /* Legacy-Felder (Kompatibilität) müssen zum Kanonischen passen. */
   if (typeof data.e2Found !== "boolean" || data.e2Found !== cards.includes("E2")) {
     errors.push("e2Found");
@@ -270,6 +376,37 @@ function _validate(data) {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+/* Übernimmt validierte Daten als neues sauberes Zustandsobjekt:
+   ausschließlich die bekannten kanonischen Felder, Arrays und
+   Logeinträge werden kopiert. Das beliebige JSON-Objekt wird nie
+   direkt als Live-State gesetzt. */
+function _adoptState(data) {
+  const s = GameState.fresh();
+  s.room = data.room;
+  s.visitedHotspots = data.visitedHotspots.slice();
+  s.cards = data.cards.slice();
+  s.rounds = {
+    next: data.rounds.next,
+    resolved: data.rounds.resolved.slice()
+  };
+  s.procedureStarted = data.procedureStarted;
+  s.bindungsroutineAktiv = data.bindungsroutineAktiv;
+  s.kuendigungFreigegeben = data.kuendigungFreigegeben;
+  s.exportFreigegeben = data.exportFreigegeben;
+  s.ending = data.ending;
+  s.ended = data.ended;
+  s.alexPlus = data.alexPlus;
+  s.dialogueLog = data.dialogueLog.map((l) => {
+    const line = { speaker: l.speaker, text: l.text };
+    if (typeof l.id === "string") {
+      line.id = l.id;
+    }
+    return line;
+  });
+  GameState._syncLegacy(s);
+  return s;
 }
 
 /* =========================================================================
@@ -305,24 +442,27 @@ const GameState = {
     };
   },
 
-  /* Neustart ausführen. Die Bestätigung der Entscheidung trifft die UI;
-     der State bietet nur die eindeutige Methode. Es werden ausschließlich
-     die eigenen Spielschlüssel entfernt, nie localStorage.clear(). */
+  /* Expliziter, UI-bestästigter Neustart. Es werden ausschließlich die
+     eigenen Spielschlüssel entfernt, nie localStorage.clear(). */
   reset() {
     this._state = this.fresh();
-    const ls = _ls();
     for (const slot of Object.keys(STORAGE_KEYS)) {
+      const ls = _ls();
       if (ls) {
         try { ls.removeItem(STORAGE_KEYS[slot]); } catch (_) { /* ignorieren */ }
       }
       delete _memoryStore[slot];
+      delete _memoryPreferred[slot];
     }
   },
 
-  /* Liefert den aktuellen Zustand (mit Legacy-Feldern). */
+  /* Liefert den aktuellen Zustand (mit Legacy-Feldern).
+     Lazy, NICHT destruktiv: ein frischer Arbeitsspeicherzustand wird
+     nur in den RAM gesetzt; vorhandene gespeicherte Slots bleiben
+     erhalten und sind danach per load()/hasSave() erreichbar. */
   get() {
     if (!this._state) {
-      this.reset();
+      this._state = this.fresh();
     }
     return this._state;
   },
@@ -342,7 +482,7 @@ const GameState = {
     if (s.ended) {
       return { ok: false, reason: "already-ended", ending: s.ending };
     }
-    if (typeof roomId !== "string" || !CONTENT.lookup.room(roomId)) {
+    if (typeof roomId !== "string" || !_knownRoom(roomId)) {
       return { ok: false, reason: "unknown-room" };
     }
     if (roomId === "vorfuehr" && !s.cards.includes("E2")) {
@@ -359,10 +499,10 @@ const GameState = {
     if (s.ended) {
       return { ok: false, reason: "already-ended", ending: s.ending };
     }
-    const h = CONTENT.lookup.hotspot(hotspotId);
-    if (!h) {
+    if (typeof hotspotId !== "string" || !_knownHotspot(hotspotId)) {
       return { ok: false, reason: "unknown-hotspot" };
     }
+    const h = CONTENT.hotspots[hotspotId];
     if (h.room === "vorfuehr" && !s.cards.includes("E2")) {
       return { ok: false, reason: "room-locked", room: h.room };
     }
@@ -382,11 +522,14 @@ const GameState = {
     if (s.ended) {
       return { ok: false, reason: "already-ended", ending: s.ending };
     }
-    const h = CONTENT.lookup.hotspot(hotspotId);
-    if (!h) {
+    if (typeof hotspotId !== "string" || !_knownHotspot(hotspotId)) {
       return { ok: false, reason: "unknown-hotspot" };
     }
-    const cardId = CARD_SOURCE[hotspotId];
+    const h = CONTENT.hotspots[hotspotId];
+    if (h.room === "vorfuehr" && !s.cards.includes("E2")) {
+      return { ok: false, reason: "room-locked", room: h.room };
+    }
+    const cardId = _ownKey(CARD_SOURCE, hotspotId) ? CARD_SOURCE[hotspotId] : null;
     if (!cardId) {
       return { ok: false, reason: "no-card", hotspot: hotspotId };
     }
@@ -444,10 +587,10 @@ const GameState = {
     if (s.ended) {
       return { ok: false, reason: "already-ended", ending: s.ending };
     }
-    const w = CONTENT.lookup.contradiction(roundId);
-    if (!w) {
+    if (typeof roundId !== "string" || !_knownRound(roundId)) {
       return { ok: false, reason: "unknown-round" };
     }
+    const w = CONTENT.contradictions[roundId];
     if (s.rounds.resolved.includes(roundId)) {
       return { ok: false, reason: "already-resolved", round: roundId };
     }
@@ -572,10 +715,11 @@ const GameState = {
 
   /* Explizit speichern unter Slot "save" oder "checkpoint".
      Rückgabe: {ok, slot, storage:"local"|"memory", warning?} oder
-     {ok:false, reason, ...}. Wirft nie. */
+     {ok:false, reason, ...}. Wirft nie. Ungültige Slots werden vor
+     jeglichem Storage-Zugriff abgewiesen. */
   save(slot) {
     slot = slot || "save";
-    if (!STORAGE_KEYS[slot]) {
+    if (!_knownSlot(slot)) {
       return { ok: false, reason: "unknown-slot" };
     }
     const s = this.get();
@@ -594,10 +738,12 @@ const GameState = {
 
   /* Explizit laden aus Slot "save" oder "checkpoint".
      Inkonsistente/ungültige Daten werden abgelehnt (reason:"invalid",
-     errors:[...]); der aktuelle funktionierende Spielstand bleibt erhalten. */
+     errors:[...]); der aktuelle funktionierende Spielstand bleibt
+     unangetastet. Ungültige Slots werden vor jeglichem Storage-Zugriff
+     abgewiesen. */
   load(slot) {
     slot = slot || "save";
-    if (!STORAGE_KEYS[slot]) {
+    if (!_knownSlot(slot)) {
       return { ok: false, reason: "unknown-slot" };
     }
     const raw = _readRaw(slot);
@@ -614,14 +760,13 @@ const GameState = {
     if (!v.ok) {
       return { ok: false, reason: "invalid", slot, errors: v.errors };
     }
-    this._state = data;
-    this._syncLegacy(this._state);
+    this._state = _adoptState(data);
     return { ok: true, slot, storage: raw.storage };
   },
 
   hasSave(slot) {
     slot = slot || "save";
-    if (!STORAGE_KEYS[slot]) {
+    if (!_knownSlot(slot)) {
       return { exists: false, storage: null };
     }
     const raw = _readRaw(slot);
