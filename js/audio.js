@@ -38,7 +38,7 @@ const GameAudio = {
     }
     const a = new Audio();
     a.preload = "none";
-    a.addEventListener("ended", () => this._onEnded());
+    a.addEventListener("ended", (event) => this._onEnded(event));
     a.addEventListener("error", () => this._onError());
     this._audio = a;
   },
@@ -148,15 +148,30 @@ const GameAudio = {
   },
 
   /* aktueller Clip zu Ende: nächste wartende Zeile — nur wenn die
-     Folge nicht verworfen wurde. */
-  _onEnded() {
+     Folge nicht verworfen wurde. Nur ein echtes Ende des tatsächlich
+     aktuellen Clips zählt: ein künstlich injiziertes oder verspätetes
+     'ended' (falsches Ziel, andere Quelle, oder die Medienzeit läuft
+     noch) darf die Folge nicht vorzeitig weiterschalten. */
+  _onEnded(event) {
+    const a = this._audio;
+    if (!a) {
+      return;
+    }
+    if (event && event.target && event.target !== a) {
+      return; /* Ereignis gehört zu einem anderen Element */
+    }
+    if (!a.ended) {
+      return; /* Medienzeit läuft noch: kein echtes Ende dieses Clips */
+    }
+    if (a._audioToken !== this._token) {
+      return; /* stop() in der Zwischenzeit: Folge veraltet */
+    }
     if (!this._queue.length) {
       return;
     }
-    const myToken = this._token;
     const next = this._queue.shift();
-    if (myToken !== this._token) {
-      return; /* stop() in der Zwischenzeit: Folge veraltet */
+    if (a._audioToken !== this._token) {
+      return;
     }
     this._start(next);
   },

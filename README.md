@@ -110,12 +110,27 @@ Dann öffnen: http://127.0.0.1:8000/
   W3-Einleitung und erfolgreiche Beweisrunden laufen in sichtbarer
   Reihenfolge. „Weiter“, Schließen, Escape, Raum-/Panelwechsel, Laden,
   Entscheidungspunkt und bestätigter Neustart stoppen laufende Sprache
-  und verwerfen wartende Clips. Höchstens ein Audioelement spielt
+  und verwerfen wartende Clips. Auch der Wechsel auf eine stille oder
+  fehlende Dialogzeile und jeder Verfahrensübergang (Erfolg → nächste
+  Runde, Runde → Erfolgsansicht) stoppen die vorherige Stimme sofort und
+  verwerfen die wartende Folge. Höchstens ein Audioelement spielt
   gleichzeitig; `preload="none"` — keine der 45 Dateien wird beim
   Seitenstart geladen.
-- **Wiederholen:** Vertonte Zeilen im Dialog und im Verlauf haben eine
-  klare Wiederhol- bzw. „Anhören“-Schaltfläche; das Öffnen des Verlaufs
-  selbst spielt keine Historie ab.
+- **Einschalten im Verfahren:** Wird „Stimmen an“ in einer sichtbaren
+  Verfahrensansicht gedrückt, starten die dort sichtbaren vertonten
+  Zeilen in sichtbarer Reihenfolge (Erfolgsfolge bzw. W3-Einleitung) —
+  keine veraltete Folge, keine neue Runde, keine Dialogansicht im
+  Hintergrund. Ausschalten stoppt sofort und leert die Queue.
+- **ended-Guard:** Ein `ended`-Ereignis führt die Folge nur weiter, wenn
+  es ein echtes Ende des tatsächlich aktuellen Clips ist (Element,
+  Quelle und Medienzustand passen); ein künstlich injiziertes oder
+  verspätetes Ereignis (z. B. QA-Fixture per `dispatchEvent`) wird
+  ignoriert.
+- **Wiederholen:** Vertonte Zeilen im Dialog, im Verlauf und an den
+  sichtbaren vertonten Verfahrenszeilen (Erfolgsfolgen, W3-Einleitung)
+  haben eine klare, tastaturbedienbare Wiederhol- bzw. „Anhören“-
+  Schaltfläche; stille Zeilen und fehlende Katalog-IDs bekommen keine.
+  Das Öffnen des Verlaufs selbst spielt keine Historie ab.
 - **Fehler:** Fehlende Dateien, nicht unterstütztes Audio oder
   abgelehntes `play()` geben einen kurzen Statushinweis; der Text bleibt
   vollständig bedienbar, es gibt keine Fehlerdialoge oder Abwürfe.
@@ -154,8 +169,9 @@ Dann öffnen: http://127.0.0.1:8000/
 ## Ausgeführte Prüfung
 
 - `node --check` auf allen `js/*.js`-Dateien (Syntaxprüfung) — für diesen
-  Stand tatsächlich ausgeführt; das ist **ausschließlich** eine
-  Syntaxprüfung, kein Browser- oder Funktionstest.
+  Stand nach der Audio-Bedienungsreparatur tatsächlich ausgeführt; das
+  ist **ausschließlich** eine Syntaxprüfung, kein Browser- oder
+  Funktionstest.
 
 ## Unabhängige Browserbefunde (Grundlage, keine Abnahme durch diese Reparatur)
 
@@ -164,6 +180,15 @@ Dann öffnen: http://127.0.0.1:8000/
   Checkpoint-Meldung bei blockiertem `localStorage`) beruhen auf
   eigenständigen Browserbeobachtungen (Chromium/Firefox) über die
   vollständigen Wege W1→W2→W3 und beide Enden.
+- Fünf Audio-Bedienbefunde (Chromium HTTP/`file://`, Firefox `file://`)
+  bildeten die Grundlage der jetzt eingesetzten Audio-Reparaturen:
+  A01 laufende Stimme unter einer stillen Zeile (ankunft-01→02),
+  A02 nicht verworfene W1-Folge unter W2 nach „Weiter“, A03 fehlende
+  Replay-Schaltflächen an sichtbaren vertonten Verfahrenszeilen, A04 kein
+  Start der sichtbaren Folge bei „Stimmen an“ in der Erfolgsansicht,
+  A05 künstlich injiziertes `ended`-Ereignis (QA-Fixture per
+  `dispatchEvent`, ausdrücklich kein natürliches Browserereignis)
+  schaltet die neue Folge vorzeitig weiter.
 - Diese Reparatur wurde **nicht** erneut in einem Browser abgenommen;
   ob die Korrekturen im Browser wie beschrieben greifen, ist eine
   separate Browserprüfung.
@@ -176,6 +201,8 @@ Dann öffnen: http://127.0.0.1:8000/
 - Noch keine Kunst: keine Bilder, keine erfundenen Bild-Assets; die
   Bebilderung folgt mit lokalen Krea-Assets. Der Ton besteht aus den
   45 lokalen WAV-Dateien (Batch 004) — keine neuen Stimmen erzeugt.
-- Die Audio-Anbindung wurde **nicht** in einem Browser abgenommen
+- Die Audio-Anbindung — einschließlich der jetzt eingesetzten
+  Reparaturen zu A01–A05 — wurde **nicht** in einem Browser abgenommen
   (keine Hörabnahme); `node --check` ist ausschließlich eine
-  Syntaxprüfung, kein Browser- oder Funktionstest.
+  Syntaxprüfung, kein Browser- oder Funktionstest. Die unabhängige
+  Browser-Nachprüfung und Hörabnahme dieser fünf Befunde steht noch aus.

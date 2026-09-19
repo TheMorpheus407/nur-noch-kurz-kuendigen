@@ -68,6 +68,7 @@ const UI_TEXTS = {
 const UI = {
   els: {},
   _dialogue: null,        /* aktive Dialogfolge: {steps, index, onDone} */
+  _procedureView: null,   /* aktive Verfahrensansicht: {type, rid} */
   _focusReturn: null,     /* Element, auf das der Fokus beim Schließen zurückgeht */
   _openStack: [],         /* geöffnete schließbare Panels, zuletzt oben (Escape) */
   lastAdvanceAt: 0,
@@ -502,7 +503,10 @@ const UI = {
   },
 
   /* Master-Umschalter. Bei Einschalten spielt die gerade sichtbare
-     vertonte Dialogzeile; bei Ausschalten stoppt alles sofort. */
+     vertonte Dialogzeile — oder, falls die Verfahrensansicht aktiv
+     ist, die dort sichtbaren vertonten Zeilen in sichtbarer
+     Reihenfolge. Bei Ausschalten stoppt alles sofort und leert die
+     Queue. */
   toggleAudio() {
     const on = GameAudio.toggle();
     this.els.btnAudio.textContent = on ? "Stimmen aus" : "Stimmen an";
@@ -511,11 +515,40 @@ const UI = {
       const step = this.currentDialogueStep();
       if (step && step.kind === "line" && GameAudio.hasLine(step.id)) {
         GameAudio.playLine(step.id);
+      } else if (this.els.procedurePanel.hidden === false &&
+                 this.playVisibleProcedureAudio()) {
+        /* sichtbare vertonte Verfahrenszeilen, keine veraltete Folge */
       }
       this.setStatus(UI_TEXTS.audioOn);
     } else {
       this.setStatus(UI_TEXTS.audioOff);
     }
+  },
+
+  /* Bei bewusstem Einschalten: genau die gerade sichtbaren vertonten
+     Verfahrenszeilen der tatsächlich aktiven Ansicht in sichtbarer
+     Reihenfolge abspielen (Erfolgsfolge bzw. W3-Einleitung). Keine
+     veraltete Folge, keine neue Runde, keine Dialogansicht im
+     Hintergrund. Stille Zeilen bleiben still; ohne vertonte Zeilen
+     passiert nichts. */
+  playVisibleProcedureAudio() {
+    const view = this._procedureView;
+    if (!view || !view.rid) {
+      return false;
+    }
+    const w = CONTENT.contradictions[view.rid];
+    if (!w) {
+      return false;
+    }
+    if (view.type === "success" && Array.isArray(w.erfolg)) {
+      GameAudio.playSequence(w.erfolg.map((l) => l.id));
+      return true;
+    }
+    if (view.type === "round" && Array.isArray(w.vorher)) {
+      GameAudio.playSequence(w.vorher.map((l) => l.id));
+      return true;
+    }
+    return false;
   },
 
   /* Bewusst angeklickte Zeile wieder abspielen (Dialog oder Verlauf).
@@ -594,6 +627,11 @@ const UI = {
       if (GameAudio.hasLine(step.id)) {
         body.appendChild(this.makeReplayButton(step.id, "Zeile wiederholen"));
         GameAudio.playLine(step.id);
+      } else {
+        /* Wechsel zu einer stillen/fehlenden Zeile: vorherige Stimme
+           sofort stoppen und wartende Clips verwerfen — keine laufende
+           Medienzeit unter der neuen Zeile, kein Ersatzclip. */
+        this.stopAudio();
       }
     } else {
       /* Bewusster Lesemoment (z. B. Ende A zwischen Löschung und
@@ -757,11 +795,15 @@ const UI = {
   },
 
   renderProcedure() {
+    /* Verfahrensübergang: laufende und wartende Sprache der vorherigen
+       Ansicht verwirfen, bevor die neue Ansicht gilt. */
+    this.stopAudio();
     const s = GameState.get();
     const body = this.els.procedureBody;
     body.textContent = "";
 
     if (!s.e2Found) {
+      this._procedureView = { type: "locked" };
       this.els.procedureTitle.textContent = CONTENT.labels.widerspruchsverfahren;
       body.append(
         this.make("p", null, CONTENT.contradiction.noCard),
@@ -771,6 +813,7 @@ const UI = {
     }
 
     if (s.ended) {
+      this._procedureView = { type: "ended" };
       this.els.procedureTitle.textContent = CONTENT.labels.entscheidung;
       const badge = this.make("p", "badge is-done", "Abgeschlossen");
       body.append(
@@ -793,6 +836,7 @@ const UI = {
     body.textContent = "";
     const s = GameState.get();
     const w = CONTENT.contradictions[rid];
+    this._procedureView = { type: "round", rid: rid };
     this.els.procedureTitle.textContent = w.titel;
 
     /* Bereits abgeschlossene Runden sichtbar machen. */
@@ -811,6 +855,11 @@ const UI = {
           this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
           this.make("p", "dialogue-text", line.text)
         );
+        /* Vertonte Einleitungszeile: klare Wiederholfunktion; stille
+           Zeilen und fehlende Katalog-IDs bleiben ohne Button. */
+        if (GameAudio.hasLine(line.id)) {
+          el.appendChild(this.makeReplayButton(line.id, "Zeile wiederholen"));
+        }
         body.appendChild(el);
       }
       if (playIntro) {
@@ -886,8 +935,12 @@ const UI = {
   },
 
   renderSuccess(rid, body) {
+    /* Übergang in die Erfolgsansicht: laufende/wartende Sprache der
+       vorherigen Ansicht verwirfen, bevor die neue Ansicht gilt. */
+    this.stopAudio();
     body.textContent = "";
     const w = CONTENT.contradictions[rid];
+    this._procedureView = { type: "success", rid: rid };
     this.els.procedureTitle.textContent = w.titel;
 
     body.appendChild(this.make("p", "badge", "Runde abgeschlossen"));
@@ -907,6 +960,11 @@ const UI = {
         this.make("span", "dialogue-speaker" + this.speakerClass(line.speaker), line.speaker),
         this.make("p", "dialogue-text", line.text)
       );
+      /* Vertonte Erfolgszeile: klare Wiederholfunktion; stille Zeilen
+         (z. B. Alex) und fehlende Katalog-IDs bleiben ohne Button. */
+      if (GameAudio.hasLine(line.id)) {
+        el.appendChild(this.makeReplayButton(line.id, "Zeile wiederholen"));
+      }
       body.appendChild(el);
     }
 
@@ -938,6 +996,7 @@ const UI = {
   /* ---------- Entscheidung und Enden ---------- */
 
   renderDecision(body) {
+    this._procedureView = { type: "decision" };
     this.els.procedureTitle.textContent = CONTENT.labels.entscheidung;
     body.appendChild(this.make("p", "decision-prompt", CONTENT.decision.prompt));
     const cp = GameState.hasSave("checkpoint");
