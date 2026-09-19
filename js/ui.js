@@ -56,7 +56,7 @@ const UI_TEXTS = {
   noLog: "Noch keine Gesprächszeilen im Verlauf.",
   audioOn: "Stimmen an: vertonte Zeilen werden gesprochen.",
   audioOff: "Stimmen aus: laufende Sprache gestoppt.",
-  audioOffHint: "Stimmen sind ausgeschaltet — „Stimmen an“ schaltet sie ein."
+  audioOffHint: "Stimmen sind ausgeschaltet — „Stimmen an“ schaltet sie ein.",
   miraNachW1Titel: "MIRA — Stand des Vorgangs",
   procedureLocked: "Zuerst eine Beweiskarte finden: das Auskunftsterminal im Empfang.",
   cardPickLabel: "Beweiskarte aus dem Ordner wählen und vorlegen:",
