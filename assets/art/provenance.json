@@ -1,0 +1,61 @@
+{
+  "generator": "Krea 2 Turbo FP8, local workstation",
+  "model_repository": "Comfy-Org/Krea-2",
+  "model_revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
+  "selection_and_crops": "Cedric; rectangular pixel-preserving crops and byte-identical copies",
+  "lora_applied": false,
+  "emotion_variants": false,
+  "note": "MIRA and Alex Plus are selected character-sheet crops. Rolf is cropped from the selected room to retain identical plant pixels. All originals and generation evidence remain in the production archive.",
+  "files": [
+    {
+      "file": "mira-neutral.png",
+      "source": "game-assets/001_initial/mira-neutral.png",
+      "sha256": "28925b2a1f30abb6eb2939d263c9cb7aa9162b159a299b7f965b4c9b505ff5dc",
+      "size": [
+        1008,
+        976
+      ],
+      "bytes": 764613
+    },
+    {
+      "file": "alex-plus-neutral.png",
+      "source": "game-assets/001_initial/alex-plus-neutral.png",
+      "sha256": "7c95fed2cf5109035301e31c34c6222ded11f0e914abcf0eeae7db020657cb66",
+      "size": [
+        968,
+        944
+      ],
+      "bytes": 742407
+    },
+    {
+      "file": "rolf-room.png",
+      "source": "game-assets/001_initial/rolf-room.png",
+      "sha256": "a5d91607604e42c30985d13238e5c1a94ff1764d4ab350d9b01ef7378c1df2b7",
+      "size": [
+        392,
+        824
+      ],
+      "bytes": 345143
+    },
+    {
+      "file": "empfang.png",
+      "source": "krea/003_game_assets/empfang_background_attempt_001/image_00001_.png",
+      "sha256": "a88e2a7a332a98a942a2021428c79a37718024589875598e7ddd42ff283716a9",
+      "size": [
+        2048,
+        1152
+      ],
+      "bytes": 2072380
+    },
+    {
+      "file": "vorfuehr.png",
+      "source": "krea/005_vorfuehrraum_retry/vorfuehrraum_background_attempt_001/image_00002_.png",
+      "sha256": "7508f191c23713c4823924d22f5490e8c8b7f70e64cd02a84ef450e0749f7c17",
+      "size": [
+        2048,
+        1152
+      ],
+      "bytes": 2401473
+    }
+  ]
+}
