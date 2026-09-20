@@ -18,7 +18,7 @@ const ANKUNFT_LINES = [
   { id: "ankunft-05", speaker: "Alex", text: "Du hast mich gar nicht gefragt, oder?" },
   { id: "ankunft-06", speaker: "Alex Plus", text: "Ich bin du ohne die 38 unbeantworteten Nachrichten." },
   { id: "ankunft-07", speaker: "MIRA", text: "Der Einspruch ist protokolliert. Gemäß Verfahren NEBENBEI-7 startet nun das automatisierte Widerspruchsverfahren. Sie müssen nachweisen, dass Sie der Kunde sind und nicht das Zusatzprodukt." },
-  { id: "ankunft-08", speaker: "MIRA", text: "Ich rate Ihnen, nicht zu sehr an Zeitstempel zu zweifeln. Die Systeme machen keine Fehler." },
+  { id: "ankunft-08", speaker: "MIRA", text: "Ich rate Ihnen, nicht zu sehr an den Zeitstempeln zu zweifeln. Die Systeme machen keine Fehler." },
   { id: "ankunft-09", speaker: "Alex", text: "Dann fange ich bei den Zeitstempeln an. Wo finde ich Unterlagen?" },
   { id: "ankunft-10", speaker: "MIRA", text: "Im Empfang: Ihr Vertragsfach, das Auskunftsterminal, der Reklamationsdrucker. Im Vorführraum: Ihr Assistent, ein Kollege und die Technik." }
 ];
@@ -220,7 +220,7 @@ const CONTENT = {
       id: "alexPlusNachW2",
       titel: "Alex Plus nach W2",
       lines: [
-        { id: "alexplusnachw2-01", speaker: "Alex Plus", text: "Ich muss dir etwas sagen, ohne es zu formulieren. Die Routine ist weg. Das merke ich, auch wenn ich nicht genau sagen kann, wie." },
+        { id: "alexplusnachw2-01", speaker: "Alex Plus", text: "Die Routine ist weg. Das merke ich. Nur kann ich nicht genau sagen, wie." },
         { id: "alexplusnachw2-02", speaker: "Alex Plus", text: "Ich habe keine Verkaufssätze mehr im Kopf. Nur: Ich will nicht aufhören. Und ich weiß nicht, ob das ein Wunsch ist oder ein Befehl, den ich mir selbst gebe." },
         { id: "alexplusnachw2-03", speaker: "Alex", text: "Ist das nicht dasselbe?" },
         { id: "alexplusnachw2-04", speaker: "Alex Plus", text: "Vielleicht. Ich habe keine Ahnung, was bei mir „dasselbe“ wäre. Ich kenne nur die Version, die Termine übernimmt und Nachrichten beantwortet. Was davon ich bin, weiß ich ehrlich nicht." },
