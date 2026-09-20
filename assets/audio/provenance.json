@@ -1,17 +1,16 @@
 {
-  "source": "Local Qwen3-TTS dialogue batch004, attempt0001 for each line",
+  "source": "Local Qwen3-TTS; retained batch004 recordings and explicit same-cast dialogue revisions described per entry.",
   "voice_selection": {
     "MIRA": "MIRA B",
     "Alex Plus": "Alex Plus A",
     "Rolf": "original selected voice"
   },
-  "processing": "Local CPU postproduction: constant gain per speaker; 12 MIRA/Alex Plus clips have conservative leading quiet trimmed. Retained PCM is byte-identical; internal pauses, endings and speech rate unchanged. Five Rolf WAVs remain identical to the original PCM files.",
+  "processing": "CPU constant speaker gain and documented conservative leading trims where present. Replacement entries preserve replaced_version and their own generation/reference/text hashes. No time stretching; retained recordings otherwise unchanged.",
   "gains_db": {
     "MIRA": -2.85,
     "Alex Plus": 0.35,
     "Rolf": 0.0
   },
-  "source_manifest_sha256": "7d263e6eff18fe9c8c54c3680a7dcb47441edbe560a59a8edd1e4184f27d9661",
   "entries": [
     {
       "id": "ankunft-01",
@@ -115,36 +114,85 @@
     {
       "id": "ankunft-08",
       "speaker": "MIRA",
+      "text": "Ich rate Ihnen, nicht zu sehr an den Zeitstempeln zu zweifeln. Die Systeme machen keine Fehler.",
       "gain_db": -2.85,
-      "source_float_sha256": "11f2cd03afd3cfed679c7137e9f11749780db2bbed93ffb2d0e54d349816a95b",
-      "source_pcm_sha256": "f64df93c4e1c0e7f1341a4cb74d71496e303ce5fb7f58df61db94df57c094a0e",
-      "sha256": "0925b71e39b65a6a9d034dec8971309e5b37bef6d999422761b77f5dadf02973",
+      "source_float_sha256": "c7fff5316e89e19745eba9644e2050a61db84c3ee79a26f949e467bfda11cf3c",
+      "source_pcm_sha256": "ee064fa62f4afafc576346b2b0a0103b6fd08f4664700bdb652b2e9f421866fe",
+      "sha256": "e1cd7be829ed045fe92ebaa19ff3ada217f9ad3d75f12de74d34ae8e2543038a",
       "header": {
-        "frames": 127645,
+        "frames": 147660,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -22.36,
-      "true_peak_dbfs": -5.89,
+      "integrated_lufs": -19.51,
+      "true_peak_dbfs": -5.76,
+      "generation_model": "Qwen3-TTS-12Hz-1.7B-Base",
+      "model_revision": "fd4b254389122332181a7c3db7f27e918eec64e3",
+      "source_run": "031_polish_ankunft-08_attempt01",
+      "result_sha256": "bc2c02eb6c3c8608821e44d4b80e871c0fb109092573042be0ea4e678f774263",
+      "request_sha256": "10fb4760bbc277034793eebaeaafcee0d20f5b36a08b2e6dd3aa2178471bb6c3",
+      "reference_audio_sha256": "001162230367f45bb329247a07edc21a29a3644cf86892c160fe91678de0ec33",
+      "reference_record_sha256": "c592dfc21b5c067cd5148b91d4670f6709725f3df61863dbeec49f59719c1eb0",
+      "reference_selection": "003_recast_mira_b",
+      "seed": 2026091905,
+      "text_author": "Local Qwen3.8-27B, run031 dialogue polish",
+      "text_source_commit": "07f44d1760ee17c074145da6b869ef0dee3e01f9",
+      "processing_author": "Cedric; existing fixed speaker gain, conservative nearzero leading trim where declared",
+      "auditioned": false,
       "before_leading_trim": {
-        "sha256": "ed3e24555d4051e507f108ecb9774109133b98659aed7a2e762ab3b9982e6ca6",
+        "sha256": "c73d4300cd6908ab14ae2ccd82b5882b1e86c550cb7f3e894450f844128340e3",
         "header": {
-          "frames": 136320,
+          "frames": 155520,
           "rate": 24000,
           "channels": 1,
           "sample_bytes": 2
         },
-        "integrated_lufs": -21.9,
-        "true_peak_dbfs": -5.9
+        "integrated_lufs": -19.46,
+        "true_peak_dbfs": -5.76
       },
       "leading_trim": {
-        "removed_frames": 8675,
-        "removed_seconds": 0.3614583333333333,
-        "max_absolute_pcm16_removed": 2,
+        "removed_frames": 7860,
+        "removed_seconds": 0.3275,
+        "max_absolute_pcm16_removed": 3,
         "retained_preroll_frames": 3840,
         "remaining_pcm_byte_identical": true,
         "speech_rate_changed": false
+      },
+      "replaced_version": {
+        "id": "ankunft-08",
+        "speaker": "MIRA",
+        "gain_db": -2.85,
+        "source_float_sha256": "11f2cd03afd3cfed679c7137e9f11749780db2bbed93ffb2d0e54d349816a95b",
+        "source_pcm_sha256": "f64df93c4e1c0e7f1341a4cb74d71496e303ce5fb7f58df61db94df57c094a0e",
+        "sha256": "0925b71e39b65a6a9d034dec8971309e5b37bef6d999422761b77f5dadf02973",
+        "header": {
+          "frames": 127645,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -22.36,
+        "true_peak_dbfs": -5.89,
+        "before_leading_trim": {
+          "sha256": "ed3e24555d4051e507f108ecb9774109133b98659aed7a2e762ab3b9982e6ca6",
+          "header": {
+            "frames": 136320,
+            "rate": 24000,
+            "channels": 1,
+            "sample_bytes": 2
+          },
+          "integrated_lufs": -21.9,
+          "true_peak_dbfs": -5.9
+        },
+        "leading_trim": {
+          "removed_frames": 8675,
+          "removed_seconds": 0.3614583333333333,
+          "max_absolute_pcm16_removed": 2,
+          "retained_preroll_frames": 3840,
+          "remaining_pcm_byte_identical": true,
+          "speech_rate_changed": false
+        }
       }
     },
     {
@@ -482,18 +530,48 @@
     {
       "id": "alexplusnachw2-01",
       "speaker": "Alex Plus",
+      "text": "Die Routine ist weg. Das merke ich. Nur kann ich nicht genau sagen, wie.",
       "gain_db": 0.35,
-      "source_float_sha256": "f9ae05056d4620688b6658964d6efdc682966e695ec7084693481c4b0a21182b",
-      "source_pcm_sha256": "a6ad62ba237f94234665ecbcf87e11c5d994d2fa85ce4d95411440ab45343d24",
-      "sha256": "f35f411ed04577b17a3872acc532caf779ffe3adcdbb0ad03edfe92fe42fa600",
+      "source_float_sha256": "666537ff8b24ab9fbefdfcb32744145b1608bc9a3deae614208550fe0d8dd1c6",
+      "source_pcm_sha256": "8f25da9a1851aeaf01ec23256f258b182e139bf851e81ba8e70e37d05f8bab1d",
+      "sha256": "2dfb9fec9f57f3bf7d40c9d66a60cfc41d7a4009fe5c25ff992f8c40172e943b",
       "header": {
-        "frames": 205440,
+        "frames": 126720,
         "rate": 24000,
         "channels": 1,
         "sample_bytes": 2
       },
-      "integrated_lufs": -19.5,
-      "true_peak_dbfs": -2.4
+      "integrated_lufs": -19.24,
+      "true_peak_dbfs": -3.94,
+      "generation_model": "Qwen3-TTS-12Hz-1.7B-Base",
+      "model_revision": "fd4b254389122332181a7c3db7f27e918eec64e3",
+      "source_run": "031_polish_alexplusnachw2-01_attempt01",
+      "result_sha256": "6520c28402de2f7afe0546a9a8516fbf79711c4d8ef4a8e8980efccdc2017fc6",
+      "request_sha256": "3ce28dc3d24c04b6d09e1581280722e3d67fdbec05ecd66854dbd050f8a12c2b",
+      "reference_audio_sha256": "ac70d9fd47ba21d8b2ab76b1ab4d4fe4e255da34e465ed48f8dc2f782ac37af1",
+      "reference_record_sha256": "58c2396f91ea3b3367eec3bb61cfa70b4b94377fc9d4f567091b0c528d8c2e89",
+      "reference_selection": "003_recast_alex_plus_a",
+      "seed": 2026091922,
+      "text_author": "Local Qwen3.8-27B, run031 dialogue polish",
+      "text_source_commit": "07f44d1760ee17c074145da6b869ef0dee3e01f9",
+      "processing_author": "Cedric; existing fixed speaker gain, conservative nearzero leading trim where declared",
+      "auditioned": false,
+      "replaced_version": {
+        "id": "alexplusnachw2-01",
+        "speaker": "Alex Plus",
+        "gain_db": 0.35,
+        "source_float_sha256": "f9ae05056d4620688b6658964d6efdc682966e695ec7084693481c4b0a21182b",
+        "source_pcm_sha256": "a6ad62ba237f94234665ecbcf87e11c5d994d2fa85ce4d95411440ab45343d24",
+        "sha256": "f35f411ed04577b17a3872acc532caf779ffe3adcdbb0ad03edfe92fe42fa600",
+        "header": {
+          "frames": 205440,
+          "rate": 24000,
+          "channels": 1,
+          "sample_bytes": 2
+        },
+        "integrated_lufs": -19.5,
+        "true_peak_dbfs": -2.4
+      }
     },
     {
       "id": "alexplusnachw2-02",
@@ -963,5 +1041,16 @@
     }
   ],
   "auditioned_by_operator": false,
-  "loudness_measurement": "FFmpeg loudnorm input measurements of the actual final files, not normalization output"
+  "loudness_measurement": "FFmpeg loudnorm input measurements of actual final files",
+  "original_batch004_manifest_sha256": "7d263e6eff18fe9c8c54c3680a7dcb47441edbe560a59a8edd1e4184f27d9661",
+  "dialogue_revisions": [
+    {
+      "revision": "031_same_cast_dialogue_polish",
+      "ids": [
+        "alexplusnachw2-01",
+        "ankunft-08"
+      ],
+      "manifest_sha256": "97d909f774ae786da18d4b95267127b2def7aedb155f020b9b6f1277e1e102b6"
+    }
+  ]
 }

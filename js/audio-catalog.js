@@ -1,5 +1,5 @@
 "use strict";
-// Asset metadata; local Qwen3-TTS batch004, approved voices, gain and leading-quiet edits in provenance.
+// Asset metadata; local Qwen3-TTS, selected voices, same-cast revisions and processing in provenance.
 const AUDIO_CATALOG = Object.freeze({
   "ankunft-01": {
     "url": "assets/audio/ankunft-01.wav",
@@ -29,7 +29,7 @@ const AUDIO_CATALOG = Object.freeze({
   "ankunft-08": {
     "url": "assets/audio/ankunft-08.wav",
     "speaker": "MIRA",
-    "duration": 5.3185416666666665
+    "duration": 6.1525
   },
   "ankunft-10": {
     "url": "assets/audio/ankunft-10.wav",
@@ -114,7 +114,7 @@ const AUDIO_CATALOG = Object.freeze({
   "alexplusnachw2-01": {
     "url": "assets/audio/alexplusnachw2-01.wav",
     "speaker": "Alex Plus",
-    "duration": 8.56
+    "duration": 5.28
   },
   "alexplusnachw2-02": {
     "url": "assets/audio/alexplusnachw2-02.wav",
