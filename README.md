@@ -1,6 +1,6 @@
 # Nur noch kurz kündigen
 
-**Überarbeitete Arbeitsfassung zur Durchsicht, keine finale Abnahme.** MIRA, Alex Plus und Rolf haben jeweils eine eigene lokal trainierte Charakter-LoRA; ausgewählte Bilder sind eingebaut. Bühne, Dialogführung, Rätselpräsentation und beide Enden wurden überarbeitet. Die vollständige Hörabnahme steht aus. Dieses Repository wird privat gepflegt.
+**In Cedrics Auftrag stellvertretend geprüft und abgenommen, mit dokumentierten Grenzen der automatisierten Tonprüfung.** MIRA, Alex Plus und Rolf haben jeweils eine eigene lokal trainierte Charakter-LoRA; ausgewählte Bilder sind eingebaut. Bühne, Dialogführung, Rätselpräsentation und beide Enden wurden überarbeitet. Eine kleine lokale Qwen-Runde hat zuletzt zwei Dialogformulierungen verbessert und mit derselben Besetzung neu vertonen lassen. Persönliches Probehören oder eine menschliche Schauspielbewertung werden nicht behauptet. Dieses Repository wird privat gepflegt.
 
 Du willst das Abo für deinen digitalen Doppelgänger kündigen. Der Kundenservice
 hat Rückfragen. Dein Doppelgänger auch. Und der Ficus weiß mehr, als er sollte.
@@ -64,6 +64,10 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
   sind als getrennte Commits erhalten.
   Auch zurückgenommene, unvollständige Modellversuche bleiben in der
   Git-Historie nachvollziehbar; diese unterscheidet die Beiträge.
+  Der lokale Qwen-Lauf 031 korrigierte die Grammatik in MIRAs Zeitstempel-Satz
+  und kürzte eine unklare Einleitung im optionalen Alex-Plus-Nachgespräch.
+  Cedric begrenzte und prüfte diesen Auftrag; beide Modellformulierungen
+  wurden unverändert übernommen. Spiellogik und übrige Dialoge blieben gleich.
 - Die fünf bisherigen Spielbilder entstanden mit lokalem Krea 2 Turbo FP8.
   MIRA und Alex Plus sind ausgewählte Ausschnitte aus Figurenbögen; Rolf stammt
   direkt aus dem Vorführraum. Diese fünf Grafiken verwenden keine Charakter-LoRA.
@@ -84,12 +88,17 @@ Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
   Spielerfigur bleibt stumm. Alternative Enden sind enthalten; die summierte
   Audiodauer entspricht deshalb keiner gemessenen Spielzeit. MIRA und Alex
   haben einen konstanten Pegelabgleich erhalten; Rolf bleibt unverändert.
-  Bei zwölf MIRA-/Alex-Plus-Dateien wurde außerdem nur der anfängliche leise
-  Vorlauf gekürzt; 160 Millisekunden vor dem ersten definierten Signal bleiben
-  stehen. Die erhaltenen Sprachsamples, inneren Pausen, Enden, das Tempo und
-  die Besetzung bleiben gleich. `assets/audio/provenance.json` nennt
-  Bearbeitung und Herkunft je Datei. Automatische Transkription fand keine
-  bedeutungsrelevante Textabweichung; sie bewertet keine Schauspielqualität.
+  Dokumentierte leise Vorläufe wurden konservativ gekürzt; 160 Millisekunden
+  vor dem ersten definierten Signal bleiben stehen. Für die beiden zuletzt
+  geänderten Texte entstanden zwei neue Qwen3-TTS-Aufnahmen mit den gewählten
+  Referenzen MIRA B und Alex Plus A. Sie erhielten denselben Sprecherpegel;
+  bei der neuen MIRA-Aufnahme wurde nur ein nachweislich nahezu lautloser
+  Anfangsbereich entfernt. Die übrigen 43 WAVs blieben unverändert.
+  `assets/audio/provenance.json` nennt Bearbeitung und Herkunft je Datei
+  und erhält bei den ersetzten Aufnahmen die vorherigen Metadaten.
+  Frische lokale Whisper-Transkriptionen bestätigten beide neuen Texte;
+  die bestehenden Prüfungen gelten hashgebunden für die erhaltenen Dateien.
+  Diese automatisierte Prüfung bewertet keine Schauspielqualität.
 
 Die Modellinferenz lief auf dem Testrechner. Cedric unterstützte die Bedienung
 und Prüfung extern. Modellgewichte und private Produktionsprotokolle sind
