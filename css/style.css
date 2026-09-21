@@ -380,6 +380,8 @@ button { font-family: var(--font-ui); }
   padding: 0;
   width: min(92vw, 720px);
   max-height: min(86vh, 720px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 .overlay::backdrop {
   background: rgba(36,31,43,0.55);
@@ -480,15 +482,18 @@ button { font-family: var(--font-ui); }
 .form-option label { font-size: 16px; cursor: pointer; }
 
 /* Challenge */
-.ch-frame { display: flex; flex-direction: column; }
+.ch-frame { display: flex; flex-direction: column; max-height: calc(min(86vh, 720px) - 6px); }
+.ch-frame > .overlay-head, .ch-feedback, .ch-frame > .overlay-foot,
+.ch-frame > .overlay-tools { flex-shrink: 0; }
 .ch-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   padding: 14px 18px;
   min-height: 0;
+  flex: 1 1 auto;
 }
-.ch-col { overflow-y: auto; max-height: 48vh; padding: 3px; }
+.ch-col { overflow-y: auto; min-height: 0; max-height: 48vh; padding: 3px; scrollbar-gutter: stable; }
 .ch-col-title {
   position: sticky;
   top: 0;
@@ -768,9 +773,15 @@ button { font-family: var(--font-ui); }
 /* ---------- Schmale Displays / kleine Höhe ---------- */
 @media (max-width: 768px) {
   :root { --dialog-h: clamp(140px, 30vh, 200px); }
-  .ch-cols { grid-template-columns: 1fr; }
-  .ch-col { max-height: 28vh; }
+  .ch-cols { display: block; overflow-y: auto; min-height: 100px; }
+  .ch-col { max-height: none; overflow: visible; }
+  .ch-col + .ch-col { margin-top: 12px; }
+  .ch-frame { max-height: calc(100dvh - 22px); }
   .diag-frame { display: flex; flex-direction: column; }
+  .diag-results { max-height: none; overflow: visible; }
+  .diag-frame > .overlay-foot { position: sticky; bottom: 61px; z-index: 2; background: var(--papier); }
+  .diag-frame > .overlay-foot:empty { display: none; }
+  .diag-frame > .overlay-tools { position: sticky; bottom: 0; z-index: 2; background: var(--papier); }
   .diag-row { flex-wrap: wrap; }
   .diag-row > div:first-child { flex: 1 1 100%; }
   .diag-status { margin-right: auto; }
@@ -784,7 +795,7 @@ button { font-family: var(--font-ui); }
   .hud-place { font-size: 13px; }
   .dialog { padding: 8px 12px 10px; }
   .dialog-text { font-size: 17px; }
-  .overlay { width: 96vw; }
+  .overlay { width: calc(100vw - 16px); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
   .overlay-choice { width: 96vw; }
 }
 @media (max-width: 420px) {

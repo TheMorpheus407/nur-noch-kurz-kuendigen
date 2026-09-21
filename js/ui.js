@@ -81,6 +81,7 @@ const UI = (() => {
   let savedRevision = null;
   let dialogContentKey = null;
   let diagnosticResultsKey = null;
+  let pendingDiagnosticResult = null;
   let voiceEnabled = false;
 
   /* ---------- GameState-Brücke ---------- */
@@ -687,6 +688,7 @@ const UI = (() => {
     }
     openOverlay("diagnostic");
     results.scrollTop = nextResultsKey !== diagnosticResultsKey ? results.scrollHeight : previousScroll;
+    if (obs.length && nextResultsKey !== diagnosticResultsKey) pendingDiagnosticResult = results.lastElementChild;
     diagnosticResultsKey = nextResultsKey;
   }
 
@@ -720,9 +722,11 @@ const UI = (() => {
     const tr = v && v.transfer;
     if (!tr) { closeOverlay("transfer"); return; }
     text($("#tr-text"), tr.text || "");
+    text($("#tr-title"), v.ending === "delete" ? "Abschied von Plus" : "Plus mitnehmen");
     const status = $("#tr-status");
     clear(status);
-    const steps = [
+    status.hidden = v.ending === "delete";
+    const steps = v.ending === "delete" ? [] : [
       { key: "transferred", label: "Kopie übertragen", done: !!tr.transferred },
       { key: "bootVerified", label: "Lokaler Start geprüft", done: !!tr.bootVerified },
       { key: "providerDeleted", label: "Anbieterkopie gelöscht", done: !!tr.providerDeleted }
@@ -984,6 +988,14 @@ const UI = (() => {
     if (replacement && !replacement.disabled && replacement.getClientRects().length &&
         (!activeOverlay || el.dlg[activeOverlay].contains(replacement))) replacement.focus();
     else if (activeOverlay && !el.dlg[activeOverlay].contains(document.activeElement)) focusOverlay(el.dlg[activeOverlay]);
+    if (pendingDiagnosticResult) {
+      // Nach einer neuen Beobachtung auch den äußeren mobilen Dialog folgen
+      // lassen; ein unveränderter Rerender verschiebt weder Lesen noch Fokus.
+      pendingDiagnosticResult.tabIndex = -1;
+      pendingDiagnosticResult.focus({preventScroll: true});
+      pendingDiagnosticResult.scrollIntoView({block: "nearest"});
+      pendingDiagnosticResult = null;
+    }
 
     lastRenderedPhase = v.phase;
     lastRenderedMode = v.mode;
