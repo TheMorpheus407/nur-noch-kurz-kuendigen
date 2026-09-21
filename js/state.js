@@ -1,787 +1,387 @@
 "use strict";
-
-/* =========================================================================
- * js/state.js — „Nur noch kurz kündigen“
- * Zentraler Spielzustand und gesamte Zustandslogik.
- *
- * GameState ist der EINZIGE Ort für Zustandsänderungen. UI (ui.js) und
- * Inhalt (content.js) rufen nur Methoden auf und lesen get() — sie ändern
- * nie den internen Zustand direkt. Keine DOM-, fetch-, Netzwerk- oder
- * Zufallslogik in dieser Datei; keine substring-Vergleiche von Erzähltext.
- *
- * INITIALISIERUNG (repariert)
- *   Eine neue Instanz startet ohne Zustand. Der erste get()-Aufruf (oder
- *   jede andere Methode) legt FAZIG einen frischen Arbeitsspeicherzustand
- *   an — NICHT DESTRUKTIV: vorhandene gespeicherte Slots werden dabei
- *   weder gelesen noch gelöscht. Nur der explizite reset() (UI-
- *   bestätigter Neustart) entfernt die beiden eigenen Speicherslots und
- *   die Sitzungs-Einträge im RAM-Fallback. hasSave() und load() sind
- *   reine Lese-/Übernahmepfade und löschen nie Slots.
- *
- * SPEICHER
- *   SAVE_VERSION: 2
- *   Eigene localStorage-Keys (wird NIEMALS localStorage.clear() aufgerufen):
- *     "nurNochKurzKundigen.save"        → allgemeiner Spielstand   (Slot "save")
- *     "nurNochKurzKundigen.checkpoint"  → benannter Entscheidungspunkt (Slot "checkpoint")
- *   Slots werden strikt geprüft: Es werden ausschließlich die beiden
- *   eigenen STORAGE_KEYS-Schlüssel akzeptiert (explizite
- *   hasOwnProperty-Prüfung — geerbte Schlüssel wie "constructor" oder
- *   "__proto__" werden VOR JEGLICHEM Storage-Zugriff abgewiesen).
- *   Geschrieben/entfernt werden ausschließlich diese beiden eigenen
- *   Spielkeys.
- *   Fällt localStorage aus (blockiert/fehlend) oder schlägt ein lokales
- *   Schreiben fehl (z. B. Quota), wird automatisch ein sicherer
- *   RAM-Speicher für dieselbe Sitzung genutzt. Ein erfolgreicher
- *   RAM-Speichernach einem fehlgeschlagenen lokalen Schreiben hat für
- *   diesen Slot innerhalb derselben Sitzung beim Laden VORRANG — bis
- *   wieder ein lokales Schreiben gelingt, danach ist der lokale Stand
- *   der neueste und hat wieder Vorrang (keine dauerhaft veraltete
- *   RAM-Kopie). Speicherfehler werfen nie. Jede save/load-Rückgabe
- *   enthält storage: "local" | "memory" plus warning, damit die UI die
- *   Einschränkung anzeigen kann.
- *
- * REGELN (Kurzform)
- *   - Vor E2: nur Empfang, nur Fund E2 (Auskunftsterminal).
- *   - Nach E2: beide Räume, alle Funde E1–E5, Verfahrensbeginn.
- *     jederzeit zurück zur Untersuchung; die nächste offene Runde bleibt.
- *   - Runden in fester Reihenfolge W1→W2→W3, richtige Karten E2/E3/E4.
- *     Nur tatsächlich gefundene Karten; falsche Karte → passender Feedback-
- *     Text aus content.js; mehrfach gelöste Runde → kein Fortschritt.
- *   - W2: Bindungsroutine aus, Kündigung freigegeben.
- *   - W3: Exportalternative frei.
- *   - Endwahl (A löschen / B exportieren) erst nach allen drei Runden.
- *     Einmal gewählt ist das Ende endgültig; gelöschter Alex Plus kehrt
- *     nicht zurück; eine zweite Endwahl setzt nichts stillschweigend zurück.
- *   - Automatischer Checkpoint („Entscheidungspunkt“) bei Freischaltung
- *     der Endwahl; ladbar auch nach beiden Enden.
- *
- * LADEN/VALIDIERUNG (repariert)
- *   Ein gespeicherter Zustand wird nur übernommen, wenn er konsistent ist:
- *   - Bekannte EIGENE IDs nur (Räume, Hotspots, Karten, Runden, Enden) —
- *     explizite Own-Key-Prüfung, nie truthy-Tests von Objektzugriffen.
- *   - Jede gelöste Runde braucht ihre tatsächlich gefundene Beweiskarte
- *     in cards (W1=E2, W2=E3, W3=E4).
- *   - Freie Folgefunde (E1, E3, E4, E5) sowie der Vorführraum (aktueller
- *     Raum oder besuchte Hotspots) setzen voraus, dass E2 gefunden ist.
- *   - Alle zusammengehörigen Flags/Legacy-Felder passen zur festen
- *     Rundenfolge (procedureStarted, bindungsroutineAktiv,
- *     kuendigungFreigegeben, exportFreigegeben, e2Found,
- *     contradictionResolved, resolvedCount).
- *   - Ein Endzustand (ended/ending/alexPlus) ist erst nach allen drei
- *     gelösten Runden zulässig.
- *   Kaputte Daten werden abgelehnt (reason:"invalid", errors:[...]); der
- *   bereits laufende gültige Zustand bleibt unangetastet. Nach erfolgreicher
- *   Prüfung werden ausschließlich die bekannten kanonischen Felder in ein
- *   neues sauberes Zustandsobjekt übernommen (Arrays/Logeinträge werden
- *   kopiert) — nicht das beliebige JSON-Objekt direkt als Live-State.
- *
- * ÖFFENTLICHE METHODEN (für die UI) — API unverändert
- *   reset()                                → void. Frischer Zustand, eigene
- *                                             Speicherslots gelöscht. Die
- *                                             Bestätigung der Entscheidung
- *                                             trifft die UI, nicht der State.
- *   get()                                  → aktueller Zustand (enthält die
- *                                             Legacy-Felder e2Found,
- *                                             contradictionResolved,
- *                                             resolvedCount der alten UI).
- *                                             Lazy, nicht destruktiv:
- *                                             löscht nie gespeicherte Slots.
- *   enterRoom(roomId)                      → {ok, room?} | {ok:false, reason}
- *   visitHotspot(hotspotId)                → {ok, firstVisit} | {ok:false, reason}
- *   collectFrom(hotspotId)                 → {ok, card, firstFind} |
- *                                             {ok:false, reason}
- *                                             (Wiederholen verliert nichts,
- *                                             erzeugt keine zweite Karte)
- *   hasCard(cardId)                        → boolean
- *   cardList()                             → Array<string> (Kopie)
- *   startProcedure()                       → {ok} | {ok:false, reason}
- *   currentRound()                         → "W1"|"W2"|"W3"|null
- *   presentEvidence(roundId, cardId)       → siehe unten (Erfolg vs.
- *                                             passender falsche Rückmeldung)
- *   resolveContradiction(cardId)           → boolean (Legacy: aktuelle Runde)
- *   grantE2()                              → boolean (Legacy: E2 genau einmal)
- *   canChooseEnding()                      → boolean
- *   chooseEnding("A"|"B")                  → {ok, ending, alexPlus} |
- *                                             {ok:false, reason, ...}
- *   addDialogueLine(speaker, text, id?)    → {ok, line} | {ok:false, reason}
- *   getDialogueLog()                       → Array<{speaker,text,id?}> (Kopie)
- *   save(slot?) / load(slot?)              → {ok, slot, storage, warning?} |
- *                                             {ok:false, reason, ...}
- *   hasSave(slot?)                         → {exists, storage}
- *   saveCheckpoint() / loadCheckpoint()    → wie save/load, Slot "checkpoint"
- *
- * presentEvidence-Rückgabe:
- *   Erfolg:    {ok:true, round, effects:[...],
- *               checkpoint?:{ok, slot, storage, warning?}}
- *   Fehlschlag: {ok:false, reason, round?, card?, feedback?, next?}
- *   reason ∈ "already-ended" | "unknown-round" | "already-resolved"
- *           | "round-locked" | "card-missing" | "wrong-card"
- * ========================================================================= */
-
-const SAVE_VERSION = 2;
-
-const STORAGE_KEYS = {
-  save: "nurNochKurzKundigen.save",
-  checkpoint: "nurNochKurzKundigen.checkpoint"
-};
-
-const ROUND_ORDER = ["W1", "W2", "W3"];
-const CORRECT_CARD = { W1: "E2", W2: "E3", W3: "E4" };
-
-/* Welche Fundstelle liefert welche Karte (laut content.js „quelle“). */
-const CARD_SOURCE = {
-  terminal: "E2",       /* Empfang, Auskunftsterminal            */
-  vertragsfach: "E1",   /* Empfang, Vertragsfach                 */
-  drucker: "E5",        /* Empfang, Reklamationsdrucker          */
-  konsole: "E3",        /* Vorführraum, Assistenzkonsole         */
-  wartungsfach: "E4"    /* Vorführraum, Wartungsfach             */
-};
-
-const ENDINGS = ["A", "B"];
-const ALEXPLUS_STATES = ["active", "deleted", "exported"];
-
-/* Sitzungs-RAM-Fallback, falls localStorage blockiert/fehlend ist. */
-const _memoryStore = Object.create(null);
-/* Slots, deren zuletzt erfolgreiches Speichern in dieser Sitzung im
-   RAM stattfand (lokales Schreiben fehlgeschlagen, z. B. Quota). Diese
-   haben beim Laden innerhalb der Sitzung Vorrang, bis wieder ein
-   lokales Schreiben gelingt. */
-const _memoryPreferred = Object.create(null);
-
-/* ---------- Strikte ID-/Slot-Prüfung (eigene Schlüssel nur) ----------
- * Geerbte Eigenschaften (z. B. "constructor", "__proto__") dürfen nie
- * als ID oder Slot akzeptiert werden: daher explizite hasOwnProperty-
- * Prüfung, kein truthy-Test von Objektzugriffen. */
-
-function _ownKey(obj, key) {
-  return typeof key === "string" &&
-         Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-function _knownRoom(id) { return _ownKey(CONTENT.rooms, id); }
-function _knownHotspot(id) { return _ownKey(CONTENT.hotspots, id); }
-function _knownCard(id) { return _ownKey(CONTENT.cards, id); }
-function _knownRound(id) { return _ownKey(CONTENT.contradictions, id); }
-function _knownEnding(id) { return _ownKey(CONTENT.endings, id); }
-function _knownSlot(slot) { return _ownKey(STORAGE_KEYS, slot); }
-
-/* ---------- Speicher-Helfer (fehlertolerant) ---------- */
-
-function _ls() {
-  try {
-    if (typeof localStorage !== "undefined") {
-      return localStorage;
-    }
-  } catch (_) { /* Zugriff blockiert */ }
-  return null;
-}
-
-function _writeRaw(slot, json) {
-  const ls = _ls();
-  if (ls) {
-    try {
-      ls.setItem(STORAGE_KEYS[slot], json);
-      /* Lokales Schreiben erfolgreich: lokaler Stand ist wieder der
-         neueste; RAM-Vorrang für diesen Slot entfällt. */
-      _memoryStore[slot] = json; // Auch der Notfallspeicher folgt dem neuesten Stand.
-      delete _memoryPreferred[slot];
-      return { storage: "local", warning: null };
-    } catch (_) { /* auf RAM-Fallback ausweichen */ }
+/* Cedric implementation, redesign032. Rejected Qwen source is preserved under
+ * qa/redesign-032/state-source-qwen001; this code is not attributed to Qwen.
+ * Public API: get/view/dispatch, save/load/hasSave('save'|'checkpoint'), reset.
+ * UI uses the defensive view and its complete action payloads. Room and dialogue
+ * sequence are separate. Saves contain only schema/storyVersion/actions, replayed
+ * through the same guarded reducer without storage, UI or audio side effects.
+ * Exact view contract: qa/redesign-032/state-ui-contract.md. */
+const GameState = (() => {
+  const SCHEMA=3, STORY="redesign-032", MAX_ACTIONS=6000, MAX_SAVE_BYTES=2000000;
+  const KEYS=Object.freeze({save:"nurNochKurzKuendigen.redesign032.save",checkpoint:"nurNochKurzKuendigen.redesign032.checkpoint"});
+  const own=(object,key)=>typeof key==="string"&&Object.prototype.hasOwnProperty.call(object,key);
+  const copy=value=>JSON.parse(JSON.stringify(value));
+  const plain=value=>value!==null&&typeof value==="object"&&!Array.isArray(value)&&
+    (Object.getPrototypeOf(value)===Object.prototype||Object.getPrototypeOf(value)===null);
+  const memory=Object.create(null),preferred=Object.create(null),cleared=Object.create(null);
+  let current=null;
+  const fail=(reason,message)=>({ok:false,reason,...(message?{message}:{})});
+  const success=extra=>({ok:true,...extra});
+  const doc=id=>CONTENT.lookup.document(id);
+  const hasDoc=(s,id)=>s.documents.includes(id);
+  function acquire(s,id){if(!hasDoc(s,id))s.documents.push(id);}
+  function recordLine(s){
+    const line=CONTENT.lookup.line(CONTENT.lookup.sequence(s.sequenceId)[s.lineIndex]);
+    s.history.push({id:line.id,speaker:line.speaker,text:line.text});
   }
-  try {
-    _memoryStore[slot] = json;
-    /* Neuer RAM-Stand nach fehlgeschlagenem/fehlendem lokalem
-       Schreiben: innerhalb der Sitzung beim Laden Vorrang. */
-    _memoryPreferred[slot] = true;
-    return {
-      storage: "memory",
-      warning: "localStorage nicht verfügbar; RAM-Speicher für diese Sitzung genutzt."
-    };
-  } catch (err) {
-    return { storage: null, warning: null, error: String(err) };
+  function sequence(s,id,after){
+    const ids=CONTENT.lookup.sequence(id);
+    if(!ids||!ids.length)throw Error("Missing CONTENT sequence: "+id);
+    s.sequenceId=id;s.lineIndex=0;s.mode="dialogue";s.afterSequence=after;recordLine(s);
   }
-}
-
-function _readRaw(slot) {
-  /* Sitzungs-RAM-Vorrang: nur wenn für diesen Slot zuletzt im RAM
-     gespeichert wurde UND der RAM-Eintrag vorhanden ist. */
-  if (_memoryPreferred[slot] &&
-      Object.prototype.hasOwnProperty.call(_memoryStore, slot)) {
-    return { value: _memoryStore[slot], storage: "memory" };
+  function fresh(){
+    const s={schema:SCHEMA,storyVersion:STORY,phase:"home",roomId:"zuhause",sequenceId:null,
+      lineIndex:0,revision:0,mode:"dialogue",afterSequence:null,reason:null,documents:[],documentId:null,documentReturn:null,
+      flags:{plusMet:false,rolfMet:false,computerCarried:false,caseSolved:false,rolfAsked:false,choiceReached:false,providerDeleted:false},
+      challenge:{statementId:null,documentId:null,passageId:null,feedback:null,resolved:false},
+      diagnostic:{controls:{agency:true,sales:true},epochs:{agency:0,sales:0},observations:[],latestResults:null},
+      confirmation:null,letterChoice:null,ending:null,endingConfirmed:false,transferStage:null,
+      transferComplete:false,localBootVerified:false,deleteDone:false,takeDone:false,maraSent:false,done:false,history:[],actionLog:[]};
+    sequence(s,"homeIntro","explore");return s;
   }
-  const ls = _ls();
-  if (ls) {
-    try {
-      const value = ls.getItem(STORAGE_KEYS[slot]);
-      if (value !== null && value !== undefined) {
-        return { value, storage: "local" };
-      }
-    } catch (_) { /* auf RAM-Fallback ausweichen */ }
+  function ensure(){if(!current)current=fresh();return current;}
+  function showDocument(s,id,after=null){
+    if(s.mode!=="document")s.documentReturn={mode:s.mode,after};
+    s.documentId=id;s.mode="document";
   }
-  if (Object.prototype.hasOwnProperty.call(_memoryStore, slot)) {
-    return { value: _memoryStore[slot], storage: "memory" };
-  }
-  return null;
-}
-
-/* ---------- Validierung geladener Daten ----------
- * Lehnt inkonsistente Daten freundlich ab; der aktuelle funktionierende
- * Spielstand bleibt dabei unverändert. Keine willkürlichen Objekte werden
- * in den Live-State übernommen. */
-
-function _isIdArray(arr, known) {
-  return (
-    Array.isArray(arr) &&
-    arr.every((x) => typeof x === "string" && known(x)) &&
-    new Set(arr).size === arr.length
-  );
-}
-
-function _validate(data) {
-  const errors = [];
-  if (!data || typeof data !== "object" || Array.isArray(data)) {
-    return { ok: false, errors: ["kein-Objekt"] };
-  }
-
-  /* Version: endliche, erlaubte Zahl. */
-  if (typeof data.version !== "number" || !Number.isFinite(data.version) ||
-      data.version !== SAVE_VERSION) {
-    errors.push("version");
-  }
-
-  if (typeof data.room !== "string" || !_knownRoom(data.room)) {
-    errors.push("room");
-  }
-  if (!_isIdArray(data.visitedHotspots, _knownHotspot)) {
-    errors.push("visitedHotspots");
-  }
-  if (!_isIdArray(data.cards, _knownCard)) {
-    errors.push("cards");
-  }
-
-  /* Runden: eindeutige, geordnete Präfixfolge von W1..W3; next konsistent. */
-  let resolvedOk = false;
-  if (data.rounds && typeof data.rounds === "object" && !Array.isArray(data.rounds)) {
-    const r = data.rounds;
-    if (Array.isArray(r.resolved) &&
-        r.resolved.every((x) => typeof x === "string" && ROUND_ORDER.includes(x))) {
-      const n = r.resolved.length;
-      const unique = new Set(r.resolved).size === n;
-      const prefix = ROUND_ORDER.slice(0, n).every((x, i) => r.resolved[i] === x);
-      const nextOk = (n < ROUND_ORDER.length && r.next === ROUND_ORDER[n]) ||
-                     (n === ROUND_ORDER.length && r.next === null);
-      resolvedOk = unique && prefix && nextOk;
+  function afterSequence(s){
+    const after=s.afterSequence;s.afterSequence=null;
+    switch(after){
+      case "explore":s.mode="explore";break;
+      case "messagesRead":acquire(s,"messages");s.mode="explore";break;
+      case "invoiceRead":acquire(s,"invoice");s.mode="explore";showDocument(s,"invoice");break;
+      case "homeSent":s.phase="homeSent";s.mode="explore";break;
+      case "plusReason":sequence(s,s.reason==="money"?"reasonMoney":"reasonSelf","introduceRolf");break;
+      case "introduceRolf":sequence(s,"meetRolf","metBoth");break;
+      case "metBoth":s.flags.plusMet=true;s.flags.rolfMet=true;s.mode="explore";break;
+      case "caseConfirmed":s.phase="caseSolved";s.mode="explore";break;
+      case "diagnostic":s.phase="diagnosis";s.mode="diagnostic";break;
+      case "testDone":s.mode="diagnostic";break;
+      case "letterChoice":s.phase="relationship";s.mode="choice";break;
+      case "closeout":s.phase="discovery";sequence(s,"closeout","explore");break;
+      case "rolfAsked":s.flags.rolfAsked=true;s.mode="explore";break;
+      case "preview":s.phase="preview";acquire(s,"preview");s.mode="explore";showDocument(s,"preview","beforeChoice");break;
+      case "endingChoice":s.phase="choice";s.mode="choice";s.flags.choiceReached=true;break;
+      case "deleteReady":s.phase="export";s.mode="transfer";s.transferStage="delete";break;
+      case "transferReady":s.phase="export";s.mode="transfer";s.transferStage="transfer";break;
+      case "providerReady":s.phase="export";s.mode="transfer";s.transferStage="provider";break;
+      case "wrapup":s.phase="wrapup";s.mode="explore";break;
+      case "messageReady":s.phase="homeEnd";s.mode="message";break;
+      case "lastScene":sequence(s,s.ending==="delete"?"lastDelete":"lastTake","finished");break;
+      case "finished":s.phase="done";s.mode="done";s.done=true;break;
+      default:throw Error("Unknown sequence transition: "+after);
     }
   }
-  if (!resolvedOk) {
-    errors.push("rounds");
-  }
-
-  for (const b of ["procedureStarted", "bindungsroutineAktiv",
-                   "kuendigungFreigegeben", "exportFreigegeben", "ended"]) {
-    if (typeof data[b] !== "boolean") {
-      errors.push(b);
-    }
-  }
-
-  if (data.ending !== null && !_knownEnding(data.ending)) {
-    errors.push("ending");
-  }
-  if (data.ended !== (data.ending !== null)) {
-    errors.push("ended/ending");
-  }
-  if (typeof data.alexPlus !== "string" || !ALEXPLUS_STATES.includes(data.alexPlus)) {
-    errors.push("alexPlus");
-  }
-  if (data.ending === "A" && data.alexPlus !== "deleted") {
-    errors.push("alexPlus/endingA");
-  }
-  if (data.ending === "B" && data.alexPlus !== "exported") {
-    errors.push("alexPlus/endingB");
-  }
-  if (!data.ended && data.alexPlus !== "active") {
-    errors.push("alexPlus/active");
-  }
-
-  if (!Array.isArray(data.dialogueLog) ||
-      !data.dialogueLog.every((l) =>
-        l && typeof l === "object" &&
-        typeof l.speaker === "string" &&
-        typeof l.text === "string" &&
-        (l.id === undefined || typeof l.id === "string"))) {
-    errors.push("dialogueLog");
-  }
-
-  /* Konsistenz zwischen Feldern (unmögliche Zustände ablehnen). */
-  const cards = Array.isArray(data.cards) ? data.cards : [];
-  const visited = Array.isArray(data.visitedHotspots) ? data.visitedHotspots : [];
-  const resolved = (data.rounds && Array.isArray(data.rounds.resolved))
-    ? data.rounds.resolved : [];
-
-  if (typeof data.procedureStarted === "boolean" &&
-      data.procedureStarted !== cards.includes("E2")) {
-    errors.push("procedureStarted/konsistenz");
-  }
-  if (typeof data.kuendigungFreigegeben === "boolean" &&
-      data.kuendigungFreigegeben !== resolved.includes("W2")) {
-    errors.push("kuendigungFreigegeben/konsistenz");
-  }
-  if (typeof data.exportFreigegeben === "boolean" &&
-      data.exportFreigegeben !== resolved.includes("W3")) {
-    errors.push("exportFreigegeben/konsistenz");
-  }
-  if (typeof data.bindungsroutineAktiv === "boolean" &&
-      data.bindungsroutineAktiv !== !resolved.includes("W2")) {
-    errors.push("bindungsroutineAktiv/konsistenz");
-  }
-
-  /* Jede gelöste Runde braucht ihre tatsächlich gefundene Beweiskarte. */
-  for (const r of resolved) {
-    if (!_knownRound(r)) continue; // Ungültige IDs wurden oben bereits beanstandet.
-    const need = CORRECT_CARD[r];
-    if (need !== undefined && !cards.includes(need)) {
-      errors.push("evidence/" + r);
-    }
-  }
-
-  /* Freie Folgefunde und der Vorführraum setzen E2 voraus. */
-  const hasE2 = cards.includes("E2");
-  if (!hasE2) {
-    if (["E1", "E3", "E4", "E5"].some((c) => cards.includes(c))) {
-      errors.push("cards-before-e2");
-    }
-    if (data.room === "vorfuehr") {
-      errors.push("room-before-e2");
-    }
-    if (visited.some((h) => _knownHotspot(h) && CONTENT.hotspots[h].room === "vorfuehr")) {
-      errors.push("hotspot-before-e2");
-    }
-  }
-
-  /* Ein Endzustand ist erst nach allen drei gelösten Runden zulässig. */
-  if (data.ended && resolved.length !== ROUND_ORDER.length) {
-    errors.push("ended-without-rounds");
-  }
-
-  /* Legacy-Felder (Kompatibilität) müssen zum Kanonischen passen. */
-  if (typeof data.e2Found !== "boolean" || data.e2Found !== cards.includes("E2")) {
-    errors.push("e2Found");
-  }
-  if (typeof data.contradictionResolved !== "boolean" ||
-      data.contradictionResolved !== resolved.includes("W1")) {
-    errors.push("contradictionResolved");
-  }
-  if (typeof data.resolvedCount !== "number" ||
-      !Number.isFinite(data.resolvedCount) ||
-      data.resolvedCount !== resolved.length) {
-    errors.push("resolvedCount");
-  }
-
-  return { ok: errors.length === 0, errors };
-}
-
-/* Übernimmt validierte Daten als neues sauberes Zustandsobjekt:
-   ausschließlich die bekannten kanonischen Felder, Arrays und
-   Logeinträge werden kopiert. Das beliebige JSON-Objekt wird nie
-   direkt als Live-State gesetzt. */
-function _adoptState(data) {
-  const s = GameState.fresh();
-  s.room = data.room;
-  s.visitedHotspots = data.visitedHotspots.slice();
-  s.cards = data.cards.slice();
-  s.rounds = {
-    next: data.rounds.next,
-    resolved: data.rounds.resolved.slice()
-  };
-  s.procedureStarted = data.procedureStarted;
-  s.bindungsroutineAktiv = data.bindungsroutineAktiv;
-  s.kuendigungFreigegeben = data.kuendigungFreigegeben;
-  s.exportFreigegeben = data.exportFreigegeben;
-  s.ending = data.ending;
-  s.ended = data.ended;
-  s.alexPlus = data.alexPlus;
-  s.dialogueLog = data.dialogueLog.map((l) => {
-    const line = { speaker: l.speaker, text: l.text };
-    if (typeof l.id === "string") {
-      line.id = l.id;
-    }
-    return line;
+  const actionFields=Object.freeze({
+    next:{expectedLineId:"string",expectedRevision:"integer"},interact:{target:"string"},
+    openDocument:{documentId:"string"},closeDocument:{},choose:{choiceId:"string",optionId:"string"},submitCancellation:{},
+    selectStatement:{statementId:"string"},selectPassage:{documentId:"string",passageId:"string"},presentEvidence:{},
+    testDiagnostic:{testId:"string"},setDiagnostic:{controlId:"string",value:"boolean"},confirmDiagnostic:{confirm:"boolean"},
+    continueDiagnostic:{},confirmEnding:{confirm:"boolean"},deleteConfirm:{},takeTransfer:{},takeLocalBoot:{},deleteProvider:{},returnHome:{},submitMara:{}
   });
-  GameState._syncLegacy(s);
-  return s;
-}
-
-/* =========================================================================
- * GameState
- * ========================================================================= */
-
-const GameState = {
-  _state: null,
-
-  /* Frischer Zustand (Version 2). */
-  fresh() {
-    return {
-      version: SAVE_VERSION,
-      room: "empfang",
-      visitedHotspots: [],           /* eindeutige Hotspot-IDs, in Besuchreihenfolge */
-      cards: [],                     /* eindeutige Karten-IDs, in Fundreihenfolge    */
-      rounds: {
-        next: "W1",                  /* nächste offene Runde oder null (alle gelöst) */
-        resolved: []                 /* gelöste Runden in Reihenfolge W1, W2, W3     */
-      },
-      procedureStarted: false,       /* Verfahrensbeginn nach E2                     */
-      bindungsroutineAktiv: true,    /* nach W2: false                               */
-      kuendigungFreigegeben: false,  /* nach W2: true                                */
-      exportFreigegeben: false,      /* nach W3: true                                */
-      ending: null,                  /* "A" | "B" | null                             */
-      ended: false,
-      alexPlus: "active",            /* "active" | "deleted" | "exported"            */
-      dialogueLog: [],               /* [{speaker, text, id?}]                       */
-      /* Legacy-Felder (Kompatibilität mit der bisherigen UI): */
-      e2Found: false,
-      contradictionResolved: false,
-      resolvedCount: 0
-    };
-  },
-
-  /* Expliziter, UI-bestästigter Neustart. Es werden ausschließlich die
-     eigenen Spielschlüssel entfernt, nie localStorage.clear(). */
-  reset() {
-    this._state = this.fresh();
-    for (const slot of Object.keys(STORAGE_KEYS)) {
-      const ls = _ls();
-      if (ls) {
-        try { ls.removeItem(STORAGE_KEYS[slot]); } catch (_) { /* ignorieren */ }
-      }
-      delete _memoryStore[slot];
-      delete _memoryPreferred[slot];
+  function validAction(a){
+    if(!plain(a)||!own(a,"type")||!own(actionFields,a.type))return fail("invalid-action");
+    const fields=actionFields[a.type];
+    for(const key of Object.keys(a))if(key!=="type"&&key!=="expectedRevision"&&!own(fields,key))return fail("unexpected-action-field");
+    for(const [key,type] of Object.entries(fields)){
+      if(!own(a,key))return fail("missing-action-field");
+      if(type==="integer"?(!Number.isSafeInteger(a[key])||a[key]<0):typeof a[key]!==type)return fail("invalid-action-field");
+      if(type==="string"&&(!a[key].length||a[key].length>100))return fail("invalid-action-field");
     }
-  },
-
-  /* Liefert den aktuellen Zustand (mit Legacy-Feldern).
-     Lazy, NICHT destruktiv: ein frischer Arbeitsspeicherzustand wird
-     nur in den RAM gesetzt; vorhandene gespeicherte Slots bleiben
-     erhalten und sind danach per load()/hasSave() erreichbar. */
-  get() {
-    if (!this._state) {
-      this._state = this.fresh();
-    }
-    return this._state;
-  },
-
-  /* Legacy-Felder aus den kanonischen Feldern ableiten. */
-  _syncLegacy(s) {
-    s.e2Found = s.cards.includes("E2");
-    s.contradictionResolved = s.rounds.resolved.includes("W1");
-    s.resolvedCount = s.rounds.resolved.length;
-  },
-
-  /* ---------- Raum und Fundstellen ---------- */
-
-  /* Raum wechseln. Vorführraum erst nach erstem Fund von E2. */
-  enterRoom(roomId) {
-    const s = this.get();
-    if (s.ended) {
-      return { ok: false, reason: "already-ended", ending: s.ending };
-    }
-    if (typeof roomId !== "string" || !_knownRoom(roomId)) {
-      return { ok: false, reason: "unknown-room" };
-    }
-    if (roomId === "vorfuehr" && !s.cards.includes("E2")) {
-      return { ok: false, reason: "room-locked", room: roomId };
-    }
-    s.room = roomId;
-    return { ok: true, room: roomId };
-  },
-
-  /* Fundstelle/Gesprächspunkt besuchen. Wiederholtes Besuchen verliert
-     nichts; erste Besuche werden eindeutig protokolliert. */
-  visitHotspot(hotspotId) {
-    const s = this.get();
-    if (s.ended) {
-      return { ok: false, reason: "already-ended", ending: s.ending };
-    }
-    if (typeof hotspotId !== "string" || !_knownHotspot(hotspotId)) {
-      return { ok: false, reason: "unknown-hotspot" };
-    }
-    const h = CONTENT.hotspots[hotspotId];
-    if (h.room === "vorfuehr" && !s.cards.includes("E2")) {
-      return { ok: false, reason: "room-locked", room: h.room };
-    }
-    const firstVisit = !s.visitedHotspots.includes(hotspotId);
-    if (firstVisit) {
-      s.visitedHotspots.push(hotspotId);
-    }
-    return { ok: true, hotspot: hotspotId, firstVisit };
-  },
-
-  /* Karte an der Fundstelle einsammeln.
-     - Vor E2: nur E2 (Terminal) ist fundbar.
-     - Nach E2: alle Karten E1–E5 an ihren Fundstellen.
-     - Bereits gefundene Karten: keine Duplikate, nichts geht verloren. */
-  collectFrom(hotspotId) {
-    const s = this.get();
-    if (s.ended) {
-      return { ok: false, reason: "already-ended", ending: s.ending };
-    }
-    if (typeof hotspotId !== "string" || !_knownHotspot(hotspotId)) {
-      return { ok: false, reason: "unknown-hotspot" };
-    }
-    const h = CONTENT.hotspots[hotspotId];
-    if (h.room === "vorfuehr" && !s.cards.includes("E2")) {
-      return { ok: false, reason: "room-locked", room: h.room };
-    }
-    const cardId = _ownKey(CARD_SOURCE, hotspotId) ? CARD_SOURCE[hotspotId] : null;
-    if (!cardId) {
-      return { ok: false, reason: "no-card", hotspot: hotspotId };
-    }
-    const e2Found = s.cards.includes("E2");
-    if (!e2Found && cardId !== "E2") {
-      return { ok: false, reason: "locked", card: cardId };
-    }
-    if (s.cards.includes(cardId)) {
-      return { ok: false, reason: "already-found", card: cardId };
-    }
-    s.cards.push(cardId);
-    if (cardId === "E2") {
-      s.procedureStarted = true; /* Verfahrensbeginn nach E2 */
-    }
-    this._syncLegacy(s);
-    return { ok: true, card: cardId, firstFind: true };
-  },
-
-  hasCard(cardId) {
-    return this.get().cards.includes(cardId);
-  },
-
-  /* Kopie der gefundenen Karten in Fundreihenfolge. */
-  cardList() {
-    return this.get().cards.slice();
-  },
-
-  /* ---------- Widerspruchsverfahren ---------- */
-
-  /* Verfahren starten/bestätigen; setzt E2 voraus. Idempotent. */
-  startProcedure() {
-    const s = this.get();
-    if (s.ended) {
-      return { ok: false, reason: "already-ended", ending: s.ending };
-    }
-    if (!s.cards.includes("E2")) {
-      return { ok: false, reason: "no-e2" };
-    }
-    s.procedureStarted = true;
-    return { ok: true };
-  },
-
-  /* Nächste offene Runde oder null, wenn alle drei gelöst sind. */
-  currentRound() {
-    return this.get().rounds.next;
-  },
-
-  /* Beweiskarte in einer Runde vorlegen.
-     Distinguiert Erfolg von passender falscher Rückmeldung (feedback aus
-     content.js) und von bereits gelöster/gesperrter Runde.
-     Richtige Karten: W1=E2, W2=E3, W3=E4 — exakte ID-Vergleiche,
-     keine substring-Vergleiche von Erzähltext. */
-  presentEvidence(roundId, cardId) {
-    const s = this.get();
-    if (s.ended) {
-      return { ok: false, reason: "already-ended", ending: s.ending };
-    }
-    if (typeof roundId !== "string" || !_knownRound(roundId)) {
-      return { ok: false, reason: "unknown-round" };
-    }
-    const w = CONTENT.contradictions[roundId];
-    if (s.rounds.resolved.includes(roundId)) {
-      return { ok: false, reason: "already-resolved", round: roundId };
-    }
-    if (s.rounds.next !== roundId) {
-      return { ok: false, reason: "round-locked", round: roundId, next: s.rounds.next };
-    }
-    if (!s.cards.includes(cardId)) {
-      return { ok: false, reason: "card-missing", round: roundId, card: cardId };
-    }
-    if (cardId !== CORRECT_CARD[roundId]) {
-      return {
-        ok: false,
-        reason: "wrong-card",
-        round: roundId,
-        card: cardId,
-        feedback: (w.feedback && w.feedback[cardId]) || "Diese Karte trägt die Runde nicht."
-      };
-    }
-
-    /* Erfolg: Runde abschließen, Effekte setzen. */
-    const effects = [];
-    s.rounds.resolved.push(roundId);
-    const idx = ROUND_ORDER.indexOf(roundId);
-    s.rounds.next = idx + 1 < ROUND_ORDER.length ? ROUND_ORDER[idx + 1] : null;
-
-    if (roundId === "W2") {
-      s.bindungsroutineAktiv = false;
-      s.kuendigungFreigegeben = true;
-      effects.push("bindungsroutine-aus", "kuendigung-freigegeben");
-    }
-    if (roundId === "W3") {
-      s.exportFreigegeben = true;
-      effects.push("export-freigegeben");
-    }
-    this._syncLegacy(s);
-
-    /* Benannter Entscheidungspunkt unmittelbar vor der Endwahl sichern. */
-    let checkpoint = null;
-    if (s.rounds.next === null) {
-      checkpoint = this.save("checkpoint");
-    }
-    return { ok: true, round: roundId, effects, checkpoint };
-  },
-
-  /* Legacy (bisherige UI): aktuelle offene Runde mit der Karte lösen.
-     Der alte Ein-Runden-Abschluss ist NICHT die neue Endbedingung. */
-  resolveContradiction(cardId) {
-    const s = this.get();
-    if (!s.rounds.next) {
-      return false;
-    }
-    const r = this.presentEvidence(s.rounds.next, cardId);
-    return !!r.ok;
-  },
-
-  /* Legacy (bisherige UI): E2 genau einmal aus dem Terminal geben. */
-  grantE2() {
-    const r = this.collectFrom("terminal");
-    return !!(r.ok && r.card === "E2");
-  },
-
-  /* ---------- Ende ---------- */
-
-  /* Endwahl nur nach allen drei Runden und noch ohne gewähltes Ende. */
-  canChooseEnding() {
-    const s = this.get();
-    return !s.ended && s.rounds.next === null;
-  },
-
-  /* Ende wählen: "A" (Kopie löschen) oder "B" (Kopie mitnehmen/exportieren).
-     Endgültig für den Spielstand; gelöschter Alex Plus kehrt nicht zurück.
-     Eine weitere Endwahl setzt nichts stillschweigend zurück. */
-  chooseEnding(endingId) {
-    const s = this.get();
-    if (s.ended) {
-      return {
-        ok: false,
-        reason: "already-ended",
-        ending: s.ending,
-        hint: "Das gewählte Ende ist endgültig. Für einen neuen Durchlauf: expliziter, bestätigter Neustart."
-      };
-    }
-    if (endingId !== "A" && endingId !== "B") {
-      return { ok: false, reason: "unknown-ending" };
-    }
-    if (s.rounds.next !== null) {
-      return { ok: false, reason: "rounds-unfinished", next: s.rounds.next };
-    }
-    s.ending = endingId;
-    s.ended = true;
-    s.alexPlus = endingId === "A" ? "deleted" : "exported";
-    this._syncLegacy(s);
-    return { ok: true, ending: endingId, alexPlus: s.alexPlus };
-  },
-
-  /* ---------- Gesprächsverlauf (klare Daten, kein DOM) ---------- */
-
-  addDialogueLine(speaker, text, id) {
-    const s = this.get();
-    if (typeof speaker !== "string" || speaker.length === 0) {
-      return { ok: false, reason: "bad-speaker" };
-    }
-    if (typeof text !== "string") {
-      return { ok: false, reason: "bad-text" };
-    }
-    if (id !== undefined && id !== null && typeof id !== "string") {
-      return { ok: false, reason: "bad-id" };
-    }
-    const line = { speaker, text };
-    if (id) {
-      line.id = id;
-    }
-    s.dialogueLog.push(line);
-    return { ok: true, line };
-  },
-
-  getDialogueLog() {
-    return this.get().dialogueLog.map((l) => Object.assign({}, l));
-  },
-
-  /* ---------- Speichern / Laden ---------- */
-
-  /* Explizit speichern unter Slot "save" oder "checkpoint".
-     Rückgabe: {ok, slot, storage:"local"|"memory", warning?} oder
-     {ok:false, reason, ...}. Wirft nie. Ungültige Slots werden vor
-     jeglichem Storage-Zugriff abgewiesen. */
-  save(slot) {
-    slot = slot || "save";
-    if (!_knownSlot(slot)) {
-      return { ok: false, reason: "unknown-slot" };
-    }
-    const s = this.get();
-    let json;
-    try {
-      json = JSON.stringify(s);
-    } catch (err) {
-      return { ok: false, reason: "serialize-failed", error: String(err) };
-    }
-    const w = _writeRaw(slot, json);
-    if (w.storage === null) {
-      return { ok: false, reason: "write-failed", warning: w.warning, error: w.error };
-    }
-    return { ok: true, slot, storage: w.storage, warning: w.warning };
-  },
-
-  /* Explizit laden aus Slot "save" oder "checkpoint".
-     Inkonsistente/ungültige Daten werden abgelehnt (reason:"invalid",
-     errors:[...]); der aktuelle funktionierende Spielstand bleibt
-     unangetastet. Ungültige Slots werden vor jeglichem Storage-Zugriff
-     abgewiesen. */
-  load(slot) {
-    slot = slot || "save";
-    if (!_knownSlot(slot)) {
-      return { ok: false, reason: "unknown-slot" };
-    }
-    const raw = _readRaw(slot);
-    if (!raw) {
-      return { ok: false, reason: "no-save", slot };
-    }
-    let data;
-    try {
-      data = JSON.parse(raw.value);
-    } catch (_) {
-      return { ok: false, reason: "parse-failed", slot };
-    }
-    const v = _validate(data);
-    if (!v.ok) {
-      return { ok: false, reason: "invalid", slot, errors: v.errors };
-    }
-    this._state = _adoptState(data);
-    return { ok: true, slot, storage: raw.storage };
-  },
-
-  hasSave(slot) {
-    slot = slot || "save";
-    if (!_knownSlot(slot)) {
-      return { exists: false, storage: null };
-    }
-    const raw = _readRaw(slot);
-    return { exists: !!raw, storage: raw ? raw.storage : null };
-  },
-
-  /* Benannter Entscheidungspunkt (automatisch vor der Endwahl gesichert,
-     hier explizit wieder verfügbar; ladbar auch nach beiden Enden). */
-  saveCheckpoint() {
-    return this.save("checkpoint");
-  },
-
-  loadCheckpoint() {
-    return this.load("checkpoint");
+    if(own(a,"expectedRevision")&&(!Number.isSafeInteger(a.expectedRevision)||a.expectedRevision<0))return fail("invalid-revision");
+    return success();
   }
-};
+  function interactions(s){
+    if(s.mode==="form")return ["backHome"];
+    if(s.mode==="challenge")return ["backReception"];
+    if(s.mode==="diagnostic")return ["backRoom"];
+    if(s.mode!=="explore")return [];
+    if(s.phase==="home")return ["messages","computer","coffee",...(hasDoc(s,"messages")?["invoice"]:[]),...(hasDoc(s,"messages")&&hasDoc(s,"invoice")?["form"]:[])];
+    if(s.phase==="homeSent")return ["departure"];
+    if(s.phase==="reception"||s.phase==="case"){
+      if(s.roomId==="empfang")return ["terminal","toPlus",...(s.flags.plusMet&&hasDoc(s,"order")?["mira"]:[])];
+      return ["plus","rolf","toMira"];
+    }
+    if(s.phase==="caseSolved")return ["toPlus"];
+    if(s.phase==="diagnosis")return ["resumeDiagnostic","rolf"];
+    if(s.phase==="discovery")return ["rolf",...(s.flags.rolfAsked?["base","maintenance"]:[]),...(hasDoc(s,"rolfBase")&&hasDoc(s,"manual")&&s.flags.computerCarried?["connectDevice"]:[])];
+    return [];
+  }
+  function handleInteraction(s,target){
+    if(!interactions(s).includes(target))return fail("interaction-unavailable","Diese Handlung ist hier noch nicht möglich.");
+    if(target==="backHome"){s.phase="home";s.mode="explore";}
+    else if(target==="backReception"||target==="backRoom")s.mode="explore";
+    else if(target==="resumeDiagnostic")s.mode="diagnostic";
+    else if(s.phase==="home"){
+      if(target==="form"){s.phase="form";s.mode="form";}
+      else if(target==="messages")sequence(s,"homeMessages","messagesRead");
+      else if(target==="invoice")sequence(s,"homeInvoice","invoiceRead");
+      else sequence(s,target==="coffee"?"homeCoffee":"homeComputer","explore");
+    }else if(target==="departure"){
+      s.flags.computerCarried=true;s.roomId="empfang";s.phase="reception";sequence(s,"receptionIntro","explore");
+    }else if(target==="terminal"){acquire(s,"order");showDocument(s,"order");}
+    else if(target==="toPlus"){
+      s.roomId="vorfuehr";
+      if(s.phase==="caseSolved"){s.phase="diagnosis";sequence(s,"salesLoop","diagnostic");}
+      else if(!s.flags.plusMet)sequence(s,"meetPlus","plusReason");
+    }else if(target==="toMira")s.roomId="empfang";
+    else if(target==="mira"){s.phase="case";s.mode="challenge";}
+    else if(target==="plus")sequence(s,s.reason==="money"?"reasonMoney":"reasonSelf","explore");
+    else if(target==="rolf")sequence(s,s.phase==="discovery"?"askRolf":"earlyRolf",s.phase==="discovery"?"rolfAsked":"explore");
+    else if(target==="base"||target==="maintenance"){const id=target==="base"?"rolfBase":"manual";acquire(s,id);showDocument(s,id);}
+    else if(target==="connectDevice")sequence(s,"connectPreview","preview");
+    return success();
+  }
+  function diagnosticReady(s){
+    return ["agency","sales"].every(control=>!s.diagnostic.controls[control]&&
+      s.diagnostic.observations.some(o=>o.controlId===control&&o.controlState==="on")&&
+      s.diagnostic.observations.some(o=>o.controlId===control&&o.controlState==="off"&&o.epoch===s.diagnostic.epochs[control]));
+  }
+  function reduce(s,a){
+    if(s.done&&a.type!=="openDocument"&&a.type!=="closeDocument")return fail("already-done");
+    if(a.type==="next"){
+      if(s.mode!=="dialogue")return fail("not-dialogue");
+      const ids=CONTENT.lookup.sequence(s.sequenceId);
+      if(ids[s.lineIndex]!==a.expectedLineId)return fail("stale-line");
+      s.lineIndex++;if(s.lineIndex<ids.length)recordLine(s);else afterSequence(s);return success();
+    }
+    if(a.type==="openDocument"){
+      if(!hasDoc(s,a.documentId)||!doc(a.documentId))return fail("document-not-acquired");
+      showDocument(s,a.documentId);return success();
+    }
+    if(a.type==="closeDocument"){
+      if(s.mode!=="document"||!s.documentReturn)return fail("not-document");
+      const previous=s.documentReturn;s.documentId=null;s.documentReturn=null;s.mode=previous.mode;
+      if(previous.after==="beforeChoice")sequence(s,"beforeChoice","endingChoice");return success();
+    }
+    if(a.type==="interact")return handleInteraction(s,a.target);
+    if(a.type==="choose"){
+      if(!own(CONTENT.choices,a.choiceId))return fail("unknown-choice");
+      const option=CONTENT.choices[a.choiceId].options.find(o=>o.id===a.optionId);if(!option)return fail("unknown-option");
+      if(a.choiceId==="reason"&&s.phase==="form"&&s.mode==="form"){s.reason=a.optionId;return success();}
+      if(a.choiceId==="letter"&&s.phase==="relationship"&&s.mode==="choice"){
+        s.letterChoice=a.optionId;sequence(s,a.optionId==="read"?"letterRead":"letterPrivate","closeout");return success();
+      }
+      if(a.choiceId==="ending"&&s.phase==="choice"&&s.mode==="choice"&&s.flags.choiceReached){
+        s.ending=a.optionId;s.confirmation={kind:"ending",title:option.label,text:option.confirm};s.mode="confirm";return success();
+      }
+      return fail("choice-unavailable");
+    }
+    if(a.type==="submitCancellation"){
+      if(s.mode!=="form"||s.phase!=="form"||!s.reason||!hasDoc(s,"messages")||!hasDoc(s,"invoice")||hasDoc(s,"receipt"))return fail("cancellation-unavailable");
+      acquire(s,"receipt");sequence(s,"homeSent","homeSent");return success();
+    }
+    if(a.type==="selectStatement"){
+      if(s.mode!=="challenge"||!CONTENT.challenge.statements.some(x=>x.id===a.statementId))return fail("statement-unavailable");
+      s.challenge.statementId=a.statementId;s.challenge.feedback=null;return success();
+    }
+    if(a.type==="selectPassage"){
+      if(s.mode!=="challenge"||!hasDoc(s,a.documentId)||!doc(a.documentId)?.passages.some(p=>p.id===a.passageId))return fail("passage-unavailable");
+      s.challenge.documentId=a.documentId;s.challenge.passageId=a.passageId;s.challenge.feedback=null;return success();
+    }
+    if(a.type==="presentEvidence"){
+      const c=s.challenge,correct=CONTENT.challenge.correct;
+      if(s.mode!=="challenge"||c.resolved||!c.statementId||!c.documentId||!c.passageId||!hasDoc(s,c.documentId))return fail("evidence-unavailable");
+      if(c.statementId===correct.statementId&&c.documentId===correct.documentId&&c.passageId===correct.passageId&&hasDoc(s,"invoice")&&s.flags.plusMet){
+        c.resolved=true;c.feedback=null;s.flags.caseSolved=true;acquire(s,"cancellation");sequence(s,"caseSuccess","caseConfirmed");return success({success:true});
+      }
+      let key="wrongPassage";
+      if(c.statementId!==correct.statementId)key=c.statementId;
+      else if(c.documentId==="receipt")key="receipt";
+      else if(c.documentId==="invoice"&&c.passageId==="rule")key="rule";
+      else if(c.documentId!=="order")key="other";
+      c.feedback=CONTENT.challenge.feedback[key]||CONTENT.challenge.feedback.other;return success({success:false,message:c.feedback});
+    }
+    if(a.type==="testDiagnostic"){
+      const test=CONTENT.diagnostic.tests.find(t=>t.id===a.testId);
+      if(s.mode!=="diagnostic"||!test)return fail("test-unavailable");
+      const on=s.diagnostic.controls[test.controlId],result=on?test.on:test.off;
+      const observation={testId:test.id,controlId:test.controlId,controlState:on?"on":"off",text:result.text,epoch:s.diagnostic.epochs[test.controlId]};
+      s.diagnostic.observations.push(observation);s.diagnostic.latestResults=observation;
+      if(result.sequence)sequence(s,result.sequence,"testDone");return success();
+    }
+    if(a.type==="setDiagnostic"){
+      const control=CONTENT.diagnostic.controls.find(c=>c.id===a.controlId);
+      if(s.mode!=="diagnostic"||!control||s.diagnostic.controls[a.controlId]===a.value)return fail("control-unavailable");
+      if(!a.value&&!s.diagnostic.observations.some(o=>o.controlId===a.controlId&&o.controlState==="on"))return fail("test-baseline-first","Teste zuerst, was die eingeschaltete Einstellung tut.");
+      s.confirmation={kind:"diagnostic",controlId:a.controlId,value:a.value,title:control.label,text:a.value?"Diese Berechtigung wieder einschalten?":control.confirm};
+      s.mode="confirm";return success();
+    }
+    if(a.type==="confirmDiagnostic"){
+      if(s.mode!=="confirm"||s.confirmation?.kind!=="diagnostic")return fail("no-diagnostic-confirmation");
+      if(a.confirm){s.diagnostic.controls[s.confirmation.controlId]=s.confirmation.value;s.diagnostic.epochs[s.confirmation.controlId]++;}
+      s.confirmation=null;s.mode="diagnostic";return success();
+    }
+    if(a.type==="continueDiagnostic"){
+      if(s.mode!=="diagnostic"||!diagnosticReady(s))return fail("observations-incomplete");
+      sequence(s,"afterTest","letterChoice");return success();
+    }
+    if(a.type==="confirmEnding"){
+      if(s.mode!=="confirm"||s.confirmation?.kind!=="ending"||!s.flags.choiceReached)return fail("no-ending-confirmation");
+      s.confirmation=null;
+      if(!a.confirm){s.ending=null;s.mode="choice";return success();}
+      s.endingConfirmed=true;sequence(s,s.ending==="delete"?"deleteGoodbye":"takeAgreement",s.ending==="delete"?"deleteReady":"transferReady");return success();
+    }
+    if(a.type==="deleteConfirm"){
+      if(s.mode!=="transfer"||s.transferStage!=="delete"||s.ending!=="delete"||!s.endingConfirmed||s.transferComplete)return fail("deletion-unavailable");
+      s.flags.providerDeleted=true;s.deleteDone=true;sequence(s,"deleteDone","wrapup");return success();
+    }
+    if(a.type==="takeTransfer"){
+      if(s.mode!=="transfer"||s.transferStage!=="transfer"||s.ending!=="take"||!s.endingConfirmed||s.transferComplete)return fail("transfer-unavailable");
+      s.transferComplete=true;s.transferStage="boot";return success();
+    }
+    if(a.type==="takeLocalBoot"){
+      if(s.mode!=="transfer"||s.transferStage!=="boot"||!s.transferComplete||s.localBootVerified||s.flags.providerDeleted)return fail("boot-unavailable");
+      s.localBootVerified=true;sequence(s,"localBoot","providerReady");return success();
+    }
+    if(a.type==="deleteProvider"){
+      if(s.mode!=="transfer"||s.transferStage!=="provider"||!s.transferComplete||!s.localBootVerified||s.flags.providerDeleted)return fail("provider-deletion-unavailable");
+      s.flags.providerDeleted=true;s.takeDone=true;sequence(s,"takeDone","wrapup");return success();
+    }
+    if(a.type==="returnHome"){
+      if(s.phase!=="wrapup"||s.mode!=="explore"||!s.flags.providerDeleted)return fail("return-unavailable");
+      s.roomId="zuhause";s.phase="homeEnd";sequence(s,"returnHome","messageReady");return success();
+    }
+    if(a.type==="submitMara"){
+      if(s.phase!=="homeEnd"||s.mode!=="message"||s.maraSent)return fail("message-unavailable");
+      s.maraSent=true;sequence(s,"maraReply","lastScene");return success();
+    }
+    return fail("unknown-action");
+  }
+  function transition(s,action,replaying=false){
+    const valid=validAction(action);if(!valid.ok)return {result:valid};
+    if(own(action,"expectedRevision")&&action.expectedRevision!==s.revision)return {result:fail("stale-revision")};
+    if(s.actionLog.length>=MAX_ACTIONS)return {result:fail("action-limit")};
+    // Replay owns an isolated fresh state; invalid replay is discarded wholesale.
+    // Avoid repeatedly copying an ever-growing log during a long load.
+    const next=replaying?s:copy(s),result=reduce(next,action);if(!result.ok)return {result};
+    next.revision++;next.actionLog.push(copy(action));return {state:next,result};
+  }
+  function storage(){try{return typeof localStorage==="undefined"?null:localStorage;}catch(_){return null;}}
+  function writeRaw(slot,value){
+    memory[slot]=value;cleared[slot]=false;
+    try{const store=storage();if(!store)throw Error("missing");store.setItem(KEYS[slot],value);preferred[slot]=false;return {storage:"local"};}
+    catch(_){preferred[slot]=true;return {storage:"memory",warning:"Nur in dieser Sitzung gespeichert. Der Browserspeicher ist nicht verfügbar."};}
+  }
+  function readRaw(slot){
+    if(cleared[slot])return null;
+    if(preferred[slot]&&own(memory,slot))return {value:memory[slot],storage:"memory"};
+    try{const value=storage()?.getItem(KEYS[slot]);if(typeof value==="string")return {value,storage:"local"};}catch(_){}
+    return own(memory,slot)?{value:memory[slot],storage:"memory"}:null;
+  }
+  function serialize(s){return JSON.stringify({schema:SCHEMA,storyVersion:STORY,actions:s.actionLog});}
+  function replay(raw){
+    try{
+      if(typeof raw!=="string"||raw.length>MAX_SAVE_BYTES)return fail("save-size");
+      const data=JSON.parse(raw);
+      if(!plain(data)||Object.keys(data).length!==3||!own(data,"schema")||!own(data,"storyVersion")||!own(data,"actions")||data.schema!==SCHEMA||data.storyVersion!==STORY||!Array.isArray(data.actions)||data.actions.length>MAX_ACTIONS)return fail("invalid-save");
+      let state=fresh();
+      for(const action of data.actions){const step=transition(state,action,true);if(!step.result.ok)return fail("invalid-action-log");state=step.state;}
+      return {ok:true,state};
+    }catch(_){return fail("invalid-save");}
+  }
+  function save(slot="save"){
+    if(!own(KEYS,slot))return fail("unknown-slot");const s=ensure();
+    if(slot==="checkpoint"&&!(s.flags.choiceReached&&s.phase==="choice"&&s.mode==="choice"&&!s.ending))return fail("checkpoint-not-reached");
+    return {ok:true,...writeRaw(slot,serialize(s))};
+  }
+  function load(slot="save"){
+    if(!own(KEYS,slot))return fail("unknown-slot");const raw=readRaw(slot);if(!raw)return fail("no-save");
+    const result=replay(raw.value);if(!result.ok)return result;
+    if(slot==="checkpoint"&&!(result.state.flags.choiceReached&&result.state.phase==="choice"&&result.state.mode==="choice"&&!result.state.ending))return fail("invalid-checkpoint");
+    current=result.state;return {ok:true,storage:raw.storage,...(raw.storage==="memory"?{warning:"Spielstand aus dem Sitzungsspeicher geladen."}:{})};
+  }
+  function dispatch(action){
+    const before=ensure(),step=transition(before,action);if(!step.result.ok)return step.result;
+    current=step.state;const saved=save();
+    if(!before.flags.choiceReached&&current.flags.choiceReached)save("checkpoint");
+    return {...step.result,storage:saved.storage,...(saved.warning?{warning:saved.warning}:{})};
+  }
+  function reset(){
+    current=fresh();let blocked=false;
+    for(const slot of Object.keys(KEYS)){
+      delete memory[slot];delete preferred[slot];cleared[slot]=true;
+      try{const store=storage();if(!store)throw Error("missing");store.removeItem(KEYS[slot]);}catch(_){blocked=true;}
+    }
+    return {ok:true,storage:blocked?"memory":"local",...(blocked?{warning:"Neustart gilt für diese Sitzung; der Browserspeicher konnte nicht vollständig bereinigt werden."}:{})};
+  }
+  function objective(s){
+    let key=s.phase;
+    if(key==="home")key=hasDoc(s,"messages")?"form":"home";
+    if(key==="homeSent")key="reception";
+    if(key==="caseSolved")key="diagnosis";
+    if(key==="preview")key="discovery";
+    if(key==="wrapup")key="homeEnd";
+    return CONTENT.objectives[key]||CONTENT.objectives.home;
+  }
+  function view(){
+    const s=ensure();
+    const v={phase:s.phase,sceneId:s.roomId,sequenceId:s.sequenceId,mode:s.mode,revision:s.revision,
+      line:s.mode==="dialogue"?CONTENT.lookup.line(CONTENT.lookup.sequence(s.sequenceId)[s.lineIndex]):null,
+      objective:objective(s),actions:[],documents:[],history:s.history,ending:s.ending,done:s.done,
+      document:null,form:null,challenge:null,diagnostic:null,confirmation:null,choice:null,transfer:null,finalMessage:null,endingData:null};
+    const payload=(type,fields={})=>({type,...fields,expectedRevision:s.revision});
+    function add(id,label,action,position){const item={id,label,action};if(position)item.position=position;v.actions.push(item);return action;}
+    v.documents=s.documents.map(id=>({...doc(id),action:payload("openDocument",{documentId:id})}));
+    if(s.mode==="dialogue")add("next","Weiter",payload("next",{expectedLineId:v.line.id}));
+    if(s.mode==="document"){v.document=doc(s.documentId);add("closeDocument","Schließen",payload("closeDocument"));}
+    const special={departure:"Zum Kundencenter gehen",connectDevice:"Meinen Rechner anschließen",backHome:"Zurück zum Schreibtisch",backReception:"Weiter am Empfang umsehen",backRoom:"Weiter im Raum umsehen",resumeDiagnostic:"Einstellungen weiter untersuchen"};
+    for(const target of interactions(s)){
+      const hotspot=CONTENT.scenes[s.roomId]?.hotspots.find(h=>h.id===target);
+      add("interact-"+target,special[target]||hotspot?.label||target,payload("interact",{target}),hotspot?{x:hotspot.x,y:hotspot.y}:undefined);
+    }
+    if(s.phase==="wrapup"&&s.mode==="explore")add("returnHome","Nach Hause",payload("returnHome"));
+    if(s.mode==="form"){
+      const options=CONTENT.choices.reason.options.map(o=>({...o,selected:s.reason===o.id,
+        action:add("reason-"+o.id,o.label,payload("choose",{choiceId:"reason",optionId:o.id}))}));
+      v.form={title:CONTENT.form.title,description:CONTENT.form.description,reason:s.reason,options};
+      if(s.reason)add("submitCancellation",CONTENT.form.submitLabel,payload("submitCancellation"));
+    }
+    if(s.mode==="challenge"){
+      const c=s.challenge;
+      const statements=CONTENT.challenge.statements.map(x=>({...x,selected:c.statementId===x.id,
+        action:add("statement-"+x.id,x.text,payload("selectStatement",{statementId:x.id}))}));
+      const documents=s.documents.map(id=>({...doc(id),passages:doc(id).passages.map(p=>({...p,selected:c.documentId===id&&c.passageId===p.id,
+        action:add("passage-"+id+"-"+p.id,p.text,payload("selectPassage",{documentId:id,passageId:p.id}))}))}));
+      v.challenge={title:CONTENT.challenge.title,statements,documents,selectedStatement:c.statementId,selectedDocument:c.documentId,selectedPassage:c.passageId,feedback:c.feedback};
+      if(c.statementId&&c.documentId&&c.passageId)add("presentEvidence","Diese Passage vorlegen",payload("presentEvidence"));
+    }
+    if(s.mode==="diagnostic"){
+      const controls=CONTENT.diagnostic.controls.map(c=>{
+        const active=s.diagnostic.controls[c.id],baseline=s.diagnostic.observations.some(o=>o.controlId===c.id&&o.controlState==="on");
+        const action=!active||baseline?add("control-"+c.id,(active?"Abschalten: ":"Einschalten: ")+c.label,payload("setDiagnostic",{controlId:c.id,value:!active})):null;
+        return {id:c.id,label:c.label,description:c.description,active,action};
+      });
+      const tests=CONTENT.diagnostic.tests.map(t=>({id:t.id,label:t.label,input:t.input,action:add("test-"+t.id,t.label,payload("testDiagnostic",{testId:t.id}))}));
+      v.diagnostic={title:CONTENT.diagnostic.title,notice:CONTENT.diagnostic.notice,controls,tests,observations:s.diagnostic.observations,latestResults:s.diagnostic.latestResults};
+      if(diagnosticReady(s))add("continueDiagnostic","Plus antworten",payload("continueDiagnostic"));
+    }
+    if(s.mode==="confirm"){
+      v.confirmation={kind:s.confirmation.kind,title:s.confirmation.title,text:s.confirmation.text};
+      const type=s.confirmation.kind==="diagnostic"?"confirmDiagnostic":"confirmEnding";
+      add("confirmYes","Ja, bestätigen",payload(type,{confirm:true}));add("confirmNo","Abbrechen",payload(type,{confirm:false}));
+    }
+    if(s.mode==="choice"){
+      const id=s.phase==="relationship"?"letter":"ending",choice=CONTENT.choices[id];
+      v.choice={id,title:choice.title,description:choice.description||"",options:choice.options.map(o=>({id:o.id,label:o.label,...(o.description?{description:o.description}:{}),
+        action:add("choice-"+id+"-"+o.id,o.label,payload("choose",{choiceId:id,optionId:o.id}))}))};
+    }
+    if(s.mode==="transfer"){
+      const steps={delete:["deleteConfirm","Kopie jetzt löschen","Du hast dich für ein Leben ohne die Kopie entschieden."],
+        transfer:["takeTransfer","Kopie übertragen","Die Vorschau war noch keine Übertragung. Dein Rechner ist bereit."],
+        boot:["takeLocalBoot","Plus lokal starten","Die Kopie ist übertragen. Prüfe jetzt ihren lokalen Start."],
+        provider:["deleteProvider","Anbieterkopie löschen","Plus läuft auf deinem Rechner. Jetzt kann die Kopie beim Anbieter gelöscht werden."]};
+      const [type,label,text]=steps[s.transferStage];add(type,label,payload(type));
+      v.transfer={text,transferred:s.transferComplete,bootVerified:s.localBootVerified,providerDeleted:s.flags.providerDeleted};
+    }
+    if(s.mode==="message"){v.finalMessage=CONTENT.finalMessage;add("submitMara",CONTENT.finalMessage.submitLabel,payload("submitMara"));}
+    if(s.mode==="done")v.endingData=CONTENT.endings[s.ending];
+    return copy(v);
+  }
+  return Object.freeze({get:()=>copy(ensure()),view,dispatch,save,load,reset,
+    hasSave(slot="save"){
+      if(!own(KEYS,slot))return {ok:false,exists:false,storage:null};
+      const raw=readRaw(slot);return {ok:true,exists:!!raw,storage:raw?.storage||null};
+    }
+  });
+})();

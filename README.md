@@ -1,105 +1,80 @@
 # Nur noch kurz kündigen
 
-**In Cedrics Auftrag stellvertretend geprüft und abgenommen, mit dokumentierten Grenzen der automatisierten Tonprüfung.** MIRA, Alex Plus und Rolf haben jeweils eine eigene lokal trainierte Charakter-LoRA; ausgewählte Bilder sind eingebaut. Bühne, Dialogführung, Rätselpräsentation und beide Enden wurden überarbeitet. Eine kleine lokale Qwen-Runde hat zuletzt zwei Dialogformulierungen verbessert und mit derselben Besetzung neu vertonen lassen. Persönliches Probehören oder eine menschliche Schauspielbewertung werden nicht behauptet. Dieses Repository wird privat gepflegt.
+**Neufassung in Arbeit.** Die frühere Gestaltungsabnahme wurde nach Cedrics
+Spieldurchgang am 21.09.2026 zurückgenommen. Dieser Entwicklungszweig baut
+Einstieg, Handlung, Spiellogik und Oberfläche grundlegend neu. Eine neue
+Abnahme liegt noch nicht vor; die vorhandenen Stimmen werden nach dem
+vollständigen Spieldurchgang neu erzeugt und geprüft. Das Repository bleibt privat.
 
-Du willst das Abo für deinen digitalen Doppelgänger kündigen. Der Kundenservice
-hat Rückfragen. Dein Doppelgänger auch. Und der Ficus weiß mehr, als er sollte.
+Deine digitale Kopie hat einen Termin abgesagt, auf den du dich gefreut hast.
+Du willst wieder selbst entscheiden. Aber nachdem du das Abo kündigst,
+erscheint plötzlich eine neue Laufzeit.
 
-Ein kurzes deutsches Point-and-Click-Spiel im Graphic-Novel-Stil: zwei Räume,
-drei Widersprüche und zwei Enden.
+Eine kurze deutsche Graphic Novel mit Erkundung, einem Dokumentwiderspruch,
+einem Vorher-/Nachher-Versuch und zwei unterschiedlichen Endwegen. Du beginnst
+an deinem eigenen Schreibtisch und kommst am Ende dorthin zurück.
 
 ## Spielen
 
-Das vollständige Spielpaket herunterladen, entpacken und `index.html` im Browser
-öffnen. Die Ordner `assets`, `css` und `js` müssen daneben liegen bleiben.
-Mit **Stimmen an** aktivierst du die vorbereiteten Dialogstimmen.
+Das vollständige Paket entpacken und `index.html` im Browser öffnen. Die Ordner
+`assets`, `css` und `js` müssen daneben bleiben. Die Szene füllt die Browserfläche;
+Gespräche stehen unten. Markierte Gegenstände lassen sich anklicken oder per
+Tastatur erreichen. Die angebotenen Entscheidungen führen den Fall weiter.
 
-Du brauchst zum Spielen keine KI-Modelle, keine KI-Grafikkarte und keine
-Internetverbindung. Code, Bilder und Stimmen liegen im Paket. Das Spiel führt
-keine Modellinferenz aus und verwendet keine externen Skripte oder Schriftarten.
+**Notizen** enthalten dein aktuelles Anliegen, gefundene Unterlagen und den
+bisherigen Dialog. Hinweise werden auf Nachfrage angezeigt. Im **Menü** liegen
+Speichern, Laden und Neustart. Nach dem Ende lässt sich der erreichte
+Entscheidungspunkt für den anderen Weg laden. Bei blockiertem Browserspeicher
+funktioniert nur der temporäre Speicher derselben Sitzung.
 
-Die markierten Orte in den Räumen führen zu Gesprächen und Beweisen.
-Ihre Namen erscheinen bei Zeigerkontakt oder Tastaturfokus; auf schmalen
-Bildschirmen stehen sie in einer beschrifteten Liste.
-Gefundene Karten bleiben im Beweisordner. Ein erneuter Klick auf ihre Fundstelle
-öffnet direkt das zugehörige Dokument. Das Widerspruchsverfahren öffnest du
-über die Werkzeugleiste. Dialoge lassen sich mit **Weiter** lesen.
-**Überspringen** beendet die restliche Szene; **Escape** hat bei einem geöffneten
-Dialog denselben Effekt, bei anderen Panels schließt es das zuletzt geöffnete.
-Alle Aktionen sind auch per Tastatur erreichbar. Ein bestätigter **Neustart**
-beginnt wieder mit der Ankunftsszene.
+Die fertige Fassung benötigt zum Spielen weder Internet noch KI-Modelle oder
+eine KI-Grafikkarte. Die Modellinferenz findet bei der Herstellung statt;
+das Spiel selbst ist eine lokale statische Anwendung ohne externe Bibliotheken,
+Schriften oder Telemetrie. Dialogstimmen werden über die Tonsteuerung aktiviert,
+Untertitel bleiben sichtbar. Alex als Spielerfigur wird nicht gesprochen.
 
-Unter **Weitere Aktionen** findest du Verlauf, **Speichern** und **Stand laden**.
-Speichern verwendet den Browserspeicher. Falls dieser
-blockiert ist, weist das Spiel auf die nur temporäre Speicherung hin. Nach dem
-Ende führt **Zum Entscheidungspunkt** zur anderen möglichen Wahl zurück.
-
-Optional kannst du im Spielordner einen lokalen Server starten:
+Optional kann im Spielordner ein lokaler Server gestartet werden:
 
 ```sh
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Danach im Browser `http://127.0.0.1:8000/` öffnen.
+Dann `http://127.0.0.1:8000/` öffnen. Alle Firmen, Figuren und Vertragsregeln
+im Spiel sind fiktiv.
 
-## Herstellung
+## Herstellung und Urheberschaft
 
 Begleitprojekt zu einem gesponserten Video für The Morpheus mit ALTERNATE,
-AMD und Samsung. Auftrag und kreative
-Entscheidungen: Cedric. Cedric bediente die Werkzeuge, formulierte die
-Entwicklungsaufträge und prüfte die Ergebnisse in seinem Auftrag.
+AMD und Samsung. Auftrag, kreative Vorgaben und Korrekturen aus Spielersicht:
+Cedric. Cedric bedient und prüft die Werkzeuge.
 
-- Spielcode und Dialogdaten entstanden in tatsächlich protokollierten lokalen
-  Qwen3.8-27B-Läufen. Cedric ergänzte dokumentierte direkte Korrekturen an
-  Speicherrandfällen, Darstellung, Syntax, Audioauswahl und Bühnenlayout.
-  Auch die abschließende Straffung von NPC-Nachgesprächen und des W2-Pflichtwegs
-  ist gesondert als direkte Kuration durch Cedric dokumentiert. Ein weiterer lokaler
-  Qwen-Lauf reparierte Dokumentwiederbesuche und den Ankunftsdialog nach Neustart
-  und beschriftete die Überspringfunktion. Die anschließende Korrektur
-  abgeschnittener Figurenlabels, eine ungesprochene Pausenmeldung und diese
-  Bedienhilfe stammen getrennt von Cedric.
-  Der Qwen-Auftrag für die Endinszenierung erreichte nach seiner Syntaxprüfung
-  die Rundengrenze. Sein ursprünglicher Teilstand und die anschließenden
-  Korrekturen von Cedric an Zeitpunkt, Portraitdarstellung und schmalen Ansichten
-  sind als getrennte Commits erhalten.
-  Auch zurückgenommene, unvollständige Modellversuche bleiben in der
-  Git-Historie nachvollziehbar; diese unterscheidet die Beiträge.
-  Der lokale Qwen-Lauf 031 korrigierte die Grammatik in MIRAs Zeitstempel-Satz
-  und kürzte eine unklare Einleitung im optionalen Alex-Plus-Nachgespräch.
-  Cedric begrenzte und prüfte diesen Auftrag; beide Modellformulierungen
-  wurden unverändert übernommen. Spiellogik und übrige Dialoge blieben gleich.
-- Die fünf bisherigen Spielbilder entstanden mit lokalem Krea 2 Turbo FP8.
-  MIRA und Alex Plus sind ausgewählte Ausschnitte aus Figurenbögen; Rolf stammt
-  direkt aus dem Vorführraum. Diese fünf Grafiken verwenden keine Charakter-LoRA.
-  Drei zusätzliche MIRA-Ausdrucksbilder (Lächeln, Skepsis und Überraschung)
-  und zwei Alex-Plus-Ausdrücke (besorgt und erleichtert) entstanden lokal mit
-  Krea 2 Turbo FP8 und jeweils einer eigenen auf Krea 2 RAW trainierten
-  Charakter-LoRA. Die Trainingssätze dieser beiden Figuren bestehen jeweils
-  aus vier Ausschnitten eines einzelnen Figurenbogens; die gewählten Bilder
-  sind kein Nachweis beliebiger zuverlässiger Posen. Rolf erhielt einen eigenen
-  Adapter aus vier vollständigen, getrennt erzeugten Krea-Bildern. Eine ausgewählte
-  neue Ganzansicht ersetzt sein altes Gesprächsportrait; angeschnittene und doppelte
-  Pflanzenansichten wurden verworfen. Auch Rolfs Pose bleibt weitgehend aufrecht.
-  Der alte Raumcrop bleibt als Original enthalten, wird als Portrait jedoch nicht
-  mehr verwendet. Alle elf Bilder sind feste PNGs. Bildherkunft, Adapter und
-  Prüfsummen stehen in `assets/art/provenance.json`.
-- Die 45 vorbereiteten Sprachdateien stammen aus lokalem Qwen3-TTS mit den von
-  Cedric gewählten Stimmreferenzen MIRA B, Alex Plus A und Rolf. Alex als
-  Spielerfigur bleibt stumm. Alternative Enden sind enthalten; die summierte
-  Audiodauer entspricht deshalb keiner gemessenen Spielzeit. MIRA und Alex
-  haben einen konstanten Pegelabgleich erhalten; Rolf bleibt unverändert.
-  Dokumentierte leise Vorläufe wurden konservativ gekürzt; 160 Millisekunden
-  vor dem ersten definierten Signal bleiben stehen. Für die beiden zuletzt
-  geänderten Texte entstanden zwei neue Qwen3-TTS-Aufnahmen mit den gewählten
-  Referenzen MIRA B und Alex Plus A. Sie erhielten denselben Sprecherpegel;
-  bei der neuen MIRA-Aufnahme wurde nur ein nachweislich nahezu lautloser
-  Anfangsbereich entfernt. Die übrigen 43 WAVs blieben unverändert.
-  `assets/audio/provenance.json` nennt Bearbeitung und Herkunft je Datei
-  und erhält bei den ersetzten Aufnahmen die vorherigen Metadaten.
-  Frische lokale Whisper-Transkriptionen bestätigten beide neuen Texte;
-  die bestehenden Prüfungen gelten hashgebunden für die erhaltenen Dateien.
-  Diese automatisierte Prüfung bewertet keine Schauspielqualität.
+Die Beiträge werden getrennt ausgewiesen:
 
-Die Modellinferenz lief auf dem Testrechner. Cedric unterstützte die Bedienung
-und Prüfung extern. Modellgewichte und private Produktionsprotokolle sind
-nicht Teil dieses Repositories. Alle Firmen und Verfahren im Spiel sind fiktiv.
+- Die ursprüngliche Fassung und die neue Oberfläche entstanden in
+  protokollierten lokalen Qwen3.8-27B-Läufen. Die Neufassung verwendet direkte
+  Korrekturen von Cedric für Bedienung und Integration. Ein gesonderter lokaler
+  Qwen-Lauf überarbeitet die Bildführung der Oberfläche.
+- Mehrere lokale Entwürfe für Handlung und Spiellogik verletzten wesentliche
+  Anforderungen oder waren nicht durchspielbar. Sie bleiben als verworfene
+  Herstellungsbelege erhalten. Der neue kausale Aufbau, die korrigierten
+  Dialogdaten und der überarbeitete Zustandsautomat stammen ausdrücklich von
+  Cedric. Diese Arbeit wird nicht als rein lokal erzeugter Spielcode ausgegeben.
+- Die Hintergründe und Figurenbilder wurden auf dem Testrechner mit Krea 2
+  Turbo FP8 erzeugt. Für MIRA, Alex Plus und Rolf bestehen eigene lokal trainierte
+  Charakter-LoRAs. Die Figurenblätter von MIRA und Alex Plus liefern jeweils
+  vier Trainingsausschnitte; Rolfs Adapter nutzt vier separat erzeugte Bilder.
+  Die verwendeten Ausdrücke sind kein Nachweis beliebiger zuverlässiger Posen.
+  Der neue Schreibtischhintergrund verwendet keinen Charakteradapter.
+  `assets/art/provenance.json` bindet die einzelnen Bilder, Modelle, Adapter
+  und Prüfsummen.
+- Die ausgewählte Besetzung für lokale Qwen3-TTS-Aufnahmen bleibt MIRA B,
+  Alex Plus A und Rolf. Neue Texte erfordern neue Aufnahmen. Ihr vollständiger
+  Abgleich mit Katalog, Sprachdateien und frischen Whisper-Transkriptionen
+  gehört vor die fertige Lieferung. Automatische Transkription und
+  Signalprüfung ersetzen kein persönliches Probehören und keine menschliche
+  Schauspielbewertung.
+
+Die Werkzeugbedienung lief extern; Modellinferenz und Medienerzeugung erfolgten
+auf dem Testrechner. Modellgewichte und private Produktionsprotokolle sind
+nicht Teil des Spielpakets. Technische Funktion, Verständlichkeit des
+Spielablaufs und subjektiver Spielspaß werden bei der Prüfung getrennt behandelt.

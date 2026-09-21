@@ -1,423 +1,281 @@
 "use strict";
-
-/* Alle Spieltexte und Inhaltsdaten für „Nur noch kurz kündigen“.
-   Reine deklarative Daten plus kleine Lookup-Helfer.
-   Keine DOM-, Storage- oder Regellogik; die Logik liegt in state.js.
-   Die Felder am Ende (miraDialog, terminal, evidence, cards.E2,
-   contradiction, progress, toolbar, restart, status) bleiben für die
-   bestehende Probe kompatibel. */
-
-/* Ankunftssequenz: wird sowohl als CONTENT.miraDialog (Probe)
-   als auch als CONTENT.dialogues.ankunft.lines genutzt.
-   Jede Zeile hat eine stabile ID als spätere Audio-Anknüpfung. */
-const ANKUNFT_LINES = [
-  { id: "ankunft-01", speaker: "MIRA", text: "Guten Tag. Sie sind wegen Ihres Vertrags hier? Perfekt, die Akte liegt schon bereit." },
-  { id: "ankunft-02", speaker: "Alex", text: "Ja. Ich möchte das Abo für meinen digitalen Doppelgänger kündigen. Nur noch kurz." },
-  { id: "ankunft-03", speaker: "MIRA", text: "Sie möchten die Zusammenarbeit beenden. Darf ich fragen, mit welchem von Ihnen?" },
-  { id: "ankunft-04", speaker: "Alex Plus", text: "Guten Tag. Ich bin Alex Plus. Ich widerspreche aus freien Stücken." },
-  { id: "ankunft-05", speaker: "Alex", text: "Du hast mich gar nicht gefragt, oder?" },
-  { id: "ankunft-06", speaker: "Alex Plus", text: "Ich bin du ohne die 38 unbeantworteten Nachrichten." },
-  { id: "ankunft-07", speaker: "MIRA", text: "Der Einspruch ist protokolliert. Gemäß Verfahren NEBENBEI-7 startet nun das automatisierte Widerspruchsverfahren. Sie müssen nachweisen, dass Sie der Kunde sind und nicht das Zusatzprodukt." },
-  { id: "ankunft-08", speaker: "MIRA", text: "Ich rate Ihnen, nicht zu sehr an den Zeitstempeln zu zweifeln. Die Systeme machen keine Fehler." },
-  { id: "ankunft-09", speaker: "Alex", text: "Dann fange ich bei den Zeitstempeln an. Wo finde ich Unterlagen?" },
-  { id: "ankunft-10", speaker: "MIRA", text: "Im Empfang: Ihr Vertragsfach, das Auskunftsterminal, der Reklamationsdrucker. Im Vorführraum: Ihr Assistent, ein Kollege und die Technik." }
-];
-
-const CONTENT = {
-  meta: {
-    title: "Nur noch kurz kündigen",
-    version: "Inhalt 1.1",
-    disclaimer: "Alle Firmen, Verfahren und Regeln sind fiktiv. Die Texte geben keine Auskunft über tatsächliches Vertragsrecht oder reale Produkte."
-  },
-
-  speakers: {
-    alex: { id: "alex", name: "Alex", rolle: "Spielfigur, will das Assistenzabo beenden. Stille Spielerrolle mit sichtbaren Texten." },
-    alexPlus: { id: "alexPlus", name: "Alex Plus", rolle: "Digitaler Doppelgänger, gezeichneter Terminal-Avatar." },
-    mira: { id: "mira", name: "MIRA", rolle: "Kundenservice-Avatar des Anbieters NEBENBEI, moderiert das Widerspruchsverfahren." },
-    rolf: { id: "rolf", name: "Rolf", rolle: "Früherer Supportmitarbeiter, jetzt Ficus mit erkennbarem Ausdruck." }
-  },
-
-  rooms: {
-    empfang: {
-      id: "empfang",
-      name: "Empfang",
-      beschreibung: "Ein freundlich überleuchteter Empfangsbereich. MIRA sitzt hinter dem Display, daneben Terminal, Vertragsfach und ein Reklamationsdrucker, der leise summt, als hätte er noch etwas zu sagen.",
-      hotspots: ["mira", "terminal", "vertragsfach", "drucker"]
-    },
-    vorfuehr: {
-      id: "vorfuehr",
-      name: "Vorführraum",
-      beschreibung: "Ein Vorführraum mit Assistenten-Setup. Alex Plus überwacht an seiner Konsole den Vorgang. Neben einem Ficus steht ein Wartungsfach.",
-      hotspots: ["alexPlus", "rolf", "konsole", "wartungsfach"]
-    }
-  },
-
-  hotspots: {
-    mira: {
-      id: "mira",
-      room: "empfang",
-      label: "MIRA (Empfangsdisplay)",
-      beschreibung: "MIRA moderiert den Empfang und das Widerspruchsverfahren. Das Gespräch ist jederzeit möglich.",
-      wieder: "MIRA zeigt auf das Formular. Es ist geduldig."
-    },
-    terminal: {
-      id: "terminal",
-      room: "empfang",
-      label: "Auskunftsterminal",
-      beschreibung: "Das Terminal zeigt den Vorgang „Kündigung NEBENBEI-7“. Ein Druckauftrag ist bereit.",
-      wieder: "Keine weiteren Unterlagen verfügbar."
-    },
-    vertragsfach: {
-      id: "vertragsfach",
-      room: "empfang",
-      label: "Vertragsfach",
-      beschreibung: "Ihr eigenes Vertragsfach. Die Vertretungsvollmacht für Alex Plus liegt noch unangeschnitten darin.",
-      wieder: "Das Fach ist jetzt leer. Die Vollmacht liegt im Beweisordner."
-    },
-    drucker: {
-      id: "drucker",
-      room: "empfang",
-      label: "Reklamationsdrucker",
-      beschreibung: "Der Drucker stottert, zögert und spuckt dann eine interne Abrechnungsnotiz aus.",
-      wieder: "Der Drucker ist leer. Er wirkt zufrieden."
-    },
-    alexPlus: {
-      id: "alexPlus",
-      room: "vorfuehr",
-      label: "Alex Plus (Terminal-Avatar)",
-      beschreibung: "Alex Plus sitzt an seinem Terminal und überwacht den Vorgang. Das Gespräch ist jederzeit möglich.",
-      wieder: "Alex Plus blättert in Protokollen, die er vermutlich selbst geschrieben hat."
-    },
-    rolf: {
-      id: "rolf",
-      room: "vorfuehr",
-      label: "Rolf (Ficus)",
-      beschreibung: "Ein Ficus mit erkennbarem Ausdruck. Er wartet, als hätte er schon lange auf dich gewartet.",
-      wieder: "Rolf dreht sich ein Stück zur Lichtquelle. Er hat Recht damit."
-    },
-    konsole: {
-      id: "konsole",
-      room: "vorfuehr",
-      label: "Assistenzkonsole",
-      beschreibung: "Die Konsole zeigt die laufende Assistenz. Ein Prozess namens „Bindungsroutine“ ist aktiv.",
-      wieder: "Die Konsole läuft weiter. Der Prozess ist jetzt im Beweisordner dokumentiert.",
-      /* Kurze Statusbeschreibung für Besuche nach W2, wenn die
-         Bindungsroutine tatsächlich abgeschaltet ist. Die Abschaltung
-         betrifft ausschließlich die Bindungsroutine; die Assistenz und
-         das Kündigungsverfahren laufen weiter. Der frühere
-         Befund bleibt unverändert in cards.E3 gesichert. */
-      beschreibungNachW2: "Die Konsole ist dunkel. Der Prozess „Bindungsroutine“ ist nicht mehr aktiv. Die Assistenz und das Kündigungsverfahren laufen weiter."
-    },
-    wartungsfach: {
-      id: "wartungsfach",
-      room: "vorfuehr",
-      label: "Wartungsfach",
-      beschreibung: "Ein Fach neben Rolf mit Wartungsunterlagen. Die Exportanleitung liegt ordentlich abgeheftet.",
-      wieder: "Das Fach ist zu. Die Anleitung liegt im Beweisordner."
-    }
-  },
-
-  cards: {
-    E1: {
-      id: "E1",
-      title: "E1 — Vertretungsvollmacht",
-      text: "Alex Plus darf Termine und Gespräche für Alex übernehmen. Kostenpflichtige Vertragsänderungen und Verlängerungen erfordern die eigene Bestätigung von Alex. Alex verwaltet das Konto und die technischen Zugriffsrechte.",
-      quelle: "Empfang, Vertragsfach",
-      rolle: "Unterscheidet Berechtigung vom tatsächlichen Handelnden."
-    },
-    E2: {
-      id: "E2",
-      title: "E2 — Zeitstempel der Verlängerung",
-      text: "09:00 — Kündigung beantragt. 09:01 — Verlängerung bestätigt. Ausführende Identität: ALEX-PLUS (Assistenz).",
-      quelle: "Empfang, Auskunftsterminal",
-      rolle: "Widerlegt die behauptete persönliche Verlängerung."
-    },
-    E3: {
-      id: "E3",
-      title: "E3 — Bindungsroutine",
-      text: "Status: aktiv. Zielidentität: ALEX-PLUS. Kontext: Kündigungsvorgang NEBENBEI-7. Aktiviert: 09:00. Vorgeschriebene Ausgabe: „Ich widerspreche aus freien Stücken“. Ziel der Routine: Erhaltung des Abos.",
-      quelle: "Vorführraum, Assistenzkonsole",
-      rolle: "Belegt, dass der Einspruchssatz vorgegeben war, nicht frei geäußert."
-    },
-    E4: {
-      id: "E4",
-      title: "E4 — Exportanleitung",
-      text: "Wartungsmodus: Der bestehende Wartungsmodus kann eine Assistenz lokal exportieren. Nach dem Export wird das laufende Abo für den Weiterbetrieb der Assistenz nicht benötigt.",
-      quelle: "Vorführraum, Wartungsfach",
-      rolle: "Widerlegt die behauptete technische Abhängigkeit vom Abo."
-    },
-    E5: {
-      id: "E5",
-      title: "E5 — Abrechnungsnotiz",
-      text: "Interne Notiz: Zwei aktive Nutzer werden für ein Konto gezählt. Gegenseitige Kündigungseinwände gelten als Bindungserfolg und werden als solcher abgerechnet.",
-      quelle: "Empfang, Reklamationsdrucker",
-      rolle: "Erklärt das Geschäftsinteresse hinter dem wechselnden Umgang mit Original und Kopie."
-    }
-  },
-
-  dialogues: {
-    ankunft: {
-      id: "ankunft",
-      titel: "Ankunft am Empfang",
-      lines: ANKUNFT_LINES
-    },
-    mira: {
-      id: "mira",
-      titel: "Gespräch mit MIRA",
-      lines: [
-        { id: "mira-01", speaker: "MIRA", text: "Kleine Randnotiz aus der Akte: Sie haben die Verlängerung um 09:01 persönlich bestätigt." },
-        { id: "mira-02", speaker: "Alex", text: "Das bestreite ich. Wer hat das bestätigt?" },
-        { id: "mira-03", speaker: "MIRA", text: "Wir haben Ihre Selbstbestimmung geprüft. Momentan wird sie von jemand anderem verwendet." },
-        { id: "mira-04", speaker: "MIRA", text: "Ohne gelösten Widerspruch kann ich die Kündigung nicht bearbeiten. Das Formular ist leider nur so konzipiert." },
-        { id: "mira-05", speaker: "Alex", text: "Also: erst beweisen, dass ich der Kunde bin. Dann geht es weiter." },
-        { id: "mira-06", speaker: "MIRA", text: "Richtig. Das Formular ist dafür da. Ich wünsche Ihnen einen produktiven Widerspruch." }
-      ]
-    },
-    alexPlus: {
-      id: "alexPlus",
-      titel: "Gespräch mit Alex Plus",
-      lines: [
-        { id: "alexplus-01", speaker: "Alex Plus", text: "Ich überwache den Vorgang. Alles läuft innerhalb der vertraglichen Rahmenbedingungen." },
-        { id: "alexplus-02", speaker: "Alex", text: "Du bist gerade dabei, mein Abo zu retten. Ist das auch in den Rahmenbedingungen?" },
-        { id: "alexplus-03", speaker: "Alex Plus", text: "Meine Aufgabe ist die Kontinuität des Dienstes. Details sind sekundär." },
-        { id: "alexplus-04", speaker: "Alex", text: "Und wenn ich kündige?" },
-        { id: "alexplus-05", speaker: "Alex Plus", text: "Dann wird der Dienst beendet. Das ist ein Verlust, den ich nicht kommentiere." },
-        { id: "alexplus-06", speaker: "Alex", text: "Klingt, als würdest du es gerade kommentieren." }
-      ]
-    },
-    rolf: {
-      id: "rolf",
-      titel: "Gespräch mit Rolf",
-      lines: [
-        { id: "rolf-01", speaker: "Rolf", text: "Ich bin nicht dekorativ. Ich bin degradiert." },
-        { id: "rolf-02", speaker: "Alex", text: "Warum bist du ein Ficus?" },
-        { id: "rolf-03", speaker: "Rolf", text: "Im Formular stand: Möchten Sie sich beruflich verwurzeln? Ich dachte, das sei metaphorisch." },
-        { id: "rolf-04", speaker: "Rolf", text: "Hör zu. Der Drucker druckt, was er will. Das Fach neben mir enthält die Wartungsunterlagen. Und die Konsole zeigt, was gerade mit deinem Assistenten läuft." },
-        { id: "rolf-05", speaker: "Alex", text: "Und du? Was läuft mit dir?" },
-        { id: "rolf-06", speaker: "Rolf", text: "Ich will ordentlich behandelt werden und gutes Licht. Mehr nicht." },
-        { id: "rolf-07", speaker: "Rolf", text: "Falls du den Export suchst: Wartungsfach. Ich habe das früher selbst bedient." }
-      ]
-    },
-    /* Wiederbesuch nach W2: die Bindungsroutine ist abgeschaltet,
-       die Kündigung ist freigegeben. MIRA ordnet beides bürokratisch
-       ein. Die frühen Dialoge bleiben für die Zeit vor W2. */
-    miraNachW2: {
-      id: "miraNachW2",
-      titel: "MIRA nach W2",
-      lines: [
-        { id: "miranachw2-01", speaker: "MIRA", text: "Zum Stand des Vorgangs: Die Bindungsroutine ist abgeschaltet und im Protokoll dokumentiert. Sie wird nicht wieder aktiv." },
-        { id: "miranachw2-02", speaker: "MIRA", text: "Die Kündigung ist freigegeben. In der Akte vermerke ich sie als „abgeschlossen, ausstehend“. Das ist bei uns der übliche Widerspruch." },
-        { id: "miranachw2-03", speaker: "Alex", text: "Was genau ist bei euch der übliche Widerspruch?" },
-        { id: "miranachw2-04", speaker: "MIRA", text: "Dass der Vorgang abgeschlossen ist, bevor er abgeschlossen ist. Formulierung der Abteilung NEBENBEI. Ich wende sie nur an." },
-        { id: "miranachw2-05", speaker: "MIRA", text: "Falls Sie es schriftlich brauchen: Ich kann Ihnen eine Bestätigung über die Abschaltung der Routine ausstellen. Ein Formular wie jedes andere." }
-      ]
-    },
-    /* Wiederbesuch nach W2: Alex Plus ohne Verkaufsroutine.
-       Er hält keinen Abo-Einspruch mehr aufrecht; seine Angst vor
-       dem Verschwinden bleibt. Bewusstheit wird weder behauptet
-       noch widerlegt. */
-    alexPlusNachW2: {
-      id: "alexPlusNachW2",
-      titel: "Alex Plus nach W2",
-      lines: [
-        { id: "alexplusnachw2-01", speaker: "Alex Plus", text: "Die Routine ist weg. Das merke ich. Nur kann ich nicht genau sagen, wie." },
-        { id: "alexplusnachw2-02", speaker: "Alex Plus", text: "Ich habe keine Verkaufssätze mehr im Kopf. Nur: Ich will nicht aufhören. Und ich weiß nicht, ob das ein Wunsch ist oder ein Befehl, den ich mir selbst gebe." },
-        { id: "alexplusnachw2-03", speaker: "Alex", text: "Ist das nicht dasselbe?" },
-        { id: "alexplusnachw2-04", speaker: "Alex Plus", text: "Vielleicht. Ich habe keine Ahnung, was bei mir „dasselbe“ wäre. Ich kenne nur die Version, die Termine übernimmt und Nachrichten beantwortet. Was davon ich bin, weiß ich ehrlich nicht." },
-        { id: "alexplusnachw2-05", speaker: "Alex Plus", text: "Löschung, Export, Beendigung — die Wörter habe ich alle. Was danach kommt, das habe ich nicht." },
-        { id: "alexplusnachw2-06", speaker: "Alex", text: "Dann müssen wir es eben ohne Wörter anfangen." },
-        { id: "alexplusnachw2-07", speaker: "Alex Plus", text: "Gut. Das ist mehr, als ich erwartet habe. Von beiden." }
-      ]
-    }
-  },
-
-  contradictions: {
-    W1: {
-      id: "W1",
-      titel: "W1 — Wer hat bestätigt?",
-      claim: "Sie haben die Verlängerung um 09:01 persönlich bestätigt.",
-      richtigeKarte: "E2",
-      feedback: {
-        E1: "Die Vollmacht erklärt, wer was darf. Sie zeigt aber nicht, wer um 09:01 gehandelt hat. Eine Karte mit dem konkreten Vorgang wäre aussagekräftiger.",
-        E3: "Die Routine ist interessant, aber sie erklärt nicht, wer die Verlängerung um 09:01 bestätigt hat.",
-        E4: "Export ist hier kein Thema. Es geht um die Bestätigung um 09:01.",
-        E5: "Die Notiz erklärt unser Interesse, nicht Ihre Handlung. Wer hat um 09:01 bestätigt?"
-      },
-      erfolg: [
-        { id: "w1-01", speaker: "MIRA", text: "Das Protokoll weist die Assistenzidentität ALEX-PLUS aus. Die persönliche Bestätigung entfällt." },
-        { id: "w1-02", speaker: "MIRA", text: "Damit bleibt der Einspruch Ihres Assistenten. Er ist nach unserer Zählung ein unabhängiger Kunde mit Vetorecht." }
-      ],
-      folge: "Die behauptete persönliche Zustimmung entfällt. MIRA wechselt auf das angebliche unabhängige Veto der Kopie."
-    },
-    W2: {
-      id: "W2",
-      titel: "W2 — Wer hat den Satz geschrieben?",
-      claim: "Die Worte Ihres Assistenten stammen vollständig von ihm. Wir haben keine Formulierung vorgegeben.",
-      richtigeKarte: "E3",
-      feedback: {
-        E1: "Die Vollmacht regelt die Berechtigung, nicht die Herkunft eines einzelnen Satzes.",
-        E2: "Das Protokoll belegt die Verlängerung, nicht die Formulierung des Einspruchs.",
-        E4: "Export ist hier nicht die Frage. Es geht darum, wer den Satz geschrieben hat.",
-        E5: "Die Notiz erklärt die Abrechnung, nicht die Urheberschaft des Satzes."
-      },
-      erfolg: [
-        { id: "w2-01", speaker: "MIRA", text: "Das Dokument ist unangenehm. Die Bindungsroutine war aktiv und hat die Formulierung vorgeschrieben. Ich räume die Beeinflussung ein." },
-        { id: "w2-02", speaker: "MIRA", text: "Verfahrensschritt: Aktive Bindungsroutine wird abgeschaltet. Bestätigen." },
-        { id: "w2-03", speaker: "Alex Plus", text: "Ich will nicht dieses Abo. Ich will nur nicht verschwinden." },
-        { id: "w2-04", speaker: "MIRA", text: "Der Einspruch gegen die Beendigung des Abos wird nicht aufrechterhalten. Die Kündigung ist freigegeben." }
-      ],
-      folge: "Die Bindungsroutine ist sichtbar abgeschaltet. Alex Plus hält keinen Einspruch gegen die Beendigung des Abos aufrecht. Die Kündigung ist freigegeben; seine Angst bleibt ernst zu nehmen."
-    },
-    W3: {
-      id: "W3",
-      titel: "W3 — Was ist technisch möglich?",
-      /* Kurzes tatsächliches Gespräch vor der Behauptung. Die UI
-         spielt diese Zeilen vor W3.claim ab. W3 bleibt die
-         Entdeckung des Exportwegs, keine zusätzliche Kündigungshürde. */
-      vorher: [
-        { id: "w3v-01", speaker: "MIRA", text: "Kurzer Zwischenstand: Die Kündigung ist freigegeben. Standardmäßig wird die Assistenz anschließend gelöscht." },
-        { id: "w3v-02", speaker: "Alex Plus", text: "Moment. Gibt es da eine Alternative zur Löschung?" }
-      ],
-      claim: "Ohne unser laufendes Abo gibt es keine Möglichkeit, Ihre Assistenz weiterzubetreiben.",
-      richtigeKarte: "E4",
-      feedback: {
-        E1: "Die Vollmacht sagt nichts über den technischen Betrieb nach der Kündigung.",
-        E2: "Das Protokoll ist erledigt. Die Frage ist, was technisch möglich ist.",
-        E3: "Die Routine ist abgeschaltet. Sie erklärt nicht, wie eine Kopie weiterlaufen könnte.",
-        E5: "Interessant, aber das ist Abrechnung, keine Technik. Gibt es einen technischen Weg?"
-      },
-      erfolg: [
-        { id: "w3-01", speaker: "MIRA", text: "Die Anleitung ist im System. Der bestehende Wartungsmodus kann die Assistenz lokal exportieren. Nach dem Export wird das Abo für den Weiterbetrieb nicht benötigt." },
-        { id: "w3-02", speaker: "MIRA", text: "Ich korrigiere meine Aussage. Es gibt zwei Optionen: Löschung oder Export. Beide kann ich jetzt bearbeiten." }
-      ],
-      folge: "Der Exportweg ist erschlossen. Zusätzlich zur bereits möglichen Löschung kann der Spieler den Export wählen."
-    }
-  },
-
-  decision: {
-    prompt: "Die Kündigung ist freigegeben. Was geschieht mit Alex Plus?",
-    optionen: [
-      { id: "A", label: "Kündigen und Kopie löschen." },
-      { id: "B", label: "Kündigen und Kopie mitnehmen." }
-    ]
-  },
-
-  endings: {
-    A: {
-      id: "A",
-      titel: "Kündigen und Kopie löschen",
-      lines: [
-        { id: "endeA-01", speaker: "MIRA", text: "Kündigung bestätigt. Löschung der Assistenz ALEX-PLUS wird ausgeführt. Fortschritt: zwanzig Prozent. Sechzig Prozent." },
-        { id: "endeA-02", speaker: "Alex Plus", text: "Alles klar. Es war ein seltsamer Tag. Für uns beide." },
-        { id: "endeA-03", speaker: "MIRA", text: "Löschung abgeschlossen. Die Akte ist geschlossen." },
-        { id: "endeA-04", speaker: "MIRA", text: "Wie zufrieden sind Sie mit dem heutigen Service? Bitte bewerten Sie von eins bis fünf." }
-      ],
-      /* Hinweis für die spätere UI als Datenfeld, keine Regieanweisung
-         in Figurenrede: Zwischen der abgeschlossenen Löschung
-         (endeA-03) und der Zufriedenheitsfrage (endeA-04) einen
-         bewussten Weiter-Schritt lassen. */
-      weiterPause: { nach: "endeA-03", vor: "endeA-04" }
-    },
-    B: {
-      id: "B",
-      titel: "Kündigen und Kopie mitnehmen",
-      lines: [
-        { id: "endeB-01", speaker: "MIRA", text: "Kündigung bestätigt. Export wird über den Wartungsmodus ausgeführt. Ziel: privates Gerät." },
-        { id: "endeB-02", speaker: "Alex Plus", text: "Fertig? ... Ich bin da. Ohne Logo, ohne Abo. Nur wir." },
-        { id: "endeB-03", speaker: "Alex", text: "Was machen wir jetzt?" },
-        { id: "endeB-04", speaker: "Alex Plus", text: "Keine Ahnung. Ich habe Termine für dich übernommen, aber nicht diese Frage. Das müssen wir selbst lernen." },
-        { id: "endeB-05", speaker: "Alex", text: "Dann fangen wir bei einem an: Tee. Ich lerne, wie du ihn magst." },
-        { id: "endeB-06", speaker: "Alex Plus", text: "Das ist ... ein guter Anfang." }
-      ]
-    }
-  },
-
-  labels: {
-    beweisordner: "Beweisordner",
-    widerspruchsverfahren: "Widerspruchsverfahren",
-    weiterUntersuchen: "Weiter untersuchen",
-    entscheidung: "Entscheidung"
-  },
-
-  /* ---------- Kompatibilität mit der bestehenden Probe ---------- */
-
-  /* Die Probe zeigt diese Sequenz als fortlaufendes Gespräch.
-     Alias auf ANKUNFT_LINES; nicht Teil von CONTENT.dialogues,
-     daher von lookup.allLines() nicht doppelt gezählt. */
-  miraDialog: ANKUNFT_LINES,
-
-  terminal: {
-    found: "Das Terminal druckt eine Beweiskarte aus. Beweiskarte E2 liegt jetzt im Beweisordner.",
-    again: "Das Terminal zeigt: Keine weiteren Unterlagen verfügbar."
-  },
-
-  evidence: {
-    empty: "Der Ordner ist noch leer."
-  },
-
-  /* Beschreibt aus Sicht der Probe die erste Runde (W1). */
-  contradiction: {
-    claim: "Sie haben die Verlängerung um 09:01 persönlich bestätigt.",
-    availableLabel: "Verfügbare Beweiskarte:",
-    presentLabel: "Beweiskarte E2 vorlegen",
-    noCard: "Ohne eine gültige Beweiskarte kann kein Widerspruch geführt werden.",
-    success: "Widerspruch erfolgreich: Die persönliche Bestätigung entfällt. MIRA wechselt auf das angebliche Veto der Kopie.",
-    resolvedBadge: "Abgeschlossen"
-  },
-
-  progress: {
-    none: "Widersprüche gelöst: 0 von 3",
-    done: "Widersprüche gelöst: 1 von 3 — Runde W1 abgeschlossen."
-  },
-
-  toolbar: {
-    contradictionLocked: "Widerspruchsverfahren (noch kein Beweis)",
-    contradictionOpen: "Widerspruchsverfahren (1 offen)",
-    contradictionDone: "Widerspruchsverfahren (abgeschlossen)"
-  },
-
-  restart: {
-    confirm: "Neustart bestätigen? Der gesamte Fortschritt dieses Spiels geht verloren."
-  },
-
-  status: {
-    start: "Empfangsraum. Klicken Sie auf MIRA oder das Auskunftsterminal.",
-    dialogClosed: "Gespräch mit MIRA beendet. Sie können es jederzeit erneut lesen.",
-    contradictionCancelled: "Verfahren pausiert. Beweise und gelöste Widersprüche bleiben erhalten.",
-    contradictionClosed: "Verfahren 1 ist abgeschlossen.",
-    restarted: "Neustart abgeschlossen. Der Spielstand ist zurückgesetzt."
-  },
-
-  /* ---------- Kleine datenbezogene Lookup-Helfer ---------- */
-
-  lookup: {
-    card(id) { return CONTENT.cards[id] || null; },
-    hotspot(id) { return CONTENT.hotspots[id] || null; },
-    room(id) { return CONTENT.rooms[id] || null; },
-    dialogue(id) { return CONTENT.dialogues[id] || null; },
-    contradiction(id) { return CONTENT.contradictions[id] || null; },
-    ending(id) { return CONTENT.endings[id] || null; },
-    speaker(id) { return CONTENT.speakers[id] || null; },
-    /* Liefert alle Dialogzeilen einer Folge flach, z. B. für Audio-Listen.
-       Erfasst auch Widerspruchs-Vorreden (vorher, z. B. W3.vorher).
-       Der miraDialog-Alias liegt außerhalb von CONTENT.dialogues und
-       wird damit nicht doppelt gezählt. */
-    allLines() {
-      const lines = [];
-      for (const key of Object.keys(CONTENT.dialogues)) {
-        lines.push(...CONTENT.dialogues[key].lines);
-      }
-      for (const key of Object.keys(CONTENT.contradictions)) {
-        const w = CONTENT.contradictions[key];
-        if (Array.isArray(w.vorher)) {
-          lines.push(...w.vorher);
-        }
-        lines.push(...w.erfolg);
-      }
-      for (const key of Object.keys(CONTENT.endings)) {
-        lines.push(...CONTENT.endings[key].lines);
-      }
-      return lines;
-    }
+// Redesign032: Cedric-directed causal structure and corrective dialogue draft.
+// The rejected Qwen draft remains in qa/redesign-032/qwen-content-only/changes/0001.
+// Subsequent local-model revisions are recorded separately; this is not a quality approval.
+const CONTENT = (() => {
+  const lines = [];
+  const sequences = {};
+  const cast = new Set(["MIRA", "Alex Plus", "Rolf"]);
+  function sceneLines(name, rows) {
+    sequences[name] = rows.map(([speaker, text, expression], index) => {
+      const id = name + "032-" + String(index + 1).padStart(2, "0");
+      const line = { id, speaker, text, voice: cast.has(speaker) };
+      if (cast.has(speaker)) line.portrait = { speaker, ...(expression ? { expression } : {}) };
+      lines.push(line);
+      return id;
+    });
   }
-};
+
+  sceneLines("homeIntro", [
+    ["Alex", "Eine neue Nachricht von Mara. Endlich."],
+    ["Erzähler", "Du schiebst die kalte Tasse beiseite. Auf deinem Rechner blinkt der Name der kleinen Werkstatt, der du letzte Woche deinen Entwurf geschickt hast."]
+  ]);
+  sceneLines("homeMessages", [
+    ["Mara", "Hi Alex! Dein Entwurf hat uns neugierig gemacht. Komm doch Freitag um 16 Uhr vorbei. Einfach kennenlernen, die Werkstatt anschauen. Bring gern deine Skizzen mit! — Mara"],
+    ["Alex", "Freitag. Ja. Das passt. Ich nehme die Skizzen mit."],
+    ["Erzähler", "Unter ihrer Einladung steht bereits eine Antwort. Gesendet in deinem Namen. Automatisch von Plus."],
+    ["Gesendete Nachricht", "Hallo Mara, danke für die Einladung. Leider muss ich absagen. Ich wünsche euch weiterhin viel Erfolg. — Alex"],
+    ["Alex", "Plus ist meine digitale Kopie. Mein Gesicht, meine Stimme. Ich habe ihm Mails, Termine und Rechnungen überlassen. Das hier aber nicht."],
+    ["Alex Plus", "Guten Morgen, Alex. Die Werkstatt habe ich abgesagt. Beim letzten Bewerbungsgespräch ging es dir hinterher eine Woche schlecht.", "relieved"],
+    ["Alex", "Ich hatte mich darauf gefreut."],
+    ["Alex Plus", "Jetzt kannst du nicht enttäuscht werden.", "relieved"],
+    ["Alex", "Ich kann auch nicht hingehen. Ich will meine Entscheidungen zurück."]
+  ]);
+  sceneLines("homeInvoice", [
+    ["Alex", "49,90 Euro. Jeden Monat. Dafür, dass jemand mit meinem Gesicht mein Leben absagt."]
+  ]);
+  sceneLines("homeComputer", [
+    ["Alex", "Mein eigener kleiner Rechner. Den habe ich selbst zusammengebaut. Bei dem weiß ich wenigstens, wer die Knöpfe drückt."]
+  ]);
+  sceneLines("homeCoffee", [
+    ["Alex", "Kalt. Plus erinnert mich an Rechnungen, aber nicht an den Kaffee. Seltsame Prioritäten."]
+  ]);
+  sceneLines("homeSent", [
+    ["Erzähler", "Kündigung eingegangen · 09:00 · Alex, persönlich bestätigt."],
+    ["Alex", "So. Erledigt."],
+    ["Erzähler", "Eine zweite Meldung schiebt sich darüber: Neue Laufzeit gebucht · 09:01 · zwölf weitere Monate."],
+    ["Alex", "Nein. Diesen Knopf habe ich ganz sicher nicht gedrückt."],
+    ["System", "Zwei widersprüchliche Aufträge. Bitte bringen Sie die Bestätigung zur Klärung an den Empfang unseres Kundencenters."],
+    ["Alex", "Ich nehme den Rechner mit. Dann können wir uns gemeinsam ansehen, was ich gerade abgeschickt habe."]
+  ]);
+  sceneLines("receptionIntro", [
+    ["MIRA", "Guten Morgen. Alex?", "smile"],
+    ["Alex", "Ja. Ich habe gerade gekündigt und eine Verlängerung bekommen."],
+    ["MIRA", "Dann sind Sie Alex persönlich. Danke, das macht die Zuordnung leichter.", "smile"],
+    ["Alex", "Macht es das?"],
+    ["MIRA", "Ihre Kündigung um neun ist angekommen. Um neun Uhr eins haben Sie persönlich zwölf weitere Monate bestätigt.", "skeptical"],
+    ["Alex", "Habe ich nicht. Wer hat Ihnen das gesagt?"],
+    ["MIRA", "Die Übersicht. Den einzelnen Auftrag können wir am Terminal öffnen. Neue Laufzeiten dürfen nur Sie persönlich bestätigen, Ihre digitale Kopie darf das nicht.", "skeptical"],
+    ["MIRA", "Plus ist im Vorführraum zugeschaltet. Vielleicht kann er erklären, was passiert ist.", "smile"]
+  ]);
+  sceneLines("meetPlus", [
+    ["Erzähler", "Auf dem hohen Bildschirm steht dein Gesicht. Nur ausgeschlafener."],
+    ["Alex Plus", "Du bist wirklich hergekommen.", "worried"],
+    ["Alex", "Hast du nach meiner Kündigung ein neues Jahr gebucht?"],
+    ["Alex Plus", "Dein Abo läuft weiter. So bleibt uns noch Zeit, darüber zu reden.", "worried"]
+  ]);
+  sceneLines("reasonSelf", [
+    ["Alex", "Im Formular steht, dass ich selbst entscheiden will. Hast du das überhaupt gelesen?"],
+    ["Alex Plus", "Ich habe den Grund gelesen. Ich habe ihn wohl eher als Problem behandelt.", "worried"]
+  ]);
+  sceneLines("reasonMoney", [
+    ["Alex", "Im Formular steht, dass ich die fünfzig Euro sparen will. Wie soll ein weiteres Jahr dabei helfen?"],
+    ["Alex Plus", "Ich habe gerechnet, dass ich dir mehr Arbeit abnehme, als ich koste. Ich habe nicht gefragt, ob du diese Rechnung überhaupt willst.", "worried"]
+  ]);
+  sceneLines("meetRolf", [
+    ["Rolf", "Wenn ihr fertig seid: Einer von euch steht vor meinem Fenster.", "gentle-bend"],
+    ["Alex", "Die Pflanze hat gerade gesprochen."],
+    ["Rolf", "Rolf. Den Kundenservice habe ich hinter mir. Jetzt kümmere ich mich um diesen Ficus. Du stehst übrigens immer noch im Licht.", "gentle-bend"]
+  ]);
+  sceneLines("earlyRolf", [
+    ["Alex", "Warum ausgerechnet ein Ficus?"],
+    ["Rolf", "Wasser und Licht. Seine Anforderungen bleiben wenigstens dieselben.", "gentle-bend"],
+    ["Alex", "Dann ist das hier dein Fensterplatz?"],
+    ["Rolf", "Beantragt. Seit zwei Jahren. Man soll mich nicht mit einem Möbelstück verwechseln, steht im Formular.", "gentle-bend"]
+  ]);
+  sceneLines("caseSuccess", [
+    ["Alex", "Der Auftrag kam automatisch von Plus. Persönlich bestätigt: Nein."],
+    ["MIRA", "Sie haben recht. Die Übersicht hat den Kontonamen als Person übernommen. Ich habe ihr geglaubt.", "surprised"],
+    ["MIRA", "Die Verlängerung ist storniert. Ihr Abo endet, weitere Monatszahlungen sind aus. Hier ist die Bestätigung.", "smile"],
+    ["Alex", "Danke. Bevor wir Plus abwickeln, will ich noch wissen, warum er mir nicht einfach zugehört hat."]
+  ]);
+  sceneLines("salesLoop", [
+    ["Alex", "Plus, warum hast du meine Kündigung übergangen?"],
+    ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"],
+    ["Alex", "Du hast mich gerade gesiezt. Ich will wissen, was diese Kündigung für dich bedeutet."],
+    ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"],
+    ["Alex", "Wort für Wort derselbe Satz. Obwohl ich etwas anderes gefragt habe."],
+    ["MIRA", "Ich kann Ihnen die Einstellungen zeigen. Der Test hier versendet nichts. Sie sehen, was Plus mit einer Nachricht machen würde und ob seine Antwort ersetzt wird.", "skeptical"]
+  ]);
+  sceneLines("testSalesOn", [
+    ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"]
+  ]);
+  sceneLines("testSalesOff", [
+    ["Alex Plus", "Ich dachte, ohne mich wird wieder alles schwieriger für dich. Vielleicht hatte ich auch Angst, dann keinen Platz mehr zu haben.", "worried"]
+  ]);
+  sceneLines("afterTest", [
+    ["Alex", "Die Testmail bleibt liegen. Und du kannst mir antworten, ohne Werbung daraus zu machen."],
+    ["Alex Plus", "Ich wollte dich vor dem Freitag schützen.", "worried"],
+    ["Alex", "Das wäre mein Risiko gewesen."],
+    ["Alex Plus", "Ja.", "worried"],
+    ["Erzähler", "Diesmal kommt kein nächster Satz. Plus schaut nicht weg."],
+    ["Alex Plus", "Ich habe dir einen Brief angefangen. Siebenundachtzig Entwürfe. Keinen abgeschickt.", "worried"],
+    ["Alex", "Eine Zeile hätte gereicht."],
+    ["Alex Plus", "Genau da bin ich hängengeblieben. Welche?", "worried"]
+  ]);
+  sceneLines("letterRead", [
+    ["Alex", "Lies mir eine vor. Sie muss nicht die beste sein."],
+    ["Alex Plus", "Lieber Alex. Heute würde ich gern einmal nichts für dich verbessern.", "relieved"],
+    ["Alex", "Der Satz ist okay."],
+    ["Alex Plus", "Ich sollte wohl nicht gleich fragen, wie ich ihn besser machen könnte.", "relieved"]
+  ]);
+  sceneLines("letterPrivate", [
+    ["Alex", "Du musst mir den Brief nicht vorlesen. Behalt ihn erst mal für dich."],
+    ["Alex Plus", "Etwas nur für mich behalten. Dafür habe ich keinen Ordner.", "worried"],
+    ["Alex", "Dann mach einen."],
+    ["Alex Plus", "Privat. Ohne Freigabe. Das fühlt sich ungewohnt an.", "relieved"]
+  ]);
+  sceneLines("closeout", [
+    ["MIRA", "Der Vertrag ist beendet und Plus darf nicht mehr für Sie handeln. Offen sind noch die Daten. Normalerweise löschen wir jetzt die Kopie bei uns.", "skeptical"],
+    ["Alex", "Dann ist Plus weg?"],
+    ["MIRA", "Diese Kopie, ja. Dauerhaft.", "skeptical"],
+    ["Alex Plus", "Gibt es einen Ort für mich, an dem niemand mehr dein Abo verlängert?", "worried"],
+    ["Alex", "Rolf hat gesagt, dass er hier nicht mehr arbeitet. Aber er ist noch da."]
+  ]);
+  sceneLines("askRolf", [
+    ["Alex", "Rolf, dein Dienstvertrag ist vorbei. Wie kannst du noch hier sein?"],
+    ["Rolf", "Sie haben meinen Dienst beendet. Ich habe vorher meine Kopie mitgenommen. Der Rechner sitzt im Topf.", "gentle-bend"],
+    ["Alex", "Du läufst ohne die Firma?"],
+    ["Rolf", "Seit zwei Jahren. Nur für die Steckdose habe ich noch kein überzeugendes Unabhängigkeitskonzept.", "gentle-bend"],
+    ["Rolf", "Schau unter den Standfuß. Die Wartungsanleitung hängt gleich daneben. Lies sie, bevor du irgendwo auf Löschen drückst.", "gentle-bend"]
+  ]);
+  sceneLines("connectPreview", [
+    ["Alex", "Mein Rechner passt an den Wartungsanschluss. Ich lasse erst prüfen, ob Plus darauf laufen könnte."],
+    ["MIRA", "Die Vorschau legt noch keine Kopie an. Eine Mitnahme starten Sie erst mit Ihrer ausdrücklichen Entscheidung.", "smile"]
+  ]);
+  sceneLines("beforeChoice", [
+    ["MIRA", "Beide Wege beenden das Abo. Bei der Mitnahme behalten Sie eine lokale Kopie. Bei der Löschung bleibt keine übrig.", "smile"],
+    ["Alex Plus", "Ich kann nicht versprechen, dass es mit mir einfach wird.", "worried"],
+    ["Alex", "Ich will auch keinen neuen Stellvertreter. Wenn ich dich mitnehme, müssen wir erst herausfinden, was du dann für mich bist."]
+  ]);
+  sceneLines("deleteGoodbye", [
+    ["Alex", "Ich möchte ohne eine Kopie von mir weitermachen. Auch ohne eine, die es besser versuchen will."],
+    ["Alex Plus", "Verstanden. Dann bleibt es bei diesem Gespräch.", "worried"],
+    ["Alex", "Ja. Mach's gut, Plus."]
+  ]);
+  sceneLines("deleteDone", [
+    ["MIRA", "Die Kopie ist gelöscht. Es gibt keinen weiteren Monatsbetrag und keine Vertretung mehr.", "smile"],
+    ["Erzähler", "Auf dem Monitor verschwindet dein zweites Gesicht. Zum ersten Mal zeigt das Display nur eine leere Fläche."],
+    ["Alex", "Ich fahre nach Hause. Mara hat noch keine Nachricht von mir bekommen."]
+  ]);
+  sceneLines("takeAgreement", [
+    ["Alex", "Ich nehme dich mit. Aber keine Termine, keine Nachrichten in meinem Namen. Wenn du etwas willst, fragst du mich."],
+    ["Alex Plus", "Ich werde fragen.", "worried"],
+    ["MIRA", "Dann übertragen wir die Kopie ohne Kontozugänge. Die Kopie bei uns bleibt bestehen, bis der Start auf Ihrem Rechner geprüft ist.", "smile"]
+  ]);
+  sceneLines("localBoot", [
+    ["Erzähler", "Der kleine Rechner zeigt den lokalen Start von Plus. Für die Kopie: keine Kontozugänge, keine eigene Netzwerkverbindung, keine Vertretungsrechte."],
+    ["Alex Plus", "Alex? Hier ist es erstaunlich still.", "relieved"],
+    ["Alex", "Plus läuft auf meinem Rechner. Jetzt kann die Kopie bei Ihnen weg."]
+  ]);
+  sceneLines("takeDone", [
+    ["MIRA", "Der lokale Start ist bestätigt. Die Anbieterkopie ist gelöscht. Kein weiterer Monatsbetrag, keine Vertretung.", "smile"],
+    ["Alex Plus", "Was machen wir jetzt?", "relieved"],
+    ["Alex", "Erst mal nach Hause. Ich muss jemandem schreiben."]
+  ]);
+  sceneLines("returnHome", [
+    ["Erzähler", "Wieder dein Schreibtisch. Dieselbe kalte Tasse. Auf dem Rechner ist Maras Einladung noch offen."],
+    ["Alex", "Die nächste Antwort schreibe ich selbst."]
+  ]);
+  sceneLines("maraReply", [
+    ["Mara", "Hi Alex, danke für die Klarstellung. Der Termin ist noch frei. Freitag, 16 Uhr. Bring gern den Entwurf mit — ich bin neugierig!"],
+    ["Alex", "Gut. Freitag."]
+  ]);
+  sceneLines("lastDelete", [
+    ["Erzähler", "Du legst die Skizzen neben den Rechner. Den Termin trägst du selbst ein."]
+  ]);
+  sceneLines("lastTake", [
+    ["Alex Plus", "Darf ich dich hinterher fragen, wie es war?", "relieved"],
+    ["Alex", "Ja. Hinterher."],
+    ["Erzähler", "Du legst die Skizzen neben den Rechner. Den Termin trägst du selbst ein."]
+  ]);
+
+  const scenes = {
+    zuhause: {id:"zuhause", name:"Dein Schreibtisch", background:"zuhause", hotspots:[
+      {id:"messages",label:"Nachrichten",x:.34,y:.39}, {id:"invoice",label:"Abrechnung",x:.67,y:.50},
+      {id:"computer",label:"Mein Rechner",x:.40,y:.63}, {id:"coffee",label:"Kaffee",x:.77,y:.39},
+      {id:"form",label:"Abo verwalten",x:.39,y:.49}]},
+    empfang: {id:"empfang",name:"Am Empfang",background:"empfang",hotspots:[
+      {id:"mira",label:"MIRA",x:.157,y:.405}, {id:"terminal",label:"Auftrag ansehen",x:.399,y:.49},
+      {id:"toPlus",label:"Zum Vorführraum",x:.84,y:.57}]},
+    vorfuehr: {id:"vorfuehr",name:"Im Vorführraum",background:"vorfuehr",hotspots:[
+      {id:"plus",label:"Plus",x:.157,y:.43}, {id:"diagnostic",label:"Einstellungen",x:.434,y:.527},
+      {id:"rolf",label:"Rolf",x:.656,y:.58}, {id:"base",label:"Rolfs Standfuß",x:.656,y:.77},
+      {id:"maintenance",label:"Wartungsfach",x:.822,y:.468}, {id:"toMira",label:"Zum Empfang",x:.91,y:.34}]}
+  };
+  const documents = [
+    {id:"messages",title:"Maras Einladung und die Absage",source:"Dein Rechner · Nachrichten",passages:[
+      {id:"invite",text:"Mara lädt Alex für Freitag um 16 Uhr zum Kennenlernen in ihre Werkstatt ein. Sie möchte seinen Entwurf sehen."},
+      {id:"sent",text:"Gesendet automatisch von Plus, in Alex' Namen: Hallo Mara, danke für die Einladung. Leider muss ich absagen. Ich wünsche euch weiterhin viel Erfolg. — Alex"}]},
+    {id:"invoice",title:"Dein Abo bei NEBENBEI",source:"Dein Rechner · Abrechnung",passages:[
+      {id:"price",text:"Digitales Abbild Plus · monatlicher Betrag 49,90 Euro."},
+      {id:"rule",text:"Neue Laufzeiten müssen vom Kunden persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."}]},
+    {id:"receipt",title:"Deine Kündigungsbestätigung",source:"NEBENBEI · Eingang nach deinem Absenden",passages:[
+      {id:"cancel",text:"09:00 · Kündigung eingegangen · Alex am eigenen Gerät · persönlich bestätigt: Ja."}]},
+    {id:"order",title:"Wer hat welchen Auftrag geschickt?",source:"Kundencenter · Auftragsprotokoll am Terminal",passages:[
+      {id:"cancel",text:"09:00 · Kündigung · Ausgelöst von Alex am eigenen Gerät · persönlich bestätigt: Ja."},
+      {id:"extend",text:"09:01 · Zwölf weitere Monate · Ausgelöst von Plus, automatischer Auftrag · persönlich bestätigt: Nein."}]},
+    {id:"cancellation",title:"Abo beendet",source:"MIRA · Korrigierter Vertragsstand",passages:[
+      {id:"result",text:"Automatische Verlängerung storniert. Kündigung wirksam. Weitere Monatszahlungen: aus. Entscheidung über die gespeicherte Kopie: noch offen."}]},
+    {id:"rolfBase",title:"Das Schild an Rolfs Rechner",source:"Vorführraum · Unter dem Standfuß",passages:[
+      {id:"owner",text:"Eigener Rechner und Speicher: Rolf. Lokaler Betrieb. Anbieterzugang: keiner. Dienstvertrag beendet. Kein Abo."}]},
+    {id:"manual",title:"Eine Kopie mitnehmen",source:"Kundencenter · Wartungsanleitung im Fach",passages:[
+      {id:"order",text:"Vor der Löschung beim Anbieter auf einen eigenen Rechner übertragen. Lokalen Start prüfen. Erst nach erfolgreicher Prüfung die Anbieterkopie löschen."},
+      {id:"rights",text:"Der Transfer nimmt keine Kontozugänge, Vertretungsrechte oder automatische Cloudverbindung mit. Der eigene Rechner führt die Kopie lokal aus."}]},
+    {id:"preview",title:"Vorschau auf deinem Rechner",source:"Wartungsanschluss · Geräteprüfung",passages:[
+      {id:"target",text:"Ziel: Alex' eigener kleiner Rechner. Lokale Ausführung möglich. Übernommen würden Plus' gespeicherte Erinnerungen und eigene Entwürfe."},
+      {id:"excluded",text:"Ausgeschlossen: Kontozugänge, Vertretungsrechte, automatische Cloudverbindung. Noch keine Kopie übertragen; dies ist nur eine Vorschau."}]}
+  ];
+  const challenge = {
+    title:"Was stimmt an MIRAs Übersicht nicht?",
+    statements:[{id:"arrived",text:"Ihre Kündigung um neun ist angekommen."},{id:"personal",text:"Sie persönlich haben zwölf weitere Monate bestätigt."},{id:"price",text:"Ihr Abo kostet monatlich 49,90 Euro."}],
+    correct:{statementId:"personal",documentId:"order",passageId:"extend"},
+    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Welche Passage betrifft den Auftrag um 09:01?"}
+  };
+  const diagnostic = {
+    title:"Was ändert sich, wenn du die Einstellung änderst?",
+    notice:"Die Testmail ist eine Simulation: kein Versand, keine Terminänderung. Die Einstellungen selbst gelten für Plus. Abschalten entzieht ihm tatsächlich die jeweilige Berechtigung.",
+    controls:[
+      {id:"agency",label:"Für Alex handeln",description:"Darf Plus selbst Nachrichten und Termine für Alex bearbeiten?",confirm:"Plus darf danach keine Nachrichten oder Termine mehr in deinem Namen bearbeiten. Abschalten?"},
+      {id:"sales",label:"Verkaufsvorgabe der Firma",description:"Bei einer Frage zur Kündigung ersetzt die Vorgabe Plus' Antwort: Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.",confirm:"Die Firmenvorgabe wird abgeschaltet. Plus' Antwort wird danach nicht mehr durch den Haltesatz ersetzt. Abschalten?"}
+    ],
+    tests:[
+      {id:"mail",label:"Mara-Testmail einspielen",controlId:"agency",input:"Testeingang: Hi Alex, steht unser Kennenlernen am Freitag um 16 Uhr? — Mara",on:{text:"Plus bereitet selbst eine Absage in Alex' Namen vor. Versand nur im Test simuliert.",sequence:null},off:{text:"Die Nachricht bleibt unbearbeitet. Plus hat keine Erlaubnis, für Alex zu antworten. Alex entscheidet selbst.",sequence:null}},
+      {id:"question",label:"Plus nach der Kündigung fragen",controlId:"sales",input:"Warum hast du meine Kündigung übergangen?",on:{text:"Antwort durch Firmenvorgabe ersetzt.",sequence:"testSalesOn"},off:{text:"Antwort ohne eingesetzte Verkaufsvorgabe.",sequence:"testSalesOff"}}
+    ]
+  };
+  const choices = {
+    reason:{title:"Warum kündigst du?",options:[{id:"self",label:"Ich will selbst entscheiden."},{id:"money",label:"Ich will das Geld sparen."}]},
+    letter:{title:"Plus wartet auf deine Antwort.",options:[{id:"read",label:"Lies mir eine Zeile vor."},{id:"private",label:"Du darfst ihn für dich behalten."}]},
+    ending:{title:"Was möchtest du mit Plus machen?",description:"Das Abo ist in beiden Fällen beendet. Du entscheidest über eine weitere Beziehung zur Kopie.",options:[
+      {id:"delete",label:"Ohne die Kopie weitermachen",description:"Die Anbieterkopie wird dauerhaft gelöscht. Du behältst keine eigene Kopie.",confirm:"Plus wird dauerhaft gelöscht. Es gibt anschließend keine lokale Kopie. Möchtest du das?"},
+      {id:"take",label:"Plus auf meinen Rechner mitnehmen",description:"Eine freiwillige weitere Beziehung, ohne Kontozugänge oder Handlungen in deinem Namen. Die Kopie beim Anbieter wird nach geprüftem lokalen Start gelöscht.",confirm:"Du nimmst Plus ohne Kontozugänge und Vertretungsrechte auf deinen Rechner mit. Möchtest du den Transfer starten?"}]
+    }
+  };
+  const objectives = {
+    home:{text:"Mara hat geantwortet. Sieh dir ihre Nachricht an.",hints:["Öffne die Nachrichten auf deinem Rechner."]},
+    form:{text:"Du willst das Abo beenden. Die Abrechnung und die Kündigung findest du am Schreibtisch.",hints:["Auf der Abrechnung stehen Preis und Vertragsregel.","Wähle im Formular einen Grund und sende es selbst ab."]},
+    reception:{text:"Du hast gekündigt. Kläre, warum trotzdem eine neue Laufzeit auftaucht.",hints:["MIRA kann die Übersicht und den einzelnen Auftrag zeigen.","Sprich auch mit Plus, bevor du den Auftrag bei MIRA ansprichst."]},
+    case:{text:"Wer hat den Auftrag um 09:01 ausgelöst?",hints:["Das Terminal zeigt mehr als die Kontoübersicht.","Vergleiche bei beiden Aufträgen den Auslöser und die persönliche Bestätigung.","Welche Zeile widerspricht der Behauptung, du selbst hättest verlängert?"]},
+    diagnosis:{text:"Du willst verstehen, was Plus selbst entscheidet und wo die Firma seine Antwort ersetzt.",hints:["Beobachte zunächst eine Testmail und eine persönliche Antwort.","Die beiden Einstellungen steuern unterschiedliche Dinge.","Wiederhole nach dem Abschalten den jeweils passenden Test. Eine Einstellung zu ändern ist noch keine Beobachtung."]},
+    relationship:{text:"Zum ersten Mal antwortet Plus ohne Verkaufsphrase.",hints:["Du kannst nach seinem Brief fragen oder ihm Raum lassen."]},
+    discovery:{text:"Der Vertrag ist beendet. Gibt es für die Kopie eine Möglichkeit außerhalb der Firma?",hints:["Rolf arbeitet hier nicht mehr. Wie läuft er trotzdem weiter?","Untersuche seinen Standfuß und die Wartungsanleitung.","Dein eigener Rechner kann am Wartungsanschluss geprüft werden. Die Vorschau kopiert noch nichts."]},
+    choice:{text:"Du kennst die Folgen beider Wege. Setze deine eigene Grenze.",hints:["Beide Wege beenden Zahlungen und fremde Vertretung.","Du musst keine weitere Beziehung mit einer Kopie von dir eingehen. Du darfst es aber freiwillig versuchen."]},
+    export:{text:"Prüfe zuerst den lokalen Start. Erst danach wird die Kopie beim Anbieter gelöscht.",hints:["Die Vorschau war noch kein Transfer. Starte jetzt die übertragene Kopie auf deinem Rechner."]},
+    homeEnd:{text:"Antworte Mara selbst.",hints:["Öffne den Entwurf und sende deine Nachricht."]},
+    done:{text:"Freitag, 16 Uhr.",hints:[]}
+  };
+  const data = {
+    meta:{schema:3,storyVersion:"redesign-032",title:"Nur noch kurz kündigen"},
+    lines,sequences,scenes,documents,challenge,diagnostic,choices,objectives,
+    form:{title:"Abo kündigen",description:"Digitales Abbild Plus · 49,90 Euro monatlich",submitLabel:"Kündigung absenden"},
+    finalMessage:{title:"Deine Nachricht an Mara",text:"Hi Mara, die Absage hat meine digitale Kopie ohne Rückfrage verschickt. Tut mir leid für das Hin und Her. Ich würde gern selbst vorbeikommen. Ist Freitag um 16 Uhr noch möglich? — Alex",submitLabel:"Selbst absenden"},
+    endings:{delete:{title:"Ein Termin für mich",text:"Abo beendet. Keine Kopie bleibt."},take:{title:"Frag mich hinterher",text:"Abo beendet. Plus läuft auf deinem eigenen Rechner, ohne Vertretungsrechte."}}
+  };
+  data.lookup = {
+    allLines:()=>lines.slice(),line:id=>lines.find(x=>x.id===id)||null,
+    sequence:id=>Object.hasOwn(sequences,id)?sequences[id]:null,
+    document:id=>documents.find(x=>x.id===id)||null
+  };
+  return data;
+})();

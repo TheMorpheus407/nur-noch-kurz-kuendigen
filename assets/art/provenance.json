@@ -5,7 +5,7 @@
   "selection_and_crops": "Cedric; rectangular pixel-preserving crops and byte-identical copies",
   "lora_applied": true,
   "emotion_variants": true,
-  "note": "Mixed collection: the five original room/neutral images have no LoRA. Three MIRA, two Alex Plus and the additional Rolf images use their own locally trained Krea 2 RAW character adapters with Turbo FP8. The original Rolf room crop is retained but no longer used by the current portrait catalog. All PNGs are fixed offline assets. Per-file flags and adapter hashes describe actual usage; top-level flags mean such assets are included.",
+  "note": "Mixed collection: the five original room/neutral images have no LoRA. Three MIRA, two Alex Plus and the additional Rolf images use their own locally trained Krea 2 RAW character adapters with Turbo FP8. The original Rolf room crop is retained but no longer used by the current portrait catalog. All PNGs are fixed offline assets. Per-file flags and adapter hashes describe actual usage; top-level flags mean such assets are included. The added home-desk room was generated in scope 032_desk_scene without a LoRA and copied byte-identically; its per-file record binds graph, models, prompt, seed and original PNG.",
   "files": [
     {
       "file": "mira-neutral.png",
@@ -161,6 +161,108 @@
       "adapter_sha256": "5018dbe8045b63b001f600ea9a7709908c6191f6ef7fece6aabf2017e9c8497d",
       "expression": "gentle-bend",
       "transform": "None; byte-identical original Krea2 Turbo FP8 output with local RAW-trained Rolf LoRA400."
+    },
+    {
+      "file": "zuhause.png",
+      "source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/image_00001_.png",
+      "source_relative_to": "implementation",
+      "original_remote_file": "/home/morpheus/Projekte/alternate-local-ai/runtime/comfyui/output/alternate-local-ai/032_desk_scene/desk_first_person/attempt_001/image_00001_.png",
+      "sha256": "8eec3ae0d2767e19e93a5dc1c2954f97945aa30623e5164d9e61c68229a5323f",
+      "size": [
+        2048,
+        1152
+      ],
+      "bytes": 1783168,
+      "generator": "Krea 2 Turbo FP8, local Alternate workstation via existing ComfyUI",
+      "model_repository": "Comfy-Org/Krea-2",
+      "model_revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
+      "model_files": [
+        {
+          "repo": "Comfy-Org/Krea-2",
+          "revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
+          "source_path": "diffusion_models/krea2_turbo_fp8_scaled.safetensors",
+          "target": "models/diffusion_models/krea2_turbo_fp8_scaled.safetensors",
+          "bytes": 13141730784,
+          "sha256": "eb4dd8c612cfd10f64f25b057e6e6bbcb5737c94a7372177e456dbf7579502f1"
+        },
+        {
+          "repo": "Comfy-Org/Krea-2",
+          "revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
+          "source_path": "text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+          "target": "models/text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+          "bytes": 5242467968,
+          "sha256": "54bd5144df0bbc25dd6ccadfcb826b521445a1b06ae5a42570bdd2974ca87094"
+        },
+        {
+          "repo": "Comfy-Org/Krea-2",
+          "revision": "e5ea8b4dd7f38f348b138eb0fe29f92c0e367e96",
+          "source_path": "vae/qwen_image_vae.safetensors",
+          "target": "models/vae/qwen_image_vae.safetensors",
+          "bytes": 253806246,
+          "sha256": "a70580f0213e67967ee9c95f05bb400e8fb08307e017a924bf3441223e023d1f"
+        }
+      ],
+      "live_model_check": "file sizes; full SHA256 pins from recorded installation",
+      "comfyui_revision": "3c80da7f87ee359b2d06f107cb3c0797079dfbbb",
+      "seed": 2026092101,
+      "lora_applied": false,
+      "reference_conditioning": false,
+      "prompt_expansion": false,
+      "transform": "None; byte-identical original PNG including embedded graph, workflow and preparation metadata.",
+      "prompt": {
+        "text": "Wide 16:9 illustration in an adult retrofuturist graphic-novel style. Dark clean ink contours, slightly angular drawing, broad flat color areas, restrained cel shading with at most two clear shadow tones, very subtle paper grain. Warm cream, muted petrol teal, plum purple and tiny coral accents, near-black outlines. Soft broad light from upper left. Calm composition, limited small detail, no photographic gloss.\n\nFirst-person seated view at your own close personal work desk at home, looking slightly down toward the desktop. This is an intimate domestic desk, not a reception desk or a public service counter. The broad light cream desktop fills most of the lower and middle picture; its near edge is cropped by the bottom of the image. Coherent simple perspective, quiet cream wall behind it, one restrained plum wall panel in the upper background.\n\nOne open petrol-teal laptop stands slightly left of center, within comfortable reach. Its landscape screen faces the seated viewer almost directly and is entirely visible. The screen is a single completely blank light cream rectangle; clean simple dark bezel, no reflections or screen marks. The laptop is a recognizable open notebook computer with a shallow keyboard base resting on the desk, not a freestanding terminal, kiosk or upright monitor. Keep the screen generously sized and unobstructed for a browser-added mail message.\n\nThe center-right of the desktop is a large calm, empty, uninterrupted light cream surface with plenty of usable space for browser-added documents. A single small plain coffee cup rests near the far right edge of the desk, dark still coffee, no steam. No extra props on the document surface. The lower quarter stays visually quiet for a later dialogue panel. Objects must read as belonging to one coherent home desk viewed by its owner.\n\nNo people, hands, arms, faces, portraits, plants, flowers, decorative foliage or human reflections. No rendered writing, letters, numbers, document marks, labels, signage, logos, watermarks, interface controls, buttons, speech bubbles or decorative screen graphics. Do not draw mail, papers or documents: these will be placed separately by the game. No reception architecture, service counter, information kiosk or complaint printer.\n",
+        "source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/prompt.txt",
+        "sha256": "b1438131d2c7db90ef6632a4527b9622ed9f12152530c953960bbb38692f9730"
+      },
+      "graph": {
+        "api_source": "qa/redesign-032/desk-scene.prepared/jobs/desk_first_person/api.json",
+        "api_sha256": "66cddcf6bef183f53ce09c4c669225351e432d05621d7c82debe5017fd44ff4b",
+        "workflow_source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/workflow.json",
+        "workflow_sha256": "3c052c233545f32088cf0d650d4c54591f2241060c70082d157eb0a66d21c317",
+        "request_source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/request.json",
+        "request_sha256": "238fc2071fa0cb4fed1ff38f88d5626a5f9e49728ef756a1fe538239798b2810",
+        "node_classes": [
+          "CLIPLoader",
+          "CLIPTextEncode",
+          "ConditioningZeroOut",
+          "EmptyLatentImage",
+          "KSampler",
+          "SaveImage",
+          "UNETLoader",
+          "VAEDecode",
+          "VAELoader"
+        ],
+        "sampling": {
+          "seed": 2026092101,
+          "steps": 8,
+          "cfg": 1.0,
+          "sampler_name": "euler",
+          "scheduler": "simple",
+          "denoise": 1.0
+        },
+        "resolution": [
+          2048,
+          1152
+        ],
+        "batch_size": 1
+      },
+      "generation": {
+        "scope": "032_desk_scene",
+        "prompt_id": "8549495d-a5e6-4960-acf7-a0bb718a256d",
+        "started_utc": "2026-09-21T07:41:52.549393+00:00",
+        "finished_utc": "2026-09-21T07:42:21.919173+00:00",
+        "result_source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/result.json",
+        "result_sha256": "66862e7ecb21978cd7529f0c1c959a7015b38bd03af428cab2647a7e65944a99",
+        "prepared_manifest_sha256": "a03443fb166101092cfb49dc1c6cf021b664f67a51ec7cb3c3abf2ba42b6b25a",
+        "operator_source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/operator-used.py",
+        "operator_sha256": "10241511a88990d78b5b3c27ed3e065d93c616ad108bb6f6972b250638b64208"
+      },
+      "visual_review": {
+        "source": "qa/redesign-032/desk-scene-run/desk_first_person_attempt_001/visual-review.json",
+        "sha256": "46da24eb41363851e780cfc8b8cb8ae4e641ee38a8fe478cc3b43804f247b88b",
+        "status": "ACCEPT_FOR_BROWSER_INTEGRATION",
+        "browser_overlay_verified": false
+      }
     }
   ]
 }

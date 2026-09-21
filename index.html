@@ -1,140 +1,297 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
   <title>Nur noch kurz kündigen</title>
-  <!-- ausdrücklich leerer eingebetteter Favicon-Verweis: verhindert /favicon.ico-404 ohne zusätzliche Datei -->
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <a class="skip-link" href="#main">Zum Inhalt springen</a>
-
-  <!-- Kompakter Spielkopf: Titel/NEBENBEI, Raumwechsel, Stimmen -->
-  <header class="page-head">
-    <div class="head-titles">
-      <p class="kicker">Kundencenter NEBENBEI · Verfahren NEBENBEI-7</p>
-      <h1>Nur noch kurz kündigen</h1>
-      <p class="disclaimer" id="disclaimer"></p>
+  <!-- ============================================================
+       Startansicht: kurz Titel + Beginnen + Stimmen. Kein Handbuch.
+       ============================================================ -->
+  <section id="start-screen" class="start-screen" role="dialog" aria-label="Spielstart">
+    <div class="start-inner">
+      <h1 class="start-title">Nur noch kurz kündigen</h1>
+      <p class="start-sub">Eine kurze Geschichte über ein Abo, das sich selbst verlängert.</p>
+      <div class="start-actions">
+        <button id="btn-start-new" class="btn btn-primary" type="button">Neu beginnen</button>
+        <button id="btn-start-continue" class="btn" type="button" hidden>Fortsetzen</button>
+        <button id="btn-start-voice" class="btn btn-ghost" type="button" aria-pressed="false">Stimmen: aus</button>
+      </div>
+      <p id="start-note" class="start-note" role="status" aria-live="polite"></p>
     </div>
-    <div class="head-controls">
-      <!-- Raumnavigation: beide Räume, Besuchsmarkierung, Sperrzustand -->
-      <nav class="room-nav" aria-label="Räume">
-        <button id="room-empfang" class="room-btn" type="button" data-room="empfang">
-          <span class="room-name">Empfang</span>
-          <span class="room-mark" aria-hidden="true"></span>
+  </section>
+
+  <!-- ============================================================
+       Spielfläche: die gesamte Browserfläche IST die Szene.
+       ============================================================ -->
+  <main id="game" class="game" hidden>
+    <!-- Bühne: bildfüllendes Raumbild + Hotspot-Ebene -->
+    <div class="stage" id="stage">
+      <img id="stage-img" class="stage-img" alt="" draggable="false">
+      <div id="hotspots" class="hotspots" aria-label="Anklickbare Stellen in der Szene"></div>
+      <!-- Porträt-Nahaufnahme (Graphic-Novel), über der Bühne, unter dem Dialog -->
+      <div id="portrait" class="portrait" hidden>
+        <img id="portrait-img" class="portrait-img" alt="">
+      </div>
+    </div>
+
+    <!-- HUD oben: Ortszeile + kleine Bedienelemente -->
+    <header class="hud" id="hud">
+      <div class="hud-left">
+        <span id="hud-place" class="hud-place" aria-live="off"></span>
+      </div>
+      <div class="hud-right">
+        <button id="btn-notes" class="hud-btn" type="button" aria-label="Notizen" title="Notizen">
+          <span class="hud-ico" aria-hidden="true">✎</span>
         </button>
-        <button id="room-vorfuehr" class="room-btn" type="button" data-room="vorfuehr">
-          <span class="room-name">Vorführraum</span>
-          <span class="room-mark" aria-hidden="true"></span>
+        <button id="btn-voice" class="hud-btn" type="button" aria-label="Stimmen umschalten" title="Stimmen" aria-pressed="false">
+          <span class="hud-ico" aria-hidden="true">♪</span>
         </button>
-      </nav>
-      <button id="btn-audio" type="button" aria-pressed="false">Stimmen an</button>
-    </div>
-  </header>
+        <button id="btn-fullscreen" class="hud-btn" type="button" aria-label="Vollbild umschalten" title="Vollbild" hidden>
+          <span class="hud-ico" aria-hidden="true">⛶</span>
+        </button>
+        <button id="btn-menu" class="hud-btn" type="button" aria-label="Menü" title="Menü">
+          <span class="hud-ico" aria-hidden="true">☰</span>
+        </button>
+      </div>
+    </header>
 
-  <main id="main">
-    <!-- Bühnen-Layout: Bildseite links, Interaktionsfläche rechts;
-         bei schmalen Ansichten untereinander, Bild vollständig. -->
-    <div class="game">
-      <section class="stage-col" aria-label="Bühne">
-        <!-- Szene: gezeichneter 16:9-Raum (unbeschnitten) mit den
-             beschrifteten Interaktionsorten als echten Buttons; die
-             Anker kommen aus js/art-catalog.js. Schmale Ansichten
-             zeigen das Bild vollständig und die Buttons als gut
-             lesbare Liste darunter. -->
-        <section class="scene" id="scene" aria-label="Szene">
-          <div class="stage" id="stage">
-            <img class="stage-bg" id="scene-bg" alt="" width="2048" height="1152">
-            <div class="stage-hotspots" id="stage-hotspots"></div>
-          </div>
-        </section>
+    <!-- Dialogleiste unten: Name-Tab, aktuelle Zeile, Weiter-Impuls -->
+    <section class="dialog" id="dialog" aria-live="polite" aria-atomic="false">
+      <div class="dialog-head">
+        <span id="dialog-speaker" class="dialog-speaker"></span>
+        <button id="btn-replay" class="btn-replay" type="button" aria-label="Stimme wiederholen" title="Stimme wiederholen" hidden>
+          <span aria-hidden="true">↻</span>
+        </button>
+      </div>
+      <p id="dialog-text" class="dialog-text"></p>
+      <div class="dialog-actions" id="dialog-actions"></div>
+      <div id="scene-actions-mobile" class="scene-actions-mobile" aria-label="Aktionen in der Szene" hidden></div>
+    </section>
 
-        <!-- Aktiver Raum: Name, Beschreibung (sekundär, kompakt) -->
-        <section class="room-info" aria-label="Raum">
-          <h2 id="room-name"></h2>
-          <p id="room-desc"></p>
-        </section>
-
-        <!-- Info zur zuletzt besuchten Fundstelle / zum Gesprächspunkt -->
-        <section class="hotspot-info" id="hotspot-info" hidden aria-label="Fundstelle">
-          <h3 id="hotspot-info-label"></h3>
-          <p id="hotspot-info-text"></p>
-        </section>
-
-        <p id="status-line" class="status" role="status" aria-live="polite"></p>
-        <p id="progress-line" class="progress" role="status" aria-live="polite"></p>
-      </section>
-
-      <section class="panel-col" aria-label="Interaktion">
-        <!-- Dialog: Ankunftssequenz, NPC-Gespräche, Folgedialoge, Enden -->
-        <section id="dialogue-panel" class="panel" hidden aria-label="Dialog">
-          <div class="panel-head">
-            <h2 id="dialogue-title"></h2>
-            <button id="btn-dialogue-close" type="button">Schließen</button>
-          </div>
-          <div id="dialogue-body" class="dialogue-body"></div>
-          <div class="panel-actions">
-            <button id="btn-dialogue-next" class="primary" type="button">Weiter</button>
-          </div>
-        </section>
-
-        <!-- Beweisordner: gefundene Karten E1–E5 mit vollständigem Text -->
-        <section id="evidence-panel" class="panel" hidden aria-label="Beweisordner">
-          <div class="panel-head">
-            <h2>Beweisordner</h2>
-            <button id="btn-evidence-close" type="button">Ordner schließen</button>
-          </div>
-          <div id="evidence-list"></div>
-        </section>
-
-        <!-- Verlauf: alle gespielten Dialogzeilen, nachlesbar -->
-        <section id="log-panel" class="panel" hidden aria-label="Verlauf">
-          <div class="panel-head">
-            <h2>Verlauf</h2>
-            <button id="btn-log-close" type="button">Verlauf schließen</button>
-          </div>
-          <ol id="log-list" class="log-list"></ol>
-        </section>
-
-        <!-- Widerspruchsverfahren: offene Runde, Kartenwahl, Entscheidung -->
-        <section id="procedure-panel" class="panel" hidden aria-label="Widerspruchsverfahren">
-          <div class="panel-head">
-            <h2 id="procedure-title">Widerspruchsverfahren</h2>
-            <button id="btn-procedure-close" type="button">Schließen</button>
-          </div>
-          <div id="procedure-body"></div>
-        </section>
-
-        <!-- Abschluss nach gewähltem Ende -->
-        <section id="ending-panel" class="panel" hidden aria-label="Abschluss">
-          <div class="panel-head">
-            <h2 id="ending-title"></h2>
-          </div>
-          <div id="ending-body"></div>
-        </section>
-
-        <!-- Primäre Aktionen; sekundäre Funktionen im nativen Menü.
-             Alle Button-IDs und Ereignisbindungen bleiben erhalten. -->
-        <div class="toolbar">
-          <button id="btn-evidence" type="button">Beweisordner öffnen</button>
-          <button id="btn-procedure" type="button">Widerspruchsverfahren</button>
-          <details class="menu-secondary" id="menu-secondary">
-            <summary>Weitere Aktionen</summary>
-            <div class="menu-list">
-              <button id="btn-log" type="button">Verlauf öffnen</button>
-              <button id="btn-save" type="button">Speichern</button>
-              <button id="btn-load" type="button">Stand laden</button>
-              <button id="btn-checkpoint" type="button">Zum Entscheidungspunkt</button>
-              <button id="btn-restart" class="danger" type="button">Neustart</button>
-            </div>
-          </details>
-        </div>
-      </section>
-    </div>
   </main>
 
+    <!-- Kurze Rückmeldung (aria-live), z. B. Audio-Hinweise, Fehler -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- ============================================================
+         Overlays: Dokumente, Formular, Challenge, Diagnose, Choice,
+         Transfer, Nachricht, Ende. Alle als native <dialog>.
+         ============================================================ -->
+
+    <!-- Dokument (Nahansicht eines Gegenstands) -->
+    <dialog id="dlg-document" class="overlay overlay-document" aria-labelledby="doc-title">
+      <div class="doc-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="doc-title" class="overlay-title"></h2>
+            <p id="doc-source" class="overlay-source"></p>
+          </div>
+          <button class="overlay-close" type="button" data-close="document" aria-label="Dokument schließen">✕</button>
+        </header>
+        <div id="doc-body" class="doc-body"></div>
+        <footer class="overlay-foot">
+          <button class="btn" type="button" data-close="document">Zurück in die Szene</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Kündigungsformular -->
+    <dialog id="dlg-form" class="overlay overlay-form" aria-labelledby="form-title">
+      <div class="form-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="form-title" class="overlay-title"></h2>
+            <p id="form-desc" class="overlay-source"></p>
+          </div>
+          <button class="overlay-close" type="button" data-close="form" aria-label="Formular schließen">✕</button>
+        </header>
+        <div id="form-body" class="form-body"></div>
+        <footer class="overlay-foot">
+          <button id="btn-form-submit" class="btn btn-primary" type="button" disabled>Kündigung absenden</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Challenge: Behauptung + Dokumentpassage -->
+    <dialog id="dlg-challenge" class="overlay overlay-challenge" aria-labelledby="ch-title">
+      <div class="ch-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="ch-title" class="overlay-title"></h2>
+          </div>
+          <button class="overlay-close" type="button" data-close="challenge" aria-label="Schließen">✕</button>
+        </header>
+        <div class="ch-cols">
+          <section class="ch-col" aria-label="Behauptungen">
+            <h3 class="ch-col-title">Behauptungen</h3>
+            <div id="ch-statements" class="ch-list"></div>
+          </section>
+          <section class="ch-col" aria-label="Dokumente">
+            <h3 class="ch-col-title">Dokumente</h3>
+            <div id="ch-docs" class="ch-list"></div>
+          </section>
+        </div>
+        <div id="ch-feedback" class="ch-feedback" role="status" aria-live="polite"></div>
+        <footer class="overlay-foot">
+          <button id="btn-ch-present" class="btn btn-primary" type="button">Passage vorlegen</button>
+          <button class="btn" type="button" data-close="challenge">Schließen</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Diagnose: echter Bildschirm in der Szene -->
+    <dialog id="dlg-diagnostic" class="overlay overlay-diagnostic" aria-labelledby="diag-title">
+      <div class="diag-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="diag-title" class="overlay-title"></h2>
+            <p id="diag-notice" class="overlay-source"></p>
+          </div>
+          <button class="overlay-close" type="button" data-close="diagnostic" aria-label="Schließen">✕</button>
+        </header>
+        <div id="diag-controls" class="diag-controls"></div>
+        <div id="diag-tests" class="diag-tests"></div>
+        <div id="diag-results" class="diag-results" role="status" aria-live="polite"></div>
+        <footer class="overlay-foot" id="diag-foot"></footer>
+      </div>
+    </dialog>
+
+    <!-- Choice (Grund, Brief, Ende) -->
+    <dialog id="dlg-choice" class="overlay overlay-choice" aria-labelledby="choice-title">
+      <div class="choice-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="choice-title" class="overlay-title"></h2>
+            <p id="choice-desc" class="overlay-source"></p>
+          </div>
+          <button class="overlay-close" type="button" data-close="choice" aria-label="Schließen">✕</button>
+        </header>
+        <div id="choice-options" class="choice-options"></div>
+      </div>
+    </dialog>
+
+    <!-- Transfer / Vorschau am Wartungsanschluss -->
+    <dialog id="dlg-transfer" class="overlay overlay-transfer" aria-labelledby="tr-title">
+      <div class="tr-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="tr-title" class="overlay-title">Wartungsanschluss</h2>
+            <p id="tr-text" class="overlay-source"></p>
+          </div>
+          <button class="overlay-close" type="button" data-close="transfer" aria-label="Schließen">✕</button>
+        </header>
+        <div id="tr-status" class="tr-status" role="status" aria-live="polite"></div>
+        <div id="tr-actions" class="tr-actions"></div>
+        <footer class="overlay-foot">
+          <button class="btn" type="button" data-close="transfer">Schließen</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Nachricht an Mara (eigene Handlung in der Wohnung) -->
+    <dialog id="dlg-message" class="overlay overlay-message" aria-labelledby="msg-title">
+      <div class="msg-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="msg-title" class="overlay-title"></h2>
+          </div>
+          <button class="overlay-close" type="button" data-close="message" aria-label="Schließen">✕</button>
+        </header>
+        <div id="msg-body" class="msg-body"></div>
+        <footer class="overlay-foot">
+          <button id="btn-msg-submit" class="btn btn-primary" type="button">Selbst absenden</button>
+          <button class="btn" type="button" data-close="message">Später</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Ende -->
+    <dialog id="dlg-done" class="overlay overlay-done" aria-labelledby="done-title">
+      <div class="done-frame">
+        <h2 id="done-title" class="overlay-title"></h2>
+        <p id="done-text" class="done-text"></p>
+        <footer class="overlay-foot">
+          <button id="btn-done-restart" class="btn" type="button">Neu beginnen</button>
+          <button id="btn-done-checkpoint" class="btn" type="button" hidden>Zum Entscheidungspunkt</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Notizen -->
+    <dialog id="dlg-notes" class="overlay overlay-notes" aria-labelledby="notes-title">
+      <div class="notes-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="notes-title" class="overlay-title">Notizen</h2>
+          </div>
+          <button class="overlay-close" type="button" data-close="notes" aria-label="Notizen schließen">✕</button>
+        </header>
+        <div id="notes-body" class="notes-body"></div>
+        <footer class="overlay-foot">
+          <button class="btn" type="button" data-close="notes">Schließen</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Menü -->
+    <dialog id="dlg-menu" class="overlay overlay-menu" aria-labelledby="menu-title">
+      <div class="menu-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="menu-title" class="overlay-title">Menü</h2>
+          </div>
+          <button class="overlay-close" type="button" data-close="menu" aria-label="Menü schließen">✕</button>
+        </header>
+        <div class="menu-list">
+          <button id="btn-menu-save" class="btn" type="button">Speichern</button>
+          <button id="btn-menu-load" class="btn" type="button">Laden</button>
+          <button id="btn-menu-reset" class="btn" type="button">Neu beginnen</button>
+          <button id="btn-menu-voice" class="btn" type="button">Stimmen umschalten</button>
+          <button id="btn-menu-credits" class="btn btn-ghost" type="button">Technische Hinweise</button>
+        </div>
+        <footer class="overlay-foot">
+          <button class="btn" type="button" data-close="menu">Schließen</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Bestätigung (native dialog) -->
+    <dialog id="dlg-confirm" class="overlay overlay-confirm" aria-labelledby="confirm-title">
+      <div class="confirm-frame">
+        <h2 id="confirm-title" class="overlay-title"></h2>
+        <p id="confirm-text" class="confirm-text"></p>
+        <footer class="overlay-foot">
+          <button id="btn-confirm-yes" class="btn btn-primary" type="button">Ja</button>
+          <button id="btn-confirm-no" class="btn" type="button">Abbrechen</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <!-- Credits (auf Nachfrage) -->
+    <dialog id="dlg-credits" class="overlay overlay-credits" aria-labelledby="credits-title">
+      <div class="credits-frame">
+        <header class="overlay-head">
+          <div>
+            <h2 id="credits-title" class="overlay-title">Technische Hinweise</h2>
+          </div>
+          <button class="overlay-close" type="button" data-close="credits" aria-label="Schließen">✕</button>
+        </header>
+        <div class="credits-body">
+          <p>Lokales Spielprojekt. Keine externen Skripte, keine Netzwerkanfragen, keine Telemetrie.</p>
+          <p>Die Stimmen wurden lokal erzeugt. Du kannst sie jederzeit ein- und ausschalten.</p>
+          <p>Bilder: lokale Raum- und Porträtzeichnungen mit cremefarbenem Papiergrund.</p>
+        </div>
+        <footer class="overlay-foot">
+          <button class="btn" type="button" data-close="credits">Schließen</button>
+        </footer>
+      </div>
+    </dialog>
+  <!-- Klassische lokale Skripte: auch direkt über file:// lauffähig. -->
   <script src="js/content.js"></script>
   <script src="js/state.js"></script>
   <script src="js/audio-catalog.js"></script>

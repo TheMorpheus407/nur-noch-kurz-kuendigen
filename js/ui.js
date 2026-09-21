@@ -1,1471 +1,1120 @@
 "use strict";
-
 /* =========================================================================
  * js/ui.js — „Nur noch kurz kündigen“
- * Darstellung und Ereignisverdrahtung der vollständigen Textfassung.
  *
- * Liest nur CONTENT (Texte/Daten) und ruft GameState-Methoden auf —
- * eigene Spielregeln fehlen hier. Alle Zustandsänderungen laufen über
- * die State-API; die UI rendert das Ergebnis und meldet Erfolg/Fehler.
+ * Lokales Qwen-Gerüst; Vertrags- und Bedienkorrekturen durch Cedric,
+ * dokumentiert in qa/redesign-032/ui-fixes/.
+ * Ein konsistenter Renderweg aus GameState.view().
+ * Die UI mutiert nie State direkt und erfindet keine Fortschrittsregeln:
+ * sie liest view(), rendert die angebotenen actions und sendet deren
+ * action-Objekte unverändert an GameState.dispatch(action).
  *
- * Keine Module, kein fetch, keine externen Pakete: klassisches lokales
- * Skript, direkt per file:// lauffähig. Keine Telemetrie, keine Requests.
- *
- * Aufbau:
- *   - Raumnavigation (Empfang / Vorführraum) mit Besuchsmarkierung
- *   - Szene: vier Hotspot-Schaltflächen pro Raum (Gespräch / Fundstelle)
- *   - Dialogmotor (Weiter/Schließen) für Ankunft, NPC-Gespräche,
- *     Folgedialoge und beide Enden — Zeilen werden in den Verlauf geloggt
- *   - Beweisordner (E1–E5 mit vollständigem Text) und Verlauf
- *   - Widerspruchsverfahren: W1→W2→W3, Kartenwahl, passende Rückmeldung,
- *     Folgedialog, „Weiter untersuchen“ ohne Fortschrittsverlust
- *   - Entscheidung (A löschen / B exportieren), Enddialoge,
- *     Entscheidungspunkt (Checkpoint) als Rückweg zur anderen Wahl
- *   - Speichern/Laden/Neustart über die State-Methoden mit klaren Meldungen
- *   - Tastatur: echte Buttons, Fokusführung, Escape schließt ohne Verlust
+ * - Sichere textContent-Erzeugung (kein innerHTML mit Spielerdaten).
+ * - Audio: nur bei tatsächlichem Wechsel von line.id starten; Rerender
+ *   und Notizen starten keine zweite Wiedergabe.
+ * - Hotspots: normierte Koordinaten über denselben object-fit:cover-
+ *   Ausgleich projizieren (projectPoint), damit Marker und Bild denselben
+ *   Beschnitt teilen.
  * ========================================================================= */
 
-/* Gesprächspunkte (NPCs) vs. Fundstellen (Karten). */
-const NPC_IDS = ["mira", "alexPlus", "rolf"];
+const UI = (() => {
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
-/* UI-eigene Status- und Hinweiszeilen (Bedienung, kein Erzähltext).
-   Alle Erzähltexte kommen aus content.js. */
-const UI_TEXTS = {
-  start: "Empfang. Wählen Sie in der Szene ein Gespräch oder eine Fundstelle.",
-  roomLocked: "Der Vorführraum ist noch nicht freigegeben. Zuerst: das Auskunftsterminal im Empfang.",
-  ended: "Das Ende ist abgeschlossen. Über „Zum Entscheidungspunkt“ erreichen Sie den gesicherten Stand.",
-  cardFound: (id) => "Beweiskarte " + id + " liegt jetzt im Beweisordner.",
-  cardAlready: "Die Karte liegt bereits im Beweisordner.",
-  notUnlocked: "Noch nicht freigegeben. Das Auskunftsterminal ist der richtige Anfang.",
-  alexPlusGeloescht: "Das Terminal ist dunkel. ALEX-PLUS ist gelöscht und nicht mehr aktiv.",
-  alexPlusExportiert: "Das Terminal ist dunkel. ALEX-PLUS wurde exportiert.",
-  saveOk: "Spielstand gesichert.",
-  saveOkMemory: "Spielstand nur für diese Sitzung gesichert — lokales Speichern ist im Browser blockiert.",
-  saveFail: "Speichern fehlgeschlagen. Der Spielstand läuft weiter, ist aber nicht gesichert.",
-  loadOk: "Gespeicherter Stand geladen.",
-  loadNone: "Kein gespeicherter Stand vorhanden.",
-  loadInvalid: "Der gespeicherte Stand ist ungültig und wurde nicht geladen. Der aktuelle Stand bleibt erhalten.",
-  checkpointOk: "Entscheidungspunkt geladen. Die Entscheidung ist wieder offen.",
-  checkpointNone: "Noch kein Entscheidungspunkt gesichert — er entsteht automatisch nach Runde W3.",
-  checkpointAuto: "Entscheidungspunkt automatisch gesichert.",
-  checkpointAutoMemory: "Entscheidungspunkt nur für diese Sitzung gesichert — lokales Speichern ist im Browser blockiert; nach Schließen/Neuladen nicht verlässlich wiederherstellbar.",
-  decisionCheckpointMemory: "Der Entscheidungspunkt ist nur für diese Sitzung gesichert (lokales Speichern blockiert) — nach Schließen/Neuladen nicht verlässlich wiederherstellbar.",
-  roundDone: "Runde abgeschlossen.",
-  endingConfirm: "Diese Entscheidung ist für diesen Spielstand endgültig. Der Entscheidungspunkt bleibt ladbar. Bestätigen?",
-  endingNote: "Das Ende ist für diesen Spielstand abgeschlossen. Über „Zum Entscheidungspunkt“ können Sie zum gesicherten Stand zurückkehren und die andere Option wählen.",
-  noLog: "Noch keine Gesprächszeilen im Verlauf.",
-  audioOn: "Stimmen an: vertonte Zeilen werden gesprochen.",
-  audioOff: "Stimmen aus: laufende Sprache gestoppt.",
-  audioOffHint: "Stimmen sind ausgeschaltet — „Stimmen an“ schaltet sie ein.",
-  miraNachW1Titel: "MIRA — Stand des Vorgangs",
-  procedureLocked: "Zuerst eine Beweiskarte finden: das Auskunftsterminal im Empfang.",
-  cardPickLabel: "Beweiskarte aus dem Ordner wählen und vorlegen:",
-  claimBy: "MIRA behauptet:",
-  vorherLabel: "Vor der Behauptung — kurzes Gespräch:",
-  resolvedPrefix: "Abgeschlossen:"
-};
-
-const UI = {
-  els: {},
-  _dialogue: null,        /* aktive Dialogfolge: {steps, index, onDone} */
-  _procedureView: null,   /* aktive Verfahrensansicht: {type, rid} */
-  _failedRoomImageUrl: null, /* bekannter Ladefehler der aktuellen Raumgrafik */
-  _focusReturn: null,     /* Element, auf das der Fokus beim Schließen zurückgeht */
-  _openStack: [],         /* geöffnete schließbare Panels, zuletzt oben (Escape) */
-  lastAdvanceAt: 0,
-  ADVANCE_LOCK_MS: 250,   /* Mehrfachklick-Schutz: keine Zeilen springen verloren */
-
-  /* ---------- Initialisierung ---------- */
-
-  init() {
-    const $ = (id) => document.getElementById(id);
-    this.els = {
-      roomButtons: [
-        document.querySelector('#room-empfang'),
-        document.querySelector('#room-vorfuehr')
-      ],
-      roomName: $("room-name"),
-      roomDesc: $("room-desc"),
-      scene: $("scene"),
-      stage: document.querySelector("#stage"),
-      sceneBg: $("scene-bg"),
-      stageHotspots: $("stage-hotspots"),
-      hotspotInfo: $("hotspot-info"),
-      hotspotInfoLabel: $("hotspot-info-label"),
-      hotspotInfoText: $("hotspot-info-text"),
-      statusLine: $("status-line"),
-      progressLine: $("progress-line"),
-      dialoguePanel: $("dialogue-panel"),
-      dialogueTitle: $("dialogue-title"),
-      dialogueBody: $("dialogue-body"),
-      btnDialogueNext: $("btn-dialogue-next"),
-      btnDialogueClose: $("btn-dialogue-close"),
-      evidencePanel: $("evidence-panel"),
-      evidenceList: $("evidence-list"),
-      btnEvidence: $("btn-evidence"),
-      btnEvidenceClose: $("btn-evidence-close"),
-      logPanel: $("log-panel"),
-      logList: $("log-list"),
-      btnLog: $("btn-log"),
-      btnLogClose: $("btn-log-close"),
-      procedurePanel: $("procedure-panel"),
-      procedureTitle: $("procedure-title"),
-      procedureBody: $("procedure-body"),
-      btnProcedure: $("btn-procedure"),
-      btnProcedureClose: $("btn-procedure-close"),
-      endingPanel: $("ending-panel"),
-      endingTitle: $("ending-title"),
-      endingBody: $("ending-body"),
-      btnSave: $("btn-save"),
-      btnLoad: $("btn-load"),
-      btnCheckpoint: $("btn-checkpoint"),
-      btnRestart: $("btn-restart"),
-      btnAudio: $("btn-audio")
+  /* ---------- Element-Referenzen ---------- */
+  const el = {};
+  function cacheElements() {
+    el.startScreen = $("#start-screen");
+    el.game = $("#game");
+    el.stage = $("#stage");
+    el.stageImg = $("#stage-img");
+    el.hotspots = $("#hotspots");
+    el.sceneActions = $("#scene-actions-mobile");
+    el.portrait = $("#portrait");
+    el.portraitImg = $("#portrait-img");
+    el.hud = $("#hud");
+    el.hudPlace = $("#hud-place");
+    el.dialog = $("#dialog");
+    el.dialogSpeaker = $("#dialog-speaker");
+    el.dialogText = $("#dialog-text");
+    el.dialogActions = $("#dialog-actions");
+    el.btnReplay = $("#btn-replay");
+    el.toast = $("#toast");
+    el.btnNotes = $("#btn-notes");
+    el.btnVoice = $("#btn-voice");
+    el.btnFullscreen = $("#btn-fullscreen");
+    el.btnMenu = $("#btn-menu");
+    el.startNote = $("#start-note");
+    el.btnStartNew = $("#btn-start-new");
+    el.btnStartContinue = $("#btn-start-continue");
+    el.btnStartVoice = $("#btn-start-voice");
+    el.btnMenuVoice = $("#btn-menu-voice");
+    // Overlays
+    el.dlg = {
+      document: $("#dlg-document"), form: $("#dlg-form"), challenge: $("#dlg-challenge"),
+      diagnostic: $("#dlg-diagnostic"), choice: $("#dlg-choice"), transfer: $("#dlg-transfer"),
+      message: $("#dlg-message"), done: $("#dlg-done"), notes: $("#dlg-notes"),
+      menu: $("#dlg-menu"), confirm: $("#dlg-confirm"), credits: $("#dlg-credits")
     };
-
-    /* Echte Ladefehler nutzen dieselben Hotspot-Buttons als beschriftete
-       Liste. Ein normaler Neurender darf diesen Zustand nicht vergessen. */
-    this.els.sceneBg.addEventListener("load", () => this.updateRoomImageFallback());
-    this.els.sceneBg.addEventListener("error", () => this.updateRoomImageFallback());
-
-    /* Raumwechsel */
-    for (const btn of this.els.roomButtons) {
-      btn.addEventListener("click", () => this.openRoom(btn.dataset.room));
+    for (const [id, d] of Object.entries(el.dlg)) {
+      if (["menu", "notes", "credits", "confirm"].includes(id)) continue;
+      const nav = make("nav", "overlay-tools");
+      nav.setAttribute("aria-label", "Spielmenü");
+      nav.appendChild(button("Notizen", "btn btn-ghost", () => renderNotes(view())));
+      nav.appendChild(button("Menü", "btn btn-ghost", openMenu));
+      d.firstElementChild.appendChild(nav);
     }
-
-    /* Dialog */
-    this.els.btnDialogueNext.addEventListener("click", () => this.advanceDialogue());
-    this.els.btnDialogueClose.addEventListener("click", () => this.finishDialogue());
-
-    /* Beweisordner */
-    this.els.btnEvidence.addEventListener("click", () => this.openEvidence());
-    this.els.btnEvidenceClose.addEventListener("click", () => this.closeEvidence());
-
-    /* Verlauf */
-    this.els.btnLog.addEventListener("click", () => this.openLog());
-    this.els.btnLogClose.addEventListener("click", () => this.closeLog());
-
-    /* Widerspruchsverfahren */
-    this.els.btnProcedure.addEventListener("click", () => this.openProcedure());
-    this.els.btnProcedureClose.addEventListener("click", () => this.closeProcedure());
-
-    /* Stimmen: Master-Umschalter, beginnt bewusst ausgeschaltet */
-    GameAudio.init();
-    GameAudio.setNoticeHandler((text) => this.setStatus(text));
-    this.els.btnAudio.addEventListener("click", () => this.toggleAudio());
-
-    /* Speichern / Laden / Entscheidungspunkt / Neustart */
-    this.els.btnSave.addEventListener("click", () => this.doSave());
-    this.els.btnLoad.addEventListener("click", () => this.doLoad());
-    this.els.btnCheckpoint.addEventListener("click", () => this.doCheckpoint());
-    this.els.btnRestart.addEventListener("click", () => this.doRestart());
-
-    /* Escape: schließt das zuletzt geöffnete schließbare Panel in der
-       tatsächlichen Öffnungsreihenfolge, ohne Fortschritt zu verlieren. */
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") {
-        return;
-      }
-      const top = this._openStack[this._openStack.length - 1];
-      if (!top) {
-        return;
-      }
-      if (top === "dialogue") {
-        this.finishDialogue();
-      } else if (top === "procedure") {
-        this.closeProcedure();
-      } else if (top === "evidence") {
-        this.closeEvidence();
-      } else if (top === "log") {
-        this.closeLog();
-      }
-    });
-
-    /* Sekundärmenü: nach einer darin gewählten Aktion schließen, ohne
-       zusätzliche Spielaktionen auszulösen. Der Fokus bleibt in
-       sichtbaren Elementen — nicht im jetzt geschlossenen Menü. */
-    const menu = document.getElementById("menu-secondary");
-    const menuSummary = menu ? menu.querySelector("summary") : null;
-    if (menu && menuSummary) {
-      menu.addEventListener("click", (event) => {
-        const btn = event.target.closest("button");
-        if (!btn || !menu.contains(btn)) {
-          return;
-        }
-        requestAnimationFrame(() => {
-          menu.open = false;
-          const active = document.activeElement;
-          if ((active === document.body || !active.getClientRects().length ||
-               active.closest("[inert]")) &&
-              document.contains(menuSummary)) {
-            menuSummary.focus();
-          }
-        });
-      });
-    }
-
-    this.renderAll();
-
-    /* Erster Start: vorhandene Ankunftsszene.
-       (Bewusst NICHT GameState.reset() — see js/main.js.) */
-    const ankunft = CONTENT.dialogues.ankunft;
-    this.openDialogue({
-      title: ankunft.titel,
-      steps: this.buildSteps(ankunft.lines)
-    });
-  },
-
-  /* ---------- Kleine DOM-Helfer ---------- */
-
-  make(tag, className, text) {
-    const el = document.createElement(tag);
-    if (className) {
-      el.className = className;
-    }
-    if (text !== undefined && text !== null) {
-      el.textContent = text;
-    }
-    return el;
-  },
-
-  /* Sprecher-Portrait: exakte Sprechernamen aus ART_ASSETS.portraits
-     („MIRA“, „Alex Plus“, „Rolf“). Keine Teilstring-Erkennung —
-     „Alex“ (stumm) erhält kein Portrait. Fehlende Daten: null,
-     die Zeile rendert unverändert weiter. Bildladefehler: das
-     kaputte Bild wird ausgeblendet, der Dialog bleibt lauffähig.
-     Standard: ein Bild pro Figur; bei passendem portraitByLine-Eintrag
-     (exakter speaker + gültiges Ausdrucks-Bild) das Ausdrucks-Bild.
-     Ohne Emotionen/Filter/Ausschnitte. */
-  makeSpeakerPortrait(speaker, lineId) {
-    const art = (typeof ART_ASSETS !== "undefined" && ART_ASSETS) ? ART_ASSETS : null;
-    const portraits = (art && art.portraits) ? art.portraits : null;
-    let p = (portraits && typeof speaker === "string" &&
-      Object.prototype.hasOwnProperty.call(portraits, speaker)) ?
-      portraits[speaker] : null;
-    /* Passender portraitByLine-Eintrag (eigene Schlüssel, exakter
-       speaker, gültiges Ausdrucks-Bild) ersetzt das Standardportrait. */
-    if (art && typeof lineId === "string" && lineId.length > 0 &&
-        art.portraitByLine &&
-        Object.prototype.hasOwnProperty.call(art.portraitByLine, lineId)) {
-      const mapping = art.portraitByLine[lineId];
-      if (mapping && mapping.speaker === speaker &&
-          typeof mapping.expression === "string" &&
-          art.expressions &&
-          Object.prototype.hasOwnProperty.call(art.expressions, speaker) &&
-          Object.prototype.hasOwnProperty.call(art.expressions[speaker], mapping.expression)) {
-        const candidate = art.expressions[speaker][mapping.expression];
-        if (candidate && typeof candidate.url === "string" && candidate.url.length > 0) {
-          p = candidate;
-        }
-      }
-    }
-    if (!p || typeof p.url !== "string" || p.url.length === 0) {
-      return null;
-    }
-    const img = document.createElement("img");
-    img.className = "speaker-portrait";
-    img.setAttribute("alt", "");
-    img.setAttribute("src", p.url);
-    if (typeof p.width === "number" && Number.isFinite(p.width)) {
-      img.setAttribute("width", String(p.width));
-    }
-    if (typeof p.height === "number" && Number.isFinite(p.height)) {
-      img.setAttribute("height", String(p.height));
-    }
-    img.addEventListener("error", () => {
-      img.hidden = true;
-    });
-    return img;
-  },
-
-  rememberFocus() {
-    this._focusReturn = document.activeElement;
-  },
-
-  /* Öffnungsreihenfolge der schließbaren Panels verwalten: das zuletzt
-     geöffnete Panel steht oben; Escape schließt genau dieses (LIFO). */
-  trackOpen(panelId) {
-    const i = this._openStack.indexOf(panelId);
-    if (i >= 0) {
-      this._openStack.splice(i, 1);
-    }
-    this._openStack.push(panelId);
-    this.syncActivePanel();
-  },
-
-  trackClose(panelId) {
-    const i = this._openStack.lastIndexOf(panelId);
-    if (i >= 0) {
-      this._openStack.splice(i, 1);
-    }
-    this.syncActivePanel();
-  },
-
-  /* Sichtbare Interaktionsfläche synchronisieren: nur das Panel an der Spitze
-     des Öffnungsstapels belegt die Bühne. Offene Panels dahinter bleiben
-     im DOM, werden aber inert und per Darstellungsklasse ausgeblendet.
-     Der bestehende hidden-
-     Zustand der Panels bleibt unberührt; ohne aktives Panel bleibt
-     alles bedienbar. */
-  syncActivePanel() {
-    const top = this._openStack[this._openStack.length - 1] || null;
-    const active = top || (!this.els.endingPanel.hidden ? "ending" : null);
-    const panels = [
-      ["dialogue", this.els.dialoguePanel],
-      ["evidence", this.els.evidencePanel],
-      ["log", this.els.logPanel],
-      ["procedure", this.els.procedurePanel],
-      ["ending", this.els.endingPanel]
-    ];
-    for (const [id, el] of panels) {
-      if (!el || el.hidden) {
-        continue;
-      }
-      const dimmed = active !== null && active !== id;
-      el.inert = dimmed;
-      el.classList.toggle("panel--dim", dimmed);
-    }
-  },
-
-  restoreFocus(fallback) {
-    const target = this._focusReturn;
-    this._focusReturn = null;
-    const candidates = [];
-    if (target && document.contains(target)) {
-      candidates.push(target);
-    }
-    if (fallback && document.contains(fallback) && fallback !== target) {
-      candidates.push(fallback);
-    }
-    const top = this._openStack[this._openStack.length - 1];
-    const panel = top ? document.getElementById(top + "-panel") : null;
-    if (panel) {
-      const action = panel.querySelector("button.primary:not(:disabled)") ||
-        panel.querySelector("button:not(:disabled)");
-      if (action) candidates.push(action);
-    }
-    const menuSummary = document.querySelector("#menu-secondary summary");
-    if (menuSummary) candidates.push(menuSummary);
-    /* Fokussierter Knoten fehlt/ersetzt/verborgen: sinnvoller, erreichbarer
-       Rückkehrpunkt statt Fokusverlust. */
-    for (const el of candidates) {
-      if (!el.getClientRects().length || el.closest("[inert], [hidden]") || el.disabled) {
-        continue;
-      }
-      el.focus();
-      if (document.activeElement === el) {
-        return;
-      }
-    }
-  },
-
-  /* ---------- Status und Fortschritt ---------- */
-
-  setStatus(text) {
-    this.els.statusLine.textContent = text;
-  },
-
-  updateProgress() {
-    const s = GameState.get();
-    const n = s.rounds.resolved.length;
-
-    if (n === 0) {
-      this.els.progressLine.textContent = CONTENT.progress.none;
-    } else if (n === 1) {
-      this.els.progressLine.textContent = CONTENT.progress.done;
-    } else {
-      this.els.progressLine.textContent =
-        "Widersprüche gelöst: " + n + " von 3" +
-        (n === 3 ? (s.ended ? " — abgeschlossen." : " — Entscheidung möglich.") : "");
-    }
-
-    let label;
-    if (s.ended) {
-      label = CONTENT.labels.entscheidung + " — abgeschlossen";
-    } else if (!s.e2Found) {
-      label = CONTENT.toolbar.contradictionLocked;
-    } else if (n === 3) {
-      label = CONTENT.labels.entscheidung;
-    } else {
-      label = CONTENT.labels.widerspruchsverfahren + " (" + (3 - n) + " offen)";
-    }
-    this.els.btnProcedure.textContent = label;
-  },
-
-  /* ---------- Gesamtes Rendering ---------- */
-
-  renderAll() {
-    this.closeAllPanels();
-    this.renderWorld();
-    this.setStatus(GameState.get().ended ? UI_TEXTS.ended : UI_TEXTS.start);
-  },
-
-  closeAllPanels() {
-    this.stopAudio();
-    this._dialogue = null;
-    this._openStack.length = 0;
-    this.els.dialoguePanel.hidden = true;
-    this.els.dialoguePanel.classList.remove("dialogue--ending");
-    this.els.evidencePanel.hidden = true;
-    this.els.logPanel.hidden = true;
-    this.els.procedurePanel.hidden = true;
-    this.els.endingPanel.hidden = true;
-    this.els.hotspotInfo.hidden = true;
-    this.removeEndingView();
-    this.syncActivePanel();
-  },
-
-  renderWorld() {
-    this.updateProgress();
-    const s = GameState.get();
-
-    /* Raumnavigation: aktueller Raum, Besuchsmarkierung, Sperrzustand */
-    for (const btn of this.els.roomButtons) {
-      const room = btn.dataset.room;
-      const isCurrent = s.room === room;
-      const locked = s.ended ||
-        (room === "vorfuehr" && !s.cards.includes("E2"));
-      btn.setAttribute("aria-current", isCurrent ? "true" : "false");
-      if (locked) {
-        btn.setAttribute("aria-disabled", "true");
-      } else {
-        btn.removeAttribute("aria-disabled");
-      }
-      const visited = isCurrent ||
-        s.visitedHotspots.some((h) =>
-          CONTENT.hotspots[h] && CONTENT.hotspots[h].room === room);
-      btn.classList.toggle("visited", visited);
-    }
-
-    /* Raumname und passende Beschreibung */
-    const room = CONTENT.rooms[s.room];
-    this.els.roomName.textContent = room.name;
-    this.els.roomDesc.textContent = room.beschreibung;
-
-    /* Szene: gezeichneter 16:9-Raum (unbeschnitten) + vier echte
-       Hotspot-Buttons. Anker ausschließlich aus dem Bildkatalog
-       (js/art-catalog.js); ohne Katalog/Daten bleiben die Buttons als
-       gut lesbare Liste bedienbar (stage--list). */
-    const art = (typeof ART_ASSETS !== "undefined" && ART_ASSETS) ? ART_ASSETS : null;
-    const roomArt = (art && art.rooms && art.rooms[s.room]) ? art.rooms[s.room] : null;
-    const anchors = (roomArt && roomArt.hotspots) ? roomArt.hotspots : null;
-
-    if (roomArt && roomArt.url) {
-      if (this.els.sceneBg.getAttribute("src") !== roomArt.url) {
-        this.els.sceneBg.setAttribute("src", roomArt.url);
-      }
-      this.els.sceneBg.setAttribute("width", String(roomArt.width));
-      this.els.sceneBg.setAttribute("height", String(roomArt.height));
-      this.els.stage.classList.toggle("stage--list",
-        this._failedRoomImageUrl === roomArt.url);
-    } else {
-      this.els.stage.classList.add("stage--list");
-    }
-
-    const hotspotsEl = this.els.stageHotspots;
-    hotspotsEl.textContent = "";
-    for (const id of room.hotspots) {
-      const h = CONTENT.hotspots[id];
-      const isNpc = NPC_IDS.includes(id);
-      let label = h.label;
-      if (id === "alexPlus" && s.alexPlus !== "active") {
-        label += " — offline";
-      }
-      /* Bereits besuchte/gesammelte Orte bleiben erkennbar. */
-      const collected = !isNpc &&
-        typeof CARD_SOURCE !== "undefined" &&
-        Object.prototype.hasOwnProperty.call(CARD_SOURCE, id) &&
-        s.cards.includes(CARD_SOURCE[id]);
-      const visited = s.visitedHotspots.includes(id);
-      if (collected) {
-        label += " — im Beweisordner";
-      } else if (visited) {
-        label += " — besucht";
-      }
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "hotspot";
-      btn.setAttribute("aria-label", (isNpc ? "Gespräch: " : "Fundstelle: ") + label);
-      btn.dataset.label = label;
-      btn.dataset.id = id;
-      if (collected) {
-        btn.classList.add("is-collected");
-      } else if (visited) {
-        btn.classList.add("is-visited");
-      }
-      const anchor = (anchors && anchors[id]) ? anchors[id] : null;
-      if (anchor &&
-          typeof anchor.x === "number" && Number.isFinite(anchor.x) &&
-          typeof anchor.y === "number" && Number.isFinite(anchor.y)) {
-        btn.classList.add("is-placed");
-        btn.style.left = (anchor.x * 100) + "%";
-        btn.style.top = (anchor.y * 100) + "%";
-      }
-      btn.append(
-        this.make("span", "hotspot-kind", isNpc ? "Gespräch" : "Fundstelle"),
-        this.make("span", "hotspot-label", label)
-      );
-      if (s.ended) {
-        btn.setAttribute("aria-disabled", "true");
-      }
-      btn.addEventListener("click", () => this.onHotspot(id));
-      hotspotsEl.appendChild(btn);
-    }
-  },
-
-  updateRoomImageFallback() {
-    const img = this.els.sceneBg;
-    const src = img.getAttribute("src");
-    const art = typeof ART_ASSETS !== "undefined" ? ART_ASSETS : null;
-    const roomArt = art && art.rooms && art.rooms[GameState.get().room];
-    /* Nur das tatsächlich aktuelle und fertig geladene/fehlgeschlagene
-       Bild beurteilen, keine alte Antwort während eines Raumwechsels. */
-    if (!roomArt || src !== roomArt.url || !img.complete) {
-      return;
-    }
-    const failed = img.naturalWidth === 0;
-    this._failedRoomImageUrl = failed ? src : null;
-    this.els.stage.classList.toggle("stage--list", failed);
-  },
-
-  /* ---------- Raumwechsel ---------- */
-
-  openRoom(roomId) {
-    const s = GameState.get();
-    if (s.ended) {
-      this.setStatus(UI_TEXTS.ended);
-      return;
-    }
-    if (roomId === s.room) {
-      this.renderWorld();
-      return;
-    }
-    const r = GameState.enterRoom(roomId);
-    if (!r.ok) {
-      if (r.reason === "room-locked") {
-        this.setStatus(UI_TEXTS.roomLocked);
-      } else {
-        this.setStatus("Raumwechsel nicht möglich.");
-      }
-      return;
-    }
-    this.stopAudio();
-    this.els.hotspotInfo.hidden = true;
-    this.els.hotspotInfoLabel.textContent = "";
-    this.els.hotspotInfoText.textContent = "";
-    this.renderWorld();
-    this.setStatus(CONTENT.rooms[roomId].name + ". Vier Punkte sind in der Szene sichtbar.");
-  },
-
-  /* ---------- Hotspots: Gespräche und Fundstellen ---------- */
-
-  onHotspot(id) {
-    const s = GameState.get();
-    if (s.ended) {
-      this.setStatus(UI_TEXTS.ended);
-      return;
-    }
-
-    const v = GameState.visitHotspot(id);
-    if (!v.ok) {
-      if (v.reason === "room-locked") {
-        this.setStatus(UI_TEXTS.roomLocked);
-      } else {
-        this.setStatus("Noch nicht möglich.");
-      }
-      return;
-    }
-
-    if (NPC_IDS.includes(id)) {
-      this.showHotspotInfo(id, v.firstVisit);
-      this.openNpcDialogue(id);
-      return;
-    }
-
-    /* Fundstelle: Karte einmal vergeben, vollständiger Text im Ordner. */
-    const c = GameState.collectFrom(id);
-    if (c.ok) {
-      this.renderWorld();
-      this.showHotspotInfo(id, true);
-      this.setStatus(UI_TEXTS.cardFound(c.card));
-      this.openEvidenceCard(id, c.card);
-    } else if (c.reason === "already-found") {
-      this.showHotspotInfo(id, false);
-      this.setStatus(UI_TEXTS.cardAlready);
-      this.openEvidenceCard(id, c.card || this.cardForHotspot(id));
-    } else if (c.reason === "locked") {
-      this.showHotspotInfo(id, v.firstVisit);
-      this.setStatus(UI_TEXTS.notUnlocked);
-    } else {
-      this.showHotspotInfo(id, v.firstVisit);
-    }
-  },
-
-  /* Passender Kurztext der Fundstelle:
-     - Konsole nach W2: beschreibungNachW2 (Routine tatsächlich aus)
-     - sonst: Beschreibung beim ersten Besuch, „wieder“-Text danach */
-  hotspotText(id, firstVisit) {
-    const h = CONTENT.hotspots[id];
-    if (id === "konsole" &&
-        GameState.get().rounds.resolved.includes("W2")) {
-      return h.beschreibungNachW2;
-    }
-    return firstVisit ? h.beschreibung : h.wieder;
-  },
-
-  showHotspotInfo(id, firstVisit) {
-    this.els.hotspotInfoLabel.textContent = CONTENT.hotspots[id].label;
-    this.els.hotspotInfoText.textContent = this.hotspotText(id, firstVisit);
-    this.els.hotspotInfo.hidden = false;
-  },
-
-  /* ---------- NPC-Gespräche ---------- */
-
-  openNpcDialogue(id) {
-    const s = GameState.get();
-
-    if (id === "mira") {
-      this.openDialogue({
-        title: this.miraDialogue().titel,
-        steps: this.buildSteps(this.miraDialogue().lines)
-      });
-      return;
-    }
-
-    if (id === "alexPlus") {
-      /* Löschung/Export wirklich als abgeschlossen darstellen:
-         Alex Plus ist danach kein aktiver Avatar mehr. */
-      if (s.alexPlus === "deleted") {
-        this.setStatus(UI_TEXTS.alexPlusGeloescht);
-        return;
-      }
-      if (s.alexPlus === "exported") {
-        this.setStatus(UI_TEXTS.alexPlusExportiert);
-        return;
-      }
-      const d = s.rounds.resolved.includes("W2")
-        ? CONTENT.dialogues.alexPlusNachW2
-        : CONTENT.dialogues.alexPlus;
-      this.openDialogue({ title: CONTENT.dialogues.alexPlus.titel, steps: this.buildSteps(d.lines) });
-      return;
-    }
-
-    /* Rolf: Die Exporthinweis-Zeile (rolf-07) erscheint erst, wenn W2
-       abgeschlossen ist — bis dahin endet das Gespräch kohärent mit
-       rolf-06. CONTENT bleibt unverändert; hier wird nur eine
-       abgeleitete Zeilenliste verwendet. */
-    const d = CONTENT.dialogues.rolf;
-    const w2done = s.rounds.resolved.includes("W2");
-    const rolfLines = w2done ? d.lines : d.lines.filter((l) => l.id !== "rolf-07");
-    this.openDialogue({ title: d.titel, steps: this.buildSteps(rolfLines) });
-  },
-
-  /* MIRA je nach Verfahrensstand:
-     - nach W2: miraNachW2 (Routine aus, Kündigung freigegeben —
-       keine neue aktive Bindung, keine gesperrte Kündigung)
-     - nach W1: vorhandener W1-Folgetext — die widerlegte persönliche
-       Verlängerung wird NICHT erneut als Tatsache behauptet
-     - sonst: frühes Gespräch (vor W2) */
-  miraDialogue() {
-    const s = GameState.get();
-    if (s.rounds.resolved.includes("W2")) {
-      /* Den Stand nennen, dann die Pointe stehen lassen. Die vorhandenen
-         Erklärungen und das unvertonte Formularangebot bleiben im Quelltext,
-         werden hier aber nicht als weitere Gesprächsschritte angehängt. */
-      const d = CONTENT.dialogues.miraNachW2;
-      return {
-        id: d.id,
-        titel: CONTENT.dialogues.mira.titel,
-        lines: d.lines.filter((line) =>
-          line.id === "miranachw2-01" || line.id === "miranachw2-02")
-      };
-    }
-    if (s.rounds.resolved.includes("W1")) {
-      return {
-        id: "miraNachW1",
-        titel: CONTENT.dialogues.mira.titel,
-        /* Dieselbe bereits vertonte MIRA-Aussage nennt den nächsten Einwand;
-           kein ungesprochener redaktioneller Folgetext als NPC-Beitrag. */
-        lines: [CONTENT.contradictions.W1.erfolg.find((line) => line.id === "w1-02")]
-      };
-    }
-    return CONTENT.dialogues.mira;
-  },
-
-  /* ---------- Stimmen (lokale TTS-Dateien, js/audio.js) ---------- */
-
-  currentDialogueStep() {
-    const d = this._dialogue;
-    return d ? d.steps[d.index] : null;
-  },
-
-  /* Laufende Sprache stoppen und wartende Clips verwerfen. */
-  stopAudio() {
-    GameAudio.stop();
-  },
-
-  /* Master-Umschalter. Bei Einschalten spielt die gerade sichtbare
-     vertonte Dialogzeile — oder, falls die Verfahrensansicht aktiv
-     ist, die dort sichtbaren vertonten Zeilen in sichtbarer
-     Reihenfolge. Bei Ausschalten stoppt alles sofort und leert die
-     Queue. */
-  toggleAudio() {
-    const on = GameAudio.toggle();
-    this.els.btnAudio.textContent = on ? "Stimmen aus" : "Stimmen an";
-    this.els.btnAudio.setAttribute("aria-pressed", on ? "true" : "false");
-    if (on) {
-      /* Fix018c: Audio folgt wie Escape dem zuletzt geöffneten Panel. */
-      const activePanel = this._openStack[this._openStack.length - 1];
-      if (activePanel === "procedure" && !this.els.procedurePanel.hidden) {
-        this.playVisibleProcedureAudio();
-      } else if (activePanel === "dialogue" && !this.els.dialoguePanel.hidden) {
-        const step = this.currentDialogueStep();
-        if (step && step.kind === "line" && GameAudio.hasLine(step.id)) {
-          GameAudio.playLine(step.id);
-        }
-      }
-      this.setStatus(UI_TEXTS.audioOn);
-    } else {
-      this.setStatus(UI_TEXTS.audioOff);
-    }
-  },
-
-  /* Bei bewusstem Einschalten: genau die gerade sichtbaren vertonten
-     Verfahrenszeilen der tatsächlich aktiven Ansicht in sichtbarer
-     Reihenfolge abspielen (Erfolgsfolge). Die W3-Einleitung läuft im
-     Dialogmotor und wird dort zeilenweise bedient — in der reinen
-     Kartenansicht darf keine längst abgeschlossene Einleitungsfolge
-     mehr gestartet werden. Stille Zeilen bleiben still; ohne vertonte
-     Zeilen passiert nichts. */
-  playVisibleProcedureAudio() {
-    const view = this._procedureView;
-    if (!view || !view.rid) {
-      return false;
-    }
-    const w = CONTENT.contradictions[view.rid];
-    if (!w) {
-      return false;
-    }
-    if (view.type === "success" && Array.isArray(w.erfolg)) {
-      GameAudio.playSequence(w.erfolg.map((l) => l.id));
-      return true;
-    }
-    return false;
-  },
-
-  /* Bewusst angeklickte Zeile wieder abspielen (Dialog oder Verlauf).
-     Bei ausgeschalteten Stimmen: kurzer Hinweis statt Audio. */
-  replayLine(id) {
-    if (!GameAudio.isEnabled()) {
-      this.setStatus(UI_TEXTS.audioOffHint);
-      return;
-    }
-    GameAudio.playLine(id);
-  },
-
-  /* Kleine Wiederhol-Schaltfläche für eine vertonte Zeile. */
-  makeReplayButton(id, label) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "audio-replay ghost";
-    btn.textContent = label;
-    btn.addEventListener("click", () => this.replayLine(id));
-    return btn;
-  },
-
-  /* ---------- Dialogmotor (Weiter / Schließen) ---------- */
-
-  buildSteps(lines) {
-    return lines.map((l) => ({
-      kind: "line",
-      id: l.id,
-      speaker: l.speaker,
-      text: l.text
-    }));
-  },
-
-  openDialogue(opts) {
-    this.stopAudio();
-    this._dialogue = {
-      steps: opts.steps,
-      index: 0,
-      endingId: opts.endingId || null,
-      onDone: opts.onDone || null
-    };
-    this.els.dialogueTitle.textContent = opts.title;
-    this.els.dialoguePanel.classList.toggle("dialogue--ending", !!opts.endingId);
-    this.rememberFocus();
-    this.els.dialoguePanel.hidden = false;
-    this.trackOpen("dialogue");
-    this.renderStep();
-    this.els.btnDialogueNext.focus();
-  },
-
-  speakerClass(speaker) {
-    if (speaker === "Alex") {
-      return " is-alex";
-    }
-    if (speaker === "Alex Plus") {
-      return " is-alexplus";
-    }
-    return "";
-  },
-
-  renderStep() {
-    const d = this._dialogue;
-    const step = d.steps[d.index];
-    const body = this.els.dialogueBody;
-    body.textContent = "";
-
-    if (step.kind === "line") {
-      this.safeLog(step.speaker, step.text, step.id);
-      const line = this.make("div", "dialogue-line");
-      const privatePlus = d.endingId === "B" && step.speaker === "Alex Plus";
-      const portrait = privatePlus ? this.makePrivateDevice(step.id) :
-        this.makeSpeakerPortrait(step.speaker, step.id);
-      if (portrait) {
-        line.appendChild(portrait);
-      }
-      line.append(
-        this.make("span", "dialogue-speaker" + this.speakerClass(step.speaker), step.speaker),
-        this.make("p", "dialogue-text", step.text)
-      );
-      body.appendChild(line);
-      /* Vertonte Zeile: bei aktivierten Stimmen die zugehörige Datei
-         abspielen + klare Wiederholfunktion. Stille Zeilen (z. B. Alex)
-         bleiben sichtbar und ohne Ton. */
-      if (GameAudio.hasLine(step.id)) {
-        body.appendChild(this.makeReplayButton(step.id, "Zeile wiederholen"));
-        GameAudio.playLine(step.id);
-      } else {
-        /* Wechsel zu einer stillen/fehlenden Zeile: vorherige Stimme
-           sofort stoppen und wartende Clips verwerfen — keine laufende
-           Medienzeit unter der neuen Zeile, kein Ersatzclip. */
-        this.stopAudio();
-      }
-    } else {
-      /* Bewusster Lesemoment (z. B. Ende A zwischen Löschung und
-         Zufriedenheitsfrage): eigener Schritt, eigener Weiter-Klick.
-         Die bewusste Pause bleibt stumm und stoppt laufende Sprache. */
-      this.stopAudio();
-      if (d.endingId === "A") {
-        this.applyEndingView("A");
-      }
-      body.appendChild(this.make("div", "dialogue-pause", "· · ·"));
-    }
-
-    const last = d.index >= d.steps.length - 1;
-    /* Nur Darstellung: bei der aktuellen Zeile w2-02 (W2-Erfolgs-
-       moment) lautet der Weiter-Button „Abschaltung bestätigen“ —
-       keine zusätzliche State-Aktion, W2 ist bereits durch den
-       vorhandenen presentEvidence-Aufruf gelöst. */
-    let nextLabel = last ? "Schließen" : "Weiter";
-    if (!last && step.id === "w2-02") {
-      nextLabel = "Abschaltung bestätigen";
-    }
-    this.els.btnDialogueNext.textContent = nextLabel;
-    /* Kopfbutton: nichtletzter Schritt „Überspringen", letzter
-       „Schließen" (gilt auch für Pausenschritte und Enddialoge).
-       Klick-/Escape-/onDone-Logik bleibt unverändert. */
-    this.els.btnDialogueClose.textContent = last ? "Schließen" : "Überspringen";
-  },
-
-  advanceDialogue() {
-    const now = Date.now();
-    if (now - this.lastAdvanceAt < this.ADVANCE_LOCK_MS) {
-      return; /* schneller Mehrfachklick: bewusst ignorieren */
-    }
-    this.lastAdvanceAt = now;
-
-    const d = this._dialogue;
-    if (!d) {
-      return;
-    }
-    if (d.index < d.steps.length - 1) {
-      d.index += 1;
-      this.renderStep();
-    } else {
-      this.finishDialogue();
-    }
-  },
-
-  /* Schließen (Button, Escape oder letzter Schritt): ohne Fortschritts-
-     verlust; bei Enddialogen schließt der Abschluss das Ende ab. */
-  finishDialogue() {
-    this.stopAudio();
-    const d = this._dialogue;
-    this._dialogue = null;
-    this.trackClose("dialogue");
-    this.els.dialoguePanel.hidden = true;
-    this.els.dialoguePanel.classList.remove("dialogue--ending");
-    this.restoreFocus(document.body);
-    if (d && d.onDone) {
-      d.onDone();
-    }
-  },
-
-  /* Zeile in den Gesprächsverlauf legen — pro Zeilen-ID nur einmal,
-     damit erneutes Lesen desselben Dialogs keine Duplikate erzeugt. */
-  safeLog(speaker, text, id) {
-    if (id) {
-      const log = GameState.getDialogueLog();
-      if (log.some((l) => l.id === id)) {
-        return;
-      }
-    }
-    GameState.addDialogueLine(speaker, text, id);
-  },
-
-  /* ---------- Beweisordner ---------- */
-
-  openEvidence() {
-    this.stopAudio();
-    this.renderEvidenceList();
-    this.rememberFocus();
-    this.els.evidencePanel.hidden = false;
-    this.trackOpen("evidence");
-    this.els.btnEvidenceClose.focus();
-  },
-
-  closeEvidence() {
-    this.stopAudio();
-    this.trackClose("evidence");
-    this.els.evidencePanel.hidden = true;
-    this.restoreFocus(this.els.btnEvidence);
-  },
-
-  /* Gezieltes Öffnen der Beweisordner-Karte einer Fundstelle: genau die
-     passende vorhandene Karte wird fokussierbar, aktiv fokussiert und in
-     den sichtbaren Scrollbereich gebracht (auch auf kleinem Bildschirm).
-     Fokus-Rückweg geht zur Fundstelle (frische Hotspot-Knoten). */
-  openEvidenceCard(hotspotId, cardId) {
-    this.stopAudio();
-    this.renderEvidenceList();
-    const hotspotBtn = this.els.stageHotspots.querySelector(
-      '[data-id="' + hotspotId + '"]');
-    this._focusReturn = hotspotBtn || document.activeElement;
-    this.els.evidencePanel.hidden = false;
-    this.trackOpen("evidence");
-    const article = this.evidenceArticle(cardId);
-    if (article) {
-      article.tabIndex = -1;
-      article.focus({ preventScroll: true });
-      article.scrollIntoView({ block: "center" });
-      return;
-    }
-    this.els.btnEvidenceClose.focus();
-  },
-
-  /* Passender gerenderte article-Knoten einer Karten-ID, falls vorhanden. */
-  evidenceArticle(cardId) {
-    if (!cardId) {
-      return null;
-    }
-    return this.els.evidenceList.querySelector(
-      'article.card[data-card="' + cardId + '"]');
-  },
-
-  /* Karten-ID einer Fundstelle aus dem vorhandenen Quell-Zuordnungskatalog. */
-  cardForHotspot(id) {
-    if (typeof CARD_SOURCE !== "undefined" &&
-        Object.prototype.hasOwnProperty.call(CARD_SOURCE, id)) {
-      return CARD_SOURCE[id];
-    }
-    return null;
-  },
-
-  renderEvidenceList() {
-    const list = this.els.evidenceList;
-    list.textContent = "";
-    const cards = GameState.cardList();
-
-    if (!cards.length) {
-      list.appendChild(this.make("p", "evidence-empty", CONTENT.evidence.empty));
-      return;
-    }
-
-    for (const id of cards) {
-      const card = CONTENT.cards[id];
-      const article = this.make("article", "card");
-      article.dataset.card = id;
-      article.append(
-        this.make("h3", null, card.title),
-        this.make("p", null, card.text),
-        this.make("p", "card-meta", "Quelle: " + card.quelle)
-      );
-      list.appendChild(article);
-    }
-  },
-
-  /* ---------- Verlauf ---------- */
-
-  openLog() {
-    this.stopAudio();
-    this.renderLog();
-    this.rememberFocus();
-    this.els.logPanel.hidden = false;
-    this.trackOpen("log");
-    this.els.btnLogClose.focus();
-  },
-
-  closeLog() {
-    this.stopAudio();
-    this.trackClose("log");
-    this.els.logPanel.hidden = true;
-    this.restoreFocus(this.els.btnLog);
-  },
-
-  renderLog() {
-    const list = this.els.logList;
-    list.textContent = "";
-    const log = GameState.getDialogueLog();
-
-    if (!log.length) {
-      const li = this.make("li", "log-empty", UI_TEXTS.noLog);
-      list.appendChild(li);
-      return;
-    }
-
-    for (const line of log) {
-      const li = this.make("li", null);
-      li.append(
-        this.make("span", "log-speaker", line.speaker + " — "),
-        document.createTextNode(line.text)
-      );
-      /* Nur vertonte Zeilen erhalten eine Wiederholfunktion; das Öffnen
-         des Verlaufs selbst spielt keine Historie ab. */
-      if (GameAudio.hasLine(line.id)) {
-        li.appendChild(this.makeReplayButton(line.id, "Anhören"));
-      }
-      list.appendChild(li);
-    }
-  },
-
-  /* ---------- Widerspruchsverfahren ---------- */
-
-  openProcedure() {
-    this.stopAudio();
-    const previousDialogue = this._dialogue;
-    this.renderProcedure();
-    this.rememberFocus();
-    this.els.procedurePanel.hidden = false;
-    this.trackOpen("procedure");
-    if (this._dialogue && this._dialogue !== previousDialogue) {
-      /* Nur die hier neu gestartete W3-Einleitung erhält Vorrang.
-         Ein zuvor offenes NPC-Gespräch darf das bewusst gewählte
-         Verfahren nicht verdecken. Das neue Dialogpanel muss nach
-         dem gesamten Öffnungsvorgang das oberste aktive Panel sein —
-         das trackOpen("procedure") oben darf es nicht verdecken. */
-      this.trackOpen("dialogue");
-      this.els.btnDialogueNext.focus();
-      return;
-    }
-    const firstBtn = this.els.procedureBody.querySelector("button");
-    (firstBtn || this.els.btnProcedureClose).focus();
-  },
-
-  closeProcedure() {
-    this.stopAudio();
-    this.trackClose("procedure");
-    this.els.procedurePanel.hidden = true;
-    this.restoreFocus(this.els.btnProcedure);
-    this.setStatus(CONTENT.status.contradictionCancelled);
-  },
-
-  renderProcedure() {
-    /* Verfahrensübergang: laufende und wartende Sprache der vorherigen
-       Ansicht verwirfen, bevor die neue Ansicht gilt. */
-    this.stopAudio();
-    const s = GameState.get();
-    const body = this.els.procedureBody;
-    body.textContent = "";
-
-    if (!s.e2Found) {
-      this._procedureView = { type: "locked" };
-      this.els.procedureTitle.textContent = CONTENT.labels.widerspruchsverfahren;
-      body.append(
-        this.make("p", null, CONTENT.contradiction.noCard),
-        this.make("p", null, UI_TEXTS.procedureLocked)
-      );
-      return;
-    }
-
-    if (s.ended) {
-      this._procedureView = { type: "ended" };
-      this.els.procedureTitle.textContent = CONTENT.labels.entscheidung;
-      const badge = this.make("p", "badge is-done", "Abgeschlossen");
-      body.append(
-        badge,
-        this.make("p", null,
-          "Das gewählte Ende ist für diesen Spielstand endgültig. " +
-          "Über „Zum Entscheidungspunkt“ ist der Stand vor der Entscheidung wieder erreichbar.")
-      );
-      return;
-    }
-
-    if (s.rounds.next) {
-      this.renderRound(s.rounds.next, body);
-    } else {
-      this.renderDecision(body);
-    }
-  },
-
-  renderRound(rid, body, playIntro = true, feedback = null) {
-    body.textContent = "";
-    const s = GameState.get();
-    const w = CONTENT.contradictions[rid];
-    this._procedureView = { type: "round", rid: rid };
-    this.els.procedureTitle.textContent = w.titel;
-
-    /* Bereits abgeschlossene Runden sichtbar machen. */
-    if (s.rounds.resolved.length) {
-      body.appendChild(this.make("p", "badge is-done",
-        UI_TEXTS.resolvedPrefix + " " + s.rounds.resolved.join(", ")));
-    }
-
-    /* W3: vor der Behauptung das kurze tatsächliche Gespräch (vorher)
-       — nacheinander im bestehenden Dialogmotor: eine Zeile mit
-       passendem Portrait und Replay, manuelles Weiter (kein
-       Sequenzmotor, kein Auto-Weiter, Originalzeilen/IDs/Reihenfolge
-       unverändert). Erst nach dem geschlossenen Dialog erscheinen die
-       unveränderte Behauptung und die Kartenauswahl. Eine falsche
-       Karte rendert diese Ansicht (playIntro=false) und öffnet die
-       Einleitung NICHT erneut. */
-    if (Array.isArray(w.vorher) && playIntro) {
-      body.appendChild(this.make("p", "claim-by", UI_TEXTS.vorherLabel));
-      this.openDialogue({
-        title: w.titel,
-        steps: this.buildSteps(w.vorher),
-        onDone: () => {
-          this.renderRound(rid, body, false);
-          const firstBtn = this.els.procedureBody.querySelector("button");
-          (firstBtn || this.els.btnProcedureClose).focus();
-        }
-      });
-      return;
-    }
-
-    /* Offene Aussage mit Sprecher. */
-    body.appendChild(this.make("p", "claim-by", UI_TEXTS.claimBy));
-    body.appendChild(this.make("blockquote", "claim", w.claim));
-
-    /* Falsche Karte: genau eine Rückmeldung direkt nach der Behauptung
-       und vor der Kartenauswahl — nicht am Ende der Kartenliste.
-       Programmgesteuert fokussierbar (tabindex=-1) und verständlich
-       benannt; renderRound ersetzt den Inhalt, daher keine Duplikate
-       bei Mehrfachklick. */
-    if (feedback) {
-      const box = this.make("div", "feedback-box", feedback);
-      box.id = "procedure-feedback";
-      box.tabIndex = -1;
-      box.setAttribute("aria-label", "Rückmeldung zur vorgelegten Karte");
-      body.appendChild(box);
-    }
-
-    /* Kartenwahl: nur tatsächlich gefundene Karten. */
-    body.appendChild(this.make("p", null, UI_TEXTS.cardPickLabel));
-    const cards = GameState.cardList();
-    for (const cardId of cards) {
-      const card = CONTENT.cards[cardId];
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "card-pick";
-      const text = this.make("span", "card-pick-text");
-      text.append(
-        this.make("strong", null, card.title),
-        this.make("p", null, card.text)
-      );
-      btn.appendChild(text);
-      btn.addEventListener("click", () => this.presentCard(rid, cardId));
-      body.appendChild(btn);
-    }
-
-    /* „Weiter untersuchen“ in jeder Runde zugänglich — kein Verlust. */
-    const back = document.createElement("button");
-    back.type = "button";
-    back.className = "ghost";
-    back.textContent = CONTENT.labels.weiterUntersuchen;
-    back.addEventListener("click", () => this.closeProcedure());
-    body.appendChild(back);
-  },
-
-  presentCard(rid, cardId) {
-    const res = GameState.presentEvidence(rid, cardId);
-    const body = this.els.procedureBody;
-
-    if (res.ok) {
-      this.renderSuccess(rid);
-      this.updateProgress();
-      if (res.checkpoint && res.checkpoint.ok) {
-        if (res.checkpoint.storage === "memory") {
-          this.setStatus(UI_TEXTS.checkpointAutoMemory);
-        } else {
-          this.setStatus(UI_TEXTS.checkpointAuto);
-        }
-      } else {
-        this.setStatus(UI_TEXTS.roundDone);
-      }
-      return;
-    }
-
-    if (res.reason === "already-resolved") {
-      /* Doppelklick o. ä.: Runde bleibt, wie sie ist. */
-      this.renderProcedure();
-      return;
-    }
-
-    /* Passende falsche Rückmeldung (aus content.js), Runde bleibt offen.
-       Die sichtbare Einleitung wird dabei NICHT erneut abgespielt.
-       Die Rückmeldung erscheint direkt nach der Behauptung, vor der
-       Kartenauswahl; der Fokus geht dorthin, die nächste Karte bleibt
-       per Tab erreichbar (keine Fokusfalle, keine automatische Wahl). */
-    const feedbackText = res.feedback || "Diese Karte trägt die Runde nicht.";
-    this.renderRound(rid, body, false, feedbackText);
-    const box = body.querySelector("#procedure-feedback");
-    if (box) {
-      box.scrollIntoView({ block: "nearest" });
-      box.focus({ preventScroll: true });
-    }
-    this.setStatus(feedbackText);
-  },
-
-  renderSuccess(rid) {
-    /* Erfolgsreaktion als einzelne Dialogmomente auf dem bestehenden
-       Dialogmotor: pro Moment nur die aktuelle Zeile, passendes
-       Portrait, vorhandener Replay-Button, nur manuelles Weiter.
-       Keine playSequence, kein Auto-Weiter, keine w.folge-Box. */
-    this.stopAudio();
-    const w = CONTENT.contradictions[rid];
-
-    /* Nach W2 den persönlichen Wunsch stehen lassen. Die optionale
-       technische Aufzählung bleibt im NPC-Nachgespräch; der Pflichtweg
-       nimmt W3 die Entdeckung der Alternative nicht vorweg.
-       CONTENT-Arrays und Originalaufnahmen bleiben unverändert. */
-    const lines = w.erfolg.slice();
-    if (rid === "W2") {
-      const nachW2 = CONTENT.dialogues.alexPlusNachW2.lines;
-      const extra = ["alexplusnachw2-02"]
-        .map((id) => nachW2.find((l) => l.id === id))
-        .filter(Boolean);
-      const i = lines.findIndex((l) => l.id === "w2-04");
-      if (i >= 0) {
-        lines.splice(i + 1, 0, ...extra);
-      } else {
-        lines.push(...extra);
-      }
-    }
-
-    /* Abschluss (letzter Schritt, Schließen oder Escape): kontrolliert
-       zur folgenden aktuellen Verfahrensansicht (nach W3 zur
-       vorhandenen Endwahl) mit sichtbarem Fokus. Die alten Karten
-       werden ersetzt und bleiben nicht klickbar; der gelöste
-       Fortschritt bleibt bestehen. */
-    this.openDialogue({
-      title: w.titel,
-      steps: this.buildSteps(lines),
-      onDone: () => {
-        this.renderProcedure();
-        const firstBtn = this.els.procedureBody.querySelector("button");
-        (firstBtn || this.els.btnProcedureClose).focus();
-      }
-    });
-  },
-
-  /* ---------- Entscheidung und Enden ---------- */
-
-  renderDecision(body) {
-    this._procedureView = { type: "decision" };
-    this.els.procedureTitle.textContent = CONTENT.labels.entscheidung;
-    body.appendChild(this.make("p", "decision-prompt", CONTENT.decision.prompt));
-    const cp = GameState.hasSave("checkpoint");
-    if (cp.exists && cp.storage === "local") {
-      body.appendChild(this.make("p", null,
-        "Der Entscheidungspunkt wurde automatisch gesichert — die andere Option bleibt erreichbar."));
-    } else {
-      body.appendChild(this.make("p", null, UI_TEXTS.decisionCheckpointMemory));
-    }
-
-    const options = this.make("div", "decision-options");
-    for (const opt of CONTENT.decision.optionen) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.dataset.ending = opt.id;
-      btn.textContent = opt.label;
-      btn.addEventListener("click", () => this.chooseEnding(opt.id));
-      options.appendChild(btn);
-    }
-    body.appendChild(options);
-  },
-
-  chooseEnding(endingId) {
-    if (!window.confirm(UI_TEXTS.endingConfirm)) {
-      return; /* Abbrechen erhält den Fortschritt */
-    }
-    const res = GameState.chooseEnding(endingId);
-    if (!res.ok) {
-      if (res.reason === "already-ended") {
-        this.setStatus("Das gewählte Ende ist endgültig. " + (res.hint || ""));
-      } else {
-        this.setStatus("Noch nicht möglich.");
-      }
-      return;
-    }
-    this.updateProgress();
-    this.playEnding(endingId);
-  },
-
-  /* Vollständigen Enddialog abspielen.
-     Ende A: zwischen Abschlussmeldung (endeA-03) und
-     Zufriedenheitsfrage (endeA-04) ein bewusster Weiter-Schritt
-     (endings.A.weiterPause). */
-  playEnding(endingId) {
-    const e = CONTENT.endings[endingId];
-    const steps = this.buildSteps(e.lines);
-    if (e.weiterPause) {
-      const i = steps.findIndex((st) => st.id === e.weiterPause.nach);
-      if (i >= 0) {
-        steps.splice(i + 1, 0, { kind: "pause" });
-      }
-    }
-    /* Erledigte Entscheidungsansicht beim Start des Enddialogs ausblenden:
-       die Endwahl ist erst nach geladenem Entscheidungspunkt wieder offen. */
-    this.trackClose("procedure");
-    this.els.procedurePanel.hidden = true;
-    /* Abwesenheit erst im echten Pausenschritt; das private Gegenüber
-       während des Dialogs nur beim jeweiligen Plus-Beitrag zeigen. */
-    this.removeEndingView();
-    this.setStatus(UI_TEXTS.ended);
-    this.openDialogue({
-      title: e.titel,
-      steps: steps,
-      endingId: endingId,
-      onDone: () => this.showEndingPanel(endingId)
-    });
-  },
-
-  showEndingPanel(endingId) {
-    const e = CONTENT.endings[endingId];
-    this.els.endingTitle.textContent = e.titel;
-
-    const body = this.els.endingBody;
-    body.textContent = "";
-    const actions = this.make("div", "ending-actions");
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = "Zum Entscheidungspunkt";
-    btn.addEventListener("click", () => this.doCheckpoint());
-    actions.appendChild(btn);
-    body.appendChild(actions);
-
-    this.renderWorld();
-    this.applyEndingView(endingId);
-    this.els.endingPanel.hidden = false;
-    this.syncActivePanel();
-    this.setStatus(UI_TEXTS.ended);
-    btn.focus();
-  },
-
-  /* ---------- Sichtbares Endmotiv in der Bühne (nur UI-lokal) ----------
-   * Ende A: ruhige dunkle, leere Terminalfläche — Abwesenheit von
-   *   Alex Plus, ohne Plus-Portrait, ohne Störanimation oder Ton.
-   * Ende B: schlichtes privates Gerätefenster mit dem tatsächlichen
-   *   Plus-Portrait (makeSpeakerPortrait, Original-ID) und der
-   *   ungesprochenen Beschriftung „Privates Gerät“; keine
-   *   NEBENBEI-Marke, kein neues Raum-Vollbild, keine neue Bilddatei.
-   * Fehlt das Portrait, bleibt das beschriftete Fenster stehen —
-   * Text und Bedienung blockieren nicht. */
-  applyEndingView(endingId) {
-    this.removeEndingView();
-    const stage = this.els.stage;
-    const view = this.make("div", "ending-view ending-view--" + endingId);
-    view.setAttribute("aria-hidden", "true");
-    if (endingId === "A") {
-      view.appendChild(this.make("div", "ending-absence", "—"));
-    } else {
-      view.appendChild(this.makePrivateDevice("endeB-06"));
-    }
-    stage.appendChild(view);
-  },
-
-  /* Derselbe Rahmen wird pro Plus-Zeile oder einmal im Schlussbild
-     verwendet. Die Original-ID erhält die Ausdruckswahl des Bildkatalogs. */
-  makePrivateDevice(lineId) {
-    const device = this.make("div", "ending-device");
-    device.appendChild(this.make("span", "ending-device-label", "Privates Gerät"));
-    const portrait = this.makeSpeakerPortrait("Alex Plus", lineId);
-    if (portrait) {
-      portrait.classList.add("ending-portrait");
-      device.appendChild(portrait);
-    }
-    device.appendChild(this.make("span", "ending-device-caption", "Ohne Logo, ohne Abo"));
-    return device;
-  },
-
-  removeEndingView() {
-    const view = this.els.stage.querySelector(".ending-view");
-    if (view) {
-      view.remove();
-    }
-  },
-
-  /* ---------- Speichern / Laden / Entscheidungspunkt / Neustart ---------- */
-
-  doSave() {
-    const r = GameState.save("save");
-    if (r.ok) {
-      this.setStatus(r.storage === "memory" ? UI_TEXTS.saveOkMemory : UI_TEXTS.saveOk);
-    } else {
-      this.setStatus(UI_TEXTS.saveFail);
-    }
-  },
-
-  doLoad() {
-    const r = GameState.load("save");
-    if (r.ok) {
-      this.renderAll();
-      const s = GameState.get();
-      if (s.ended && s.ending) {
-        /* Abgeschlossener Stand: passendes Endpanel wieder zeigen, ohne neu
-           zu entscheiden oder den Stand zurückzusetzen. */
-        this.showEndingPanel(s.ending);
-      }
-      this.setStatus(UI_TEXTS.loadOk);
-    } else if (r.reason === "no-save") {
-      this.setStatus(UI_TEXTS.loadNone);
-    } else {
-      /* invalid / parse-failed: aktueller Stand bleibt unangetastet */
-      this.setStatus(UI_TEXTS.loadInvalid);
-    }
-  },
-
-  doCheckpoint() {
-    const r = GameState.loadCheckpoint();
-    if (r.ok) {
-      this.renderAll();
-      this.setStatus(UI_TEXTS.checkpointOk);
-      /* Entscheidung ist wieder offen: beide Optionen zeigen. */
-      this.openProcedure();
-    } else {
-      this.setStatus(UI_TEXTS.checkpointNone);
-    }
-  },
-
-  /* Neustart erst nach echter Bestätigung; Abbrechen erhält Fortschritt.
-     Reset betrifft nur den Spielzustand (eigene Slots), nie Browserdaten. */
-  doRestart() {
-    if (!window.confirm(CONTENT.restart.confirm)) {
-      return;
-    }
-    GameState.reset();
-    this.renderAll();
-    /* Bestätigter Neustart: wie beim echten frischen Start die vorhandene
-     * Ankunftsszene über den bestehenden Dialogmotor beginnen — normaler
-     * Log- und Audiofluss, keine Ersatzzeile, keine doppelte Logeinfügung. */
-    const ankunft = CONTENT.dialogues.ankunft;
-    this.openDialogue({
-      title: ankunft.titel,
-      steps: this.buildSteps(ankunft.lines)
-    });
-    this.setStatus(CONTENT.status.restarted);
   }
-};
+
+  /* ---------- Zustand der UI (kein Story-State) ---------- */
+  let lastLineId = null;          // für Audio-Wechsel
+  let lastRenderedPhase = null;
+  let lastRenderedScene = null;
+  let lastRenderedMode = null;
+  let toastTimer = null;
+  let confirmResolver = null;     // Promise-Resolver für Bestätigungen
+  let lastFocusedBeforeOverlay = null;
+  let activeOverlay = null;       // id des zuletzt geöffneten Overlays
+  let uiOverlay = null;           // Menü/Notizen über unverändertem Spielzustand
+  let currentPortrait = null;
+  let portraitScene = null;
+  let savedRevision = null;
+  let voiceEnabled = false;
+
+  /* ---------- GameState-Brücke ---------- */
+  function state() { return (typeof GameState !== "undefined") ? GameState : null; }
+  function view() {
+    const s = state();
+    if (!s || typeof s.view !== "function") return null;
+    try { return s.view(); } catch (e) { return null; }
+  }
+  function dispatch(action) {
+    const s = state();
+    if (!s || typeof s.dispatch !== "function" || !action) return { ok: false, message: "Keine Aktion." };
+    try { return s.dispatch(action); } catch (e) { return { ok: false, message: "Aktion konnte nicht ausgeführt werden." }; }
+  }
+
+  /* ---------- Sichere DOM-Hilfen ---------- */
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+  function text(node, value) { if (node) node.textContent = (value == null ? "" : String(value)); }
+  function make(tag, cls, txt) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+  }
+  function button(label, cls, onClick, attrs) {
+    const b = make("button", cls || "btn", label);
+    b.type = "button";
+    if (attrs) for (const k in attrs) b.setAttribute(k, attrs[k]);
+    if (onClick) b.addEventListener("click", (e) => { e.preventDefault(); onClick(b, e); });
+    return b;
+  }
+  function payload(action) { return action && (action.action || action); }
+  function focusKey(action) {
+    const a = payload(action);
+    return JSON.stringify(Object.fromEntries(Object.entries(a || {}).filter(([k]) => !k.startsWith("expected"))));
+  }
+  function actionButton(action, cls) {
+    return button(action.label || "Weiter", cls || "btn", () => onAction(action), {"data-focus-key": focusKey(action)});
+  }
+  function findAction(v, type) { return (v.actions || []).find(a => payload(a).type === type); }
+  function backAction(v) {
+    return (v && v.actions || []).find(a => {
+      const p = payload(a);
+      return p.type === "closeDocument" || p.confirm === false ||
+        (p.type === "interact" && ["backHome", "backReception", "backRoom"].includes(p.target));
+    });
+  }
+  function hasSave(slot) {
+    const s = state();
+    try { return !!(s && s.hasSave && s.hasSave(slot).exists); } catch (_) { return false; }
+  }
+
+  /* ---------- Toast / kurze Rückmeldung ---------- */
+  function toast(msg, ms) {
+    if (!el.toast) return;
+    text(el.toast, msg || "");
+    // Native modale Dialoge liegen über dem gewöhnlichen Toast.
+    const d = activeOverlay && el.dlg[activeOverlay];
+    if (d && d.open) {
+      let notice = $(".overlay-notice", d);
+      if (!notice) { notice = make("p", "overlay-notice"); notice.setAttribute("role", "status"); d.firstElementChild.appendChild(notice); }
+      text(notice, msg || "");
+    }
+    if (!msg) { el.toast.classList.remove("show"); return; }
+    el.toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.toast.classList.remove("show"), ms || 3200);
+  }
+
+  /* ---------- Audio-Verwaltung ---------- */
+  function audioNotice(msg) { if (msg) toast(msg, 3600); }
+  function stopAudio() {
+    if (typeof GameAudio !== "undefined" && GameAudio.stop) GameAudio.stop();
+  }
+  function maybePlayLine(line) {
+    const id = line && line.id || null;
+    if (id === lastLineId) return;
+    stopAudio();
+    lastLineId = id;
+    if (!id) return;
+    if (typeof GameAudio === "undefined") return;
+    if (!line.voice) return;
+    if (!GameAudio.isEnabled()) return;
+    if (!GameAudio.hasLine(line.id)) return; // fehlender Clip: Text bleibt, keine Ersatzstimme
+    GameAudio.playLine(line.id);
+  }
+  function replayLine() {
+    const v = view();
+    const line = v && v.line;
+    if (!line || !line.id) return;
+    if (typeof GameAudio === "undefined") return;
+    if (!GameAudio.isEnabled()) { toast("Stimmen sind aus."); return; }
+    if (!GameAudio.hasLine(line.id)) { toast("Für diese Zeile ist keine Sprachdatei vorhanden."); return; }
+    lastLineId = line.id;
+    GameAudio.playLine(line.id);
+  }
+  function setVoice(enabled) {
+    voiceEnabled = !!enabled;
+    if (el.btnVoice) el.btnVoice.setAttribute("aria-pressed", String(!!enabled));
+    if (el.btnStartVoice) {
+      el.btnStartVoice.setAttribute("aria-pressed", String(!!enabled));
+      el.btnStartVoice.textContent = "Stimmen: " + (enabled ? "an" : "aus");
+    }
+    if (el.btnVoice) el.btnVoice.setAttribute("aria-label", "Stimmen " + (enabled ? "ausschalten" : "einschalten"));
+    if (el.btnMenuVoice) { el.btnMenuVoice.textContent = "Stimmen: " + (enabled ? "an" : "aus"); el.btnMenuVoice.setAttribute("aria-pressed", String(!!enabled)); }
+  }
+  function toggleVoice() {
+    if (typeof GameAudio === "undefined") { toast("Stimmen sind gerade nicht verfügbar."); return; }
+    const on = GameAudio.toggle();
+    setVoice(on);
+    if (!on) stopAudio();
+    else if (!el.game.hidden && view() && view().line) replayLine();
+  }
+
+  /* ---------- Bildkoordinatentransformation ----------
+     Das Raumbild wird mit object-fit:cover zentriert beschnitten.
+     Normierte Hotspot-Koordinaten (0..1 auf dem ganzen Bild) müssen auf
+     die sichtbare Bühne projiziert werden. Wir berechnen den sichtbaren
+     Ausschnitt und mappen (x,y) in Prozent der Bühne. */
+  function projectPoint(nx, ny) {
+    const stage = el.stage;
+    const img = el.stageImg;
+    if (!stage || !img) return { left: "50%", top: "50%" };
+    const sw = stage.clientWidth || 1;
+    const sh = stage.clientHeight || 1;
+    const nw = img.naturalWidth || 2048;
+    const nh = img.naturalHeight || 1152;
+    const imgRatio = nw / nh;
+    const stageRatio = sw / sh;
+    let visW, visH, offX, offY;
+    if (imgRatio > stageRatio) {
+      // Bild breiter: Höhe füllt, Seiten werden beschnitten
+      visH = nh;
+      visW = nh * stageRatio;
+      offX = (nw - visW) / 2;
+      offY = 0;
+    } else {
+      // Bild höher: Breite füllt, oben/unten werden beschnitten
+      visW = nw;
+      visH = nw / stageRatio;
+      offX = 0;
+      offY = (nh - visH) / 2;
+    }
+    const px = nx * nw;
+    const py = ny * nh;
+    const vx = (px - offX) / visW;
+    const vy = (py - offY) / visH;
+    return { left: (vx * 100) + "%", top: (vy * 100) + "%", visible: vx > 0.06 && vx < 0.94 && vy > 0.08 && vy < 0.72 };
+  }
+
+  /* ---------- Hotspot-Auflösung ----------
+     Normalisierte Art-Hotspots haben Vorrang vor CONTENT-Koordinaten.
+     action.target ist die Hotspot-ID; position aus der Action als Fallback. */
+  function resolveHotspot(action, sceneId) {
+    const target = action && action.action && action.action.target;
+    let pos = null;
+    let label = (action && action.label) || "";
+    if (target && typeof ART_ASSETS !== "undefined" && ART_ASSETS.rooms && ART_ASSETS.rooms[sceneId]) {
+      const room = ART_ASSETS.rooms[sceneId];
+      const hs = room.hotspots && room.hotspots[target];
+      if (hs) { pos = { x: hs.x, y: hs.y }; }
+    }
+    if (!pos && action && action.position) {
+      pos = { x: action.position.x, y: action.position.y };
+    }
+    return { pos, label, target };
+  }
+
+  /* ---------- Porträt-Auflösung ----------
+     line.portrait = {speaker, expression?}. Alex (Ich-Figur) bekommt kein
+     NPC-Porträt. MIRA / Alex Plus / Rolf zeigen die gewählte Emotion. */
+  function resolvePortrait(line) {
+    if (!line || !line.portrait) return null;
+    const p = line.portrait;
+    if (typeof ART_ASSETS === "undefined" || !ART_ASSETS.portraits) return null;
+    const speaker = p.speaker;
+    if (!speaker) return null;
+    // Alex als Ich-Figur: kein zufälliges NPC-Porträt
+    if (speaker === "Alex") return null;
+    const base = ART_ASSETS.portraits[speaker];
+    if (!base) return null;
+    let url = base.url;
+    let alt = speaker;
+    if (p.expression && ART_ASSETS.expressions && ART_ASSETS.expressions[speaker]) {
+      const ex = ART_ASSETS.expressions[speaker][p.expression];
+      if (ex && ex.url) url = ex.url;
+    }
+    return { url, alt };
+  }
+
+  /* ---------- HUD ---------- */
+  function updateHud(v) {
+    const place = {zuhause: "Zuhause", empfang: "Kundenempfang", vorfuehr: "Vorführraum"}[v.sceneId] || "";
+    text(el.hudPlace, place);
+    // Vollbild nur auf Desktop mit Unterstützung
+    if (el.btnFullscreen) {
+      const canFs = !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+      el.btnFullscreen.hidden = !canFs;
+    }
+  }
+
+  /* ---------- Hotspots rendern ---------- */
+  function renderHotspots(v) {
+    clear(el.hotspots);
+    clear(el.sceneActions);
+    el.sceneActions.hidden = true;
+    if (!v || v.mode !== "explore" || !v.actions || !v.actions.length) return;
+    const sceneId = v.sceneId;
+    for (const action of v.actions) {
+      const r = resolveHotspot(action, sceneId);
+      if (!r.pos) continue; // keine Position → kein Hotspot (wird ggf. als Button unten)
+      const p = projectPoint(r.pos.x, r.pos.y);
+      if (window.innerWidth <= 768 || !p.visible) {
+        el.sceneActions.appendChild(actionButton(action));
+        el.sceneActions.hidden = false;
+        continue;
+      }
+      const b = make("button", "hotspot");
+      b.type = "button";
+      b.dataset.focusKey = focusKey(action);
+      b.style.left = p.left;
+      b.style.top = p.top;
+      b.setAttribute("aria-label", r.label || "Interagieren");
+      b.title = r.label || "";
+      const dot = make("span", "dot");
+      const label = make("span", "label", r.label || "");
+      b.appendChild(dot);
+      b.appendChild(label);
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        onAction(action);
+      });
+      el.hotspots.appendChild(b);
+    }
+  }
+
+  /* ---------- Porträt rendern ---------- */
+  function renderPortrait(v) {
+    const line = v && v.line;
+    if (v.sceneId !== portraitScene || !["dialogue", "choice", "confirm"].includes(v.mode)) currentPortrait = null;
+    portraitScene = v.sceneId;
+    const resolved = line ? resolvePortrait(line) : null;
+    if (resolved) currentPortrait = resolved;
+    const pr = currentPortrait;
+    if (pr) {
+      el.portraitImg.src = pr.url;
+      el.portraitImg.alt = pr.alt;
+      el.portrait.hidden = false;
+    } else {
+      el.portrait.hidden = true;
+      el.portraitImg.removeAttribute("src");
+    }
+  }
+
+  /* ---------- Dialogleiste ---------- */
+  function renderDialog(v) {
+    const line = v && v.line;
+    if (line) {
+      text(el.dialogSpeaker, line.speaker || "");
+      text(el.dialogText, line.text || "");
+      el.dialog.hidden = false;
+      // Replay nur wenn voice + Clip vorhanden
+      const canReplay = line.voice && typeof GameAudio !== "undefined" && GameAudio.hasLine(line.id);
+      el.btnReplay.hidden = !canReplay;
+    } else {
+      text(el.dialogSpeaker, "");
+      text(el.dialogText, v.mode === "explore" && v.objective ? v.objective.text : "");
+      el.btnReplay.hidden = true;
+    }
+    el.dialog.hidden = !["dialogue", "explore"].includes(v.mode);
+    renderDialogActions(v);
+  }
+
+  function renderDialogActions(v) {
+    clear(el.dialogActions);
+    if (!v || !["dialogue", "explore"].includes(v.mode) || !v.actions || !v.actions.length) return;
+    // In explore: Hotspots sind primär; hier nur Aktionen OHNE Position als Buttons
+    const buttons = v.actions.filter((a) => {
+      const r = resolveHotspot(a, v.sceneId);
+      return !r.pos; // hat Position → ist Hotspot
+    });
+    if (!buttons.length) return;
+    for (const action of buttons) {
+      const b = actionButton(action);
+      el.dialogActions.appendChild(b);
+    }
+  }
+
+  /* ---------- Aktionen ausführen ---------- */
+  function onAction(action) {
+    if (!action) return;
+    uiOverlay = null;
+    const res = dispatch(payload(action));
+    handleDispatchResult(res);
+  }
+  function handleDispatchResult(res) {
+    if (!res) return;
+    if (res.ok === false) {
+      // genaue GameState-Rückmeldung anzeigen, kein Fortschritt erfinden
+      const msg = res.message || "Diese Aktion ist gerade nicht möglich.";
+      // Neu rendern, damit der Zustand konsistent bleibt
+      render();
+      toast(msg, 4200);
+      return;
+    }
+    render();
+    if (res.warning) toast(res.warning, 3600);
+  }
+
+  /* ---------- Overlays: Fokus-Verwaltung ---------- */
+  function openOverlay(id) {
+    const d = el.dlg[id];
+    if (!d) return;
+    const wasOpen = d.open;
+    stopAudio();
+    if (activeOverlay && activeOverlay !== id && el.dlg[activeOverlay] && el.dlg[activeOverlay].open) {
+      // anderes Overlay schließen, wenn es offen ist
+      try { el.dlg[activeOverlay].close(); } catch (e) {}
+    }
+    if (!d.open) {
+      if (!activeOverlay) lastFocusedBeforeOverlay = document.activeElement;
+      if (typeof d.showModal === "function") d.showModal();
+      else d.setAttribute("open", "");
+    }
+    activeOverlay = id;
+    if (!wasOpen) focusOverlay(d);
+  }
+  function focusOverlay(d) {
+    const items = $$("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)", d).filter(n => !n.hidden && n.getClientRects().length);
+    const item = items.find(n => !n.hasAttribute("data-close")) || items[0];
+    if (item) item.focus({preventScroll: true});
+  }
+  function closeOverlay(id) {
+    const d = el.dlg[id];
+    if (!d) return;
+    if (d.open) {
+      if (typeof d.close === "function") d.close();
+      else d.removeAttribute("open");
+    }
+    if (activeOverlay === id) activeOverlay = null;
+    if (lastFocusedBeforeOverlay && lastFocusedBeforeOverlay.isConnected && lastFocusedBeforeOverlay.focus) {
+      try { lastFocusedBeforeOverlay.focus(); } catch (e) {}
+    }
+    lastFocusedBeforeOverlay = null;
+  }
+  function closeAllOverlays() {
+    for (const id in el.dlg) {
+      const d = el.dlg[id];
+      if (d && d.open) { try { d.close(); } catch (e) {} }
+    }
+    activeOverlay = null;
+  }
+  function updateCloseButtons(v) {
+    for (const [id, d] of Object.entries(el.dlg)) {
+      if (["notes", "menu", "credits", "confirm"].includes(id)) continue;
+      const back = id === v.mode ? backAction(v) : null;
+      for (const b of $$("[data-close]", d)) {
+        b.hidden = !back;
+        if (back) {
+          b.setAttribute("aria-label", back.label);
+          if (!b.classList.contains("overlay-close")) b.textContent = back.label;
+        }
+      }
+    }
+  }
+  function requestClose(id) {
+    if (id === "confirm" && confirmResolver) { confirmResolver(false); return; }
+    if (["notes", "menu", "credits"].includes(id)) {
+      closeOverlay(id);
+      if (id === "credits") { openMenu(); return; }
+      uiOverlay = null;
+      render();
+      return;
+    }
+    const back = backAction(view());
+    if (back) onAction(back);
+  }
+
+  /* ---------- Dokument ---------- */
+  function renderDocument(v) {
+    const doc = v && v.document;
+    if (!doc) { closeOverlay("document"); return; }
+    text($("#doc-title"), doc.title || "Dokument");
+    text($("#doc-source"), doc.source || "");
+    const body = $("#doc-body");
+    clear(body);
+    if (doc.passages && doc.passages.length) {
+      for (const p of doc.passages) {
+        const box = make("div", "doc-passage");
+        const t = make("p", "", p.text || "");
+        t.style.margin = "0";
+        box.appendChild(t);
+        body.appendChild(box);
+      }
+    } else {
+      body.appendChild(make("p", "notes-empty", "Kein Inhalt."));
+    }
+    openOverlay("document");
+  }
+
+  /* ---------- Formular ---------- */
+  function renderForm(v) {
+    const form = v && v.form;
+    if (!form) { closeOverlay("form"); return; }
+    text($("#form-title"), form.title || "Formular");
+    text($("#form-desc"), form.description || "");
+    const body = $("#form-body");
+    clear(body);
+    if (form.options && form.options.length) {
+      for (const opt of form.options) {
+        const row = make("label", "form-option" + (opt.selected ? " selected" : ""));
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "form-reason";
+        input.value = opt.id;
+        input.checked = !!opt.selected;
+        input.dataset.focusKey = focusKey(opt.action);
+        input.addEventListener("change", () => {
+          // Grundwahl: dieselbe action senden, die State erwartet
+          if (opt.action) onAction(opt.action);
+        });
+        const lab = make("span", "", opt.label || "");
+        row.appendChild(input);
+        row.appendChild(lab);
+        body.appendChild(row);
+      }
+    }
+    const submit = $("#btn-form-submit");
+    const submitAction = findAction(v, "submitCancellation");
+    submit.disabled = !submitAction;
+    submit.textContent = submitAction ? submitAction.label : "Kündigung absenden";
+    submit.onclick = () => {
+      // Absenden erst nach Grundwahl: die submit-Aktion aus view().actions
+      const v2 = view();
+      const act = (v2 && v2.actions || []).find((a) => a.action && a.action.type === "submitCancellation");
+      if (act) onAction(act);
+      else toast("Bitte zuerst einen Grund wählen.");
+    };
+    openOverlay("form");
+  }
+
+  /* ---------- Challenge ---------- */
+  function renderChallenge(v) {
+    const ch = v && v.challenge;
+    if (!ch) { closeOverlay("challenge"); return; }
+    text($("#ch-title"), ch.title || "Frage");
+    // Behauptungen
+    const st = $("#ch-statements");
+    clear(st);
+    if (ch.statements && ch.statements.length) {
+      for (const s of ch.statements) {
+        const sel = (ch.selectedStatement === s.id);
+        const b = make("button", "ch-item" + (sel ? " selected" : ""), s.text || "");
+        b.type = "button";
+        b.dataset.focusKey = focusKey(s.action);
+        b.setAttribute("aria-pressed", String(sel));
+        b.addEventListener("click", () => {
+          if (s.action) onAction(s.action);
+        });
+        st.appendChild(b);
+      }
+    }
+    // Dokumente + Passagen
+    const docs = $("#ch-docs");
+    clear(docs);
+    if (ch.documents && ch.documents.length) {
+      for (const d of ch.documents) {
+        const head = make("div", "ch-item", d.title || "");
+        head.style.cursor = "default";
+        head.style.background = "var(--creme-2)";
+        docs.appendChild(head);
+        if (d.passages && d.passages.length) {
+          for (const p of d.passages) {
+            const sel = (ch.selectedDocument === d.id && ch.selectedPassage === p.id);
+            const b = make("button", "ch-item" + (sel ? " selected" : ""), p.text || "");
+            b.type = "button";
+            b.dataset.focusKey = focusKey(p.action);
+            b.setAttribute("aria-pressed", String(sel));
+            b.addEventListener("click", () => {
+              if (p.action) onAction(p.action);
+            });
+            docs.appendChild(b);
+          }
+        }
+      }
+    }
+    // Feedback
+    text($("#ch-feedback"), ch.feedback || "");
+    // Vorlegen-Button
+    const present = $("#btn-ch-present");
+    const canPresent = !!findAction(v, "presentEvidence");
+    present.disabled = !canPresent;
+    present.onclick = () => {
+      const v2 = view();
+      const act = (v2 && v2.actions || []).find((a) => a.action && a.action.type === "presentEvidence");
+      if (act) onAction(act);
+      else toast("Wähle eine Behauptung und eine Passage.");
+    };
+    openOverlay("challenge");
+  }
+
+  /* ---------- Diagnose ---------- */
+  function renderDiagnostic(v) {
+    const dg = v && v.diagnostic;
+    if (!dg) { closeOverlay("diagnostic"); return; }
+    text($("#diag-title"), dg.title || "Diagnose");
+    text($("#diag-notice"), dg.notice || "");
+    // Schalter
+    const controls = $("#diag-controls");
+    clear(controls);
+    if (dg.controls && dg.controls.length) {
+      for (const c of dg.controls) {
+        const row = make("div", "diag-row");
+        const left = make("div");
+        left.appendChild(make("div", "diag-label", c.label || ""));
+        if (c.description) left.appendChild(make("div", "diag-desc", c.description));
+        const status = make("span", "diag-status " + (c.active ? "on" : "off"), c.active ? "an" : "aus");
+        const sw = make("button", "switch");
+        sw.type = "button";
+        sw.setAttribute("role", "switch");
+        sw.setAttribute("aria-checked", String(!!c.active));
+        sw.setAttribute("aria-label", c.label || "Schalter");
+        sw.disabled = !c.action;
+        sw.dataset.focusKey = "diagnostic-control-" + c.id;
+        sw.addEventListener("click", () => {
+          // Schalteränderung: State erwartet setDiagnostic + ggf. confirmDiagnostic
+          if (c.action) onAction(c.action);
+        });
+        row.appendChild(left);
+        row.appendChild(status);
+        row.appendChild(sw);
+        controls.appendChild(row);
+      }
+    }
+    // Tests
+    const tests = $("#diag-tests");
+    clear(tests);
+    if (dg.tests && dg.tests.length) {
+      for (const t of dg.tests) {
+        const row = make("div", "diag-row");
+        const left = make("div");
+        left.appendChild(make("div", "diag-label", t.label || ""));
+        if (t.input) left.appendChild(make("div", "diag-desc", t.input));
+        const b = button("Testen", "btn", (btn) => {
+          if (t.action) onAction(t.action);
+        });
+        b.disabled = !t.action;
+        b.dataset.focusKey = "diagnostic-test-" + t.id;
+        b.setAttribute("aria-label", (t.label || "Versuch") + " testen");
+        row.appendChild(left);
+        row.appendChild(b);
+        tests.appendChild(row);
+      }
+    }
+    // Beobachtungen / Ergebnisse
+    const results = $("#diag-results");
+    clear(results);
+    const obs = (dg.observations || []).slice();
+    if (dg.latestResults && !obs.some(o => JSON.stringify(o) === JSON.stringify(dg.latestResults))) obs.push(dg.latestResults);
+    if (obs.length) {
+      for (const o of obs) {
+        const box = make("div", "diag-result");
+        const control = (dg.controls || []).find(c => c.id === o.controlId);
+        const test = (dg.tests || []).find(t => t.id === o.testId);
+        const head = make("div", "diag-result-head", [test && test.label, control && (control.label + ": " + (o.controlState === "on" ? "an" : "aus"))].filter(Boolean).join(" · "));
+        box.appendChild(head);
+        box.appendChild(make("p", "", o.text || ""));
+        results.appendChild(box);
+      }
+    } else {
+      results.appendChild(make("p", "notes-empty", "Noch keine Beobachtung. Probiere einen Test aus, bevor du etwas änderst."));
+    }
+    // Fußzeile: angebotene Aktionen (z. B. Abschluss)
+    const foot = $("#diag-foot");
+    clear(foot);
+    if (v && v.actions && v.actions.length) {
+      for (const a of v.actions) {
+        if (["setDiagnostic", "testDiagnostic"].includes(payload(a).type) || a === backAction(v)) continue;
+        foot.appendChild(actionButton(a));
+      }
+    }
+    openOverlay("diagnostic");
+  }
+
+  /* ---------- Choice ---------- */
+  function renderChoice(v) {
+    const ch = v && v.choice;
+    if (!ch) { closeOverlay("choice"); return; }
+    text($("#choice-title"), ch.title || "Entscheidung");
+    text($("#choice-desc"), ch.description || "");
+    const opts = $("#choice-options");
+    clear(opts);
+    if (ch.options && ch.options.length) {
+      for (const o of ch.options) {
+        const box = make("button", "choice-option");
+        box.type = "button";
+        box.dataset.focusKey = focusKey(o.action);
+        box.appendChild(make("div", "choice-label", o.label || ""));
+        if (o.description) box.appendChild(make("div", "choice-desc", o.description));
+        box.addEventListener("click", () => {
+          // Endwahlen mit Bestätigung: confirmEnding / deleteConfirm / takeTransfer
+          if (o.action) onAction(o.action);
+        });
+        opts.appendChild(box);
+      }
+    }
+    openOverlay("choice");
+  }
+
+  /* ---------- Transfer ---------- */
+  function renderTransfer(v) {
+    const tr = v && v.transfer;
+    if (!tr) { closeOverlay("transfer"); return; }
+    text($("#tr-text"), tr.text || "");
+    const status = $("#tr-status");
+    clear(status);
+    const steps = [
+      { key: "transferred", label: "Kopie übertragen", done: !!tr.transferred },
+      { key: "bootVerified", label: "Lokaler Start geprüft", done: !!tr.bootVerified },
+      { key: "providerDeleted", label: "Anbieterkopie gelöscht", done: !!tr.providerDeleted }
+    ];
+    for (const s of steps) {
+      const row = make("div", "tr-step" + (s.done ? " done" : ""));
+      row.appendChild(make("span", "tr-dot"));
+      row.appendChild(make("span", "", s.label));
+      status.appendChild(row);
+    }
+    // Aktionen
+    const acts = $("#tr-actions");
+    clear(acts);
+    if (v && v.actions && v.actions.length) {
+      for (const a of v.actions) {
+        if (a !== backAction(v)) acts.appendChild(actionButton(a));
+      }
+    }
+    openOverlay("transfer");
+  }
+
+  /* ---------- Nachricht ---------- */
+  function renderMessage(v) {
+    const msg = v && v.finalMessage;
+    if (!msg) { closeOverlay("message"); return; }
+    text($("#msg-title"), msg.title || "Nachricht");
+    const body = $("#msg-body");
+    clear(body);
+    body.appendChild(make("div", "msg-text", msg.text || ""));
+    const submit = $("#btn-msg-submit");
+    submit.textContent = msg.submitLabel || "Absenden";
+    submit.onclick = () => {
+      const v2 = view();
+      const act = (v2 && v2.actions || []).find((a) => a.action && a.action.type === "submitMara");
+      if (act) onAction(act);
+      else toast("Nachricht konnte nicht gesendet werden.");
+    };
+    openOverlay("message");
+  }
+
+  /* ---------- Ende ---------- */
+  function renderDone(v) {
+    const ed = v && v.endingData;
+    if (!ed) { closeOverlay("done"); return; }
+    text($("#done-title"), ed.title || "Ende");
+    text($("#done-text"), ed.text || "");
+    // Checkpoint-Button nur wenn hasSave("checkpoint")
+    const btnCp = $("#btn-done-checkpoint");
+    let hasCp = false;
+    const s = state();
+    if (s && typeof s.hasSave === "function") {
+      try { hasCp = !!(s.hasSave("checkpoint") && s.hasSave("checkpoint").exists); } catch (e) {}
+    }
+    btnCp.hidden = !hasCp;
+    openOverlay("done");
+  }
+
+  /* ---------- Notizen ---------- */
+  function renderNotes(v) {
+    uiOverlay = "notes";
+    const body = $("#notes-body");
+    clear(body);
+    // Aktuelles Anliegen
+    const obj = v && v.objective;
+    if (obj && obj.text) {
+      const sec = make("div", "notes-section");
+      sec.appendChild(make("h3", "", "Aktuelles Anliegen"));
+      sec.appendChild(make("p", "notes-item", obj.text));
+      body.appendChild(sec);
+    }
+    // Bekannte Dokumente (tatsächlich erworbene)
+    const docs = (v && v.documents) || [];
+    if (docs.length) {
+      const sec = make("div", "notes-section");
+      sec.appendChild(make("h3", "", "Bekannte Dokumente"));
+      const list = make("div", "notes-list");
+      for (const d of docs) {
+        const b = button(d.title || "Dokument öffnen", "notes-item btn", () => onAction(d.action));
+        b.disabled = !d.action;
+        b.dataset.focusKey = focusKey(d.action);
+        list.appendChild(b);
+      }
+      sec.appendChild(list);
+      body.appendChild(sec);
+    } else {
+      const sec = make("div", "notes-section");
+      sec.appendChild(make("h3", "", "Bekannte Dokumente"));
+      sec.appendChild(make("p", "notes-empty", "Noch keine Unterlagen gefunden."));
+      body.appendChild(sec);
+    }
+    // Gesprochener Verlauf (letzte Zeilen)
+    const hist = (v && v.history) || [];
+    if (hist.length) {
+      const sec = make("div", "notes-section");
+      sec.appendChild(make("h3", "", "Verlauf"));
+      const list = make("div", "notes-list");
+      for (const h of hist) {
+        const item = make("div", "notes-item");
+        item.appendChild(make("strong", "", (h.speaker || "") + ": "));
+        item.appendChild(document.createTextNode(h.text || ""));
+        list.appendChild(item);
+      }
+      sec.appendChild(list);
+      body.appendChild(sec);
+    }
+    // Hinweise (nur wenn vorhanden, nicht permanent als Lösungsanzeige)
+    if (obj && obj.hints && obj.hints.length) {
+      const sec = make("div", "notes-section");
+      sec.appendChild(make("h3", "", "Hinweise"));
+      const list = make("div", "notes-list");
+      sec.appendChild(list);
+      let revealed = 0;
+      const reveal = button("Einen Hinweis zeigen", "btn", () => {
+        list.appendChild(make("p", "notes-item", obj.hints[revealed++]));
+        reveal.hidden = revealed >= obj.hints.length;
+        reveal.textContent = "Noch einen Hinweis zeigen";
+      });
+      sec.appendChild(reveal);
+      body.appendChild(sec);
+    }
+    openOverlay("notes");
+  }
+
+  /* ---------- Bestätigung (native dialog) ---------- */
+  function confirmDialog(title, txt) {
+    return new Promise((resolve) => {
+      const previous = uiOverlay;
+      uiOverlay = "confirm";
+      text($("#confirm-title"), title || "Bestätigen");
+      text($("#confirm-text"), txt || "");
+      const yes = $("#btn-confirm-yes");
+      const no = $("#btn-confirm-no");
+      yes.textContent = "Bestätigen";
+      no.textContent = "Abbrechen";
+      yes.hidden = no.hidden = false;
+      const done = (val) => {
+        yes.onclick = no.onclick = null;
+        confirmResolver = null;
+        closeOverlay("confirm");
+        uiOverlay = val ? null : previous;
+        if (!val) {
+          if (previous === "menu") openMenu();
+          else if (!el.game.hidden) render();
+        }
+        resolve(val);
+      };
+      const onYes = () => done(true);
+      const onNo = () => done(false);
+      yes.onclick = onYes;
+      no.onclick = onNo;
+      confirmResolver = done;
+      openOverlay("confirm");
+    });
+  }
+  function renderConfirmation(v) {
+    const c = v.confirmation;
+    if (!c) return;
+    text($("#confirm-title"), c.title || "Bestätigen");
+    text($("#confirm-text"), c.text || "");
+    const yes = (v.actions || []).find(a => payload(a).confirm === true);
+    const no = (v.actions || []).find(a => payload(a).confirm === false);
+    for (const [id, a] of [["yes", yes], ["no", no]]) {
+      const b = $("#btn-confirm-" + id);
+      b.hidden = !a;
+      b.textContent = a ? a.label : "";
+      b.onclick = a ? () => onAction(a) : null;
+    }
+    openOverlay("confirm");
+  }
+
+  /* ---------- Menü ---------- */
+  function openMenu() {
+    uiOverlay = "menu";
+    const loadBtn = $("#btn-menu-load");
+    loadBtn.disabled = !hasSave("save");
+    openOverlay("menu");
+  }
+
+  /* ---------- Startansicht ---------- */
+  function showStart() {
+    el.game.hidden = true;
+    el.startScreen.hidden = false;
+    // Fortsetzen-Button nur wenn Speicher vorhanden
+    const s = state();
+    let hasSave = false;
+    if (s && typeof s.hasSave === "function") {
+      try { hasSave = !!(s.hasSave("save") && s.hasSave("save").exists); } catch (e) {}
+    }
+    el.btnStartContinue.hidden = !hasSave;
+    setVoice(voiceEnabled);
+  }
+  function hideStart() {
+    el.startScreen.hidden = true;
+    el.game.hidden = false;
+    render();
+  }
+
+  /* ---------- Haupt-Render ---------- */
+  function render() {
+    const focused = document.activeElement;
+    const focusedId = focused && focused.id;
+    const focusedKey = focused && focused.dataset && focused.dataset.focusKey;
+    const v = view();
+    if (!v) {
+      // GameState nicht verfügbar: klare Meldung, kein Crash
+      toast("Das Spiel konnte nicht gestartet werden. Bitte entpacke das Spiel vollständig und öffne index.html erneut.", 6000);
+      return;
+    }
+    updateCloseButtons(v);
+    // Szene / Hintergrund
+    const sceneId = v.sceneId;
+    if (sceneId !== lastRenderedScene) {
+      lastRenderedScene = sceneId;
+      let url = null;
+      const alt = {zuhause: "Alex’ Wohnung", empfang: "Empfang im Kundenservice", vorfuehr: "Vorführraum im Kundenservice"}[sceneId] || "Raum";
+      if (typeof ART_ASSETS !== "undefined" && ART_ASSETS.rooms && ART_ASSETS.rooms[sceneId]) {
+        url = ART_ASSETS.rooms[sceneId].url;
+      }
+      if (url) {
+        el.stageImg.src = url;
+        el.stageImg.alt = alt || "Szene";
+      } else {
+        // Ruhige grafische Schreibtisch-Rückfallebene (nur im Code markiert)
+        el.stageImg.removeAttribute("src");
+        el.stageImg.alt = alt;
+        el.stage.style.background = "linear-gradient(180deg, var(--creme) 0%, var(--creme-2) 100%)";
+      }
+    }
+    updateHud(v);
+    renderHotspots(v);
+    renderPortrait(v);
+    renderDialog(v);
+
+    // Modus-spezifische Overlays öffnen (nur wenn view sie liefert)
+    if (uiOverlay === "menu") openMenu();
+    else if (uiOverlay === "notes") renderNotes(v);
+    else if (uiOverlay === "credits" || uiOverlay === "confirm") openOverlay(uiOverlay);
+    else if (v.mode === "document") renderDocument(v);
+    else if (v.mode === "form") renderForm(v);
+    else if (v.mode === "challenge") renderChallenge(v);
+    else if (v.mode === "diagnostic") renderDiagnostic(v);
+    else if (v.mode === "choice") renderChoice(v);
+    else if (v.mode === "confirm") renderConfirmation(v);
+    else if (v.mode === "transfer") renderTransfer(v);
+    else if (v.mode === "message") renderMessage(v);
+    else if (v.mode === "done") renderDone(v);
+    else closeAllOverlays();
+
+    // Audio: nur bei tatsächlichem Wechsel der Zeile
+    if (!uiOverlay && v.mode === "dialogue" && v.line) {
+      maybePlayLine(v.line);
+    } else {
+      // kein Dialog: Audio stoppen (Laden, Neustart, Menüwechsel)
+      stopAudio();
+      if (!v.line) lastLineId = null;
+    }
+    const replacement = focusedId && document.getElementById(focusedId) ||
+      (focusedKey && $$("[data-focus-key]").find(n => n.dataset.focusKey === focusedKey));
+    if (replacement && !replacement.disabled && replacement.getClientRects().length &&
+        (!activeOverlay || el.dlg[activeOverlay].contains(replacement))) replacement.focus({preventScroll: true});
+    else if (activeOverlay && !el.dlg[activeOverlay].contains(document.activeElement)) focusOverlay(el.dlg[activeOverlay]);
+
+    lastRenderedPhase = v.phase;
+    lastRenderedMode = v.mode;
+  }
+
+  /* ---------- Event-Verdrahtung ---------- */
+  function resetGame() {
+    const s = state();
+    if (!s || !s.reset) return;
+    stopAudio();
+    lastLineId = null;
+    currentPortrait = null;
+    savedRevision = null;
+    uiOverlay = null;
+    s.reset();
+    closeAllOverlays();
+    hideStart();
+  }
+  async function loadGame(slot, fromStart) {
+    const s = state();
+    if (!s || !s.load) return;
+    if (!fromStart && view().revision !== savedRevision &&
+        !await confirmDialog("Spielstand laden", "Dein aktueller Fortschritt wird durch den gespeicherten Stand ersetzt. Möchtest du fortfahren?")) return;
+    stopAudio();
+    const res = s.load(slot);
+    if (!res || !res.ok) { toast(res && (res.message || res.warning) || "Der Spielstand konnte nicht geladen werden."); return; }
+    lastLineId = null;
+    currentPortrait = null;
+    savedRevision = slot === "save" ? view().revision : null;
+    uiOverlay = null;
+    closeAllOverlays();
+    hideStart();
+    toast(res.warning || (slot === "checkpoint" ? "Zur Entscheidung zurückgekehrt." : "Spielstand geladen."));
+  }
+  function wireEvents() {
+    // Start
+    el.btnStartNew.addEventListener("click", async () => {
+      if ((hasSave("save") || hasSave("checkpoint")) &&
+          !await confirmDialog("Neu beginnen", "Möchtest du neu beginnen? Dein gespeicherter Fortschritt und der Entscheidungspunkt werden gelöscht.")) return;
+      resetGame();
+    });
+    el.btnStartContinue.addEventListener("click", () => loadGame("save", true));
+    el.btnStartVoice.addEventListener("click", toggleVoice);
+
+    // HUD
+    el.btnNotes.addEventListener("click", () => renderNotes(view()));
+    el.btnVoice.addEventListener("click", toggleVoice);
+    el.btnMenu.addEventListener("click", openMenu);
+    el.btnReplay.addEventListener("click", replayLine);
+    el.btnFullscreen.addEventListener("click", async () => {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+        else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
+      } catch (_) { toast("Vollbild konnte nicht eingeschaltet werden."); }
+    });
+
+    // Overlay-Schließen (data-close)
+    document.addEventListener("click", (e) => {
+      const t = e.target;
+      if (t && t.hasAttribute && t.hasAttribute("data-close")) {
+        const id = t.getAttribute("data-close");
+        requestClose(id);
+      }
+    });
+
+    // Menü-Aktionen
+    $("#btn-menu-save").addEventListener("click", async () => {
+      const s = state();
+      if (s && typeof s.save === "function") {
+        if (hasSave("save") && !await confirmDialog("Spielstand ersetzen", "Der bisher gespeicherte Stand wird durch deinen aktuellen Fortschritt ersetzt. Möchtest du speichern?")) return;
+        const res = s.save("save");
+        openMenu();
+        if (res && res.ok) { savedRevision = view().revision; toast(res.warning || (res.storage === "memory" ? "Nur für dieses geöffnete Fenster gespeichert. Beim Schließen geht der Spielstand verloren." : "Spielstand gespeichert.")); }
+        else toast((res && (res.message || res.warning)) || "Speichern fehlgeschlagen.");
+      } else toast("Speichern ist nicht verfügbar.");
+    });
+    $("#btn-menu-load").addEventListener("click", () => loadGame("save", false));
+    $("#btn-menu-reset").addEventListener("click", async () => {
+      const ok = await confirmDialog("Neu beginnen", "Dein aktueller und gespeicherter Fortschritt werden gelöscht. Möchtest du neu beginnen?");
+      if (!ok) return;
+      resetGame();
+    });
+    $("#btn-menu-voice").addEventListener("click", toggleVoice);
+    $("#btn-menu-credits").addEventListener("click", () => { uiOverlay = "credits"; openOverlay("credits"); });
+
+    // Ende
+    $("#btn-done-restart").addEventListener("click", async () => {
+      const ok = await confirmDialog("Neu beginnen", "Dein aktueller und gespeicherter Fortschritt werden gelöscht. Möchtest du neu beginnen?");
+      if (!ok) return;
+      resetGame();
+    });
+    $("#btn-done-checkpoint").addEventListener("click", () => loadGame("checkpoint", false));
+
+    // Escape schließt Overlays, zerstört keinen Fortschritt
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && activeOverlay) {
+        requestClose(activeOverlay);
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+    for (const [id, d] of Object.entries(el.dlg)) d.addEventListener("cancel", e => { e.preventDefault(); requestClose(id); });
+
+    // Enter/Space: Weiter nur wenn kein Button/Formular/Dialog den Fokus beansprucht
+    document.addEventListener("keydown", (e) => {
+      if (e.repeat || el.game.hidden || activeOverlay || (e.key !== "Enter" && e.key !== " ")) return;
+      const ae = document.activeElement;
+      const inControl = ae && (
+        ae.tagName === "BUTTON" || ae.tagName === "INPUT" || ae.tagName === "TEXTAREA" ||
+        ae.tagName === "SELECT" || ae.isContentEditable ||
+        (ae.closest && ae.closest("dialog[open]"))
+      );
+      if (inControl) return;
+      const v = view();
+      if (!v || v.mode !== "dialogue") return;
+      const next = (v.actions || []).find((a) => a.action && a.action.type === "next");
+      if (next) {
+        e.preventDefault();
+        onAction(next);
+      }
+    });
+
+    // Audio-Hinweise
+    if (typeof GameAudio !== "undefined" && GameAudio.setNoticeHandler) {
+      GameAudio.setNoticeHandler(audioNotice);
+    }
+
+    // Größenänderung: Hotspots neu projizieren
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const v = view();
+        if (v) renderHotspots(v);
+      }, 120);
+    });
+    el.stageImg.addEventListener("load", () => { const v = view(); if (v) renderHotspots(v); });
+  }
+
+  /* ---------- Init ---------- */
+  function init() {
+    cacheElements();
+    if (typeof GameAudio !== "undefined" && GameAudio.init) GameAudio.init();
+    setVoice(false);
+    wireEvents();
+    showStart();
+  }
+
+  return {
+    init,
+    render,
+    toast,
+    confirmDialog,
+    openOverlay,
+    closeOverlay,
+    setVoice,
+    toggleVoice,
+    _el: el
+  };
+})();

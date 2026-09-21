@@ -47,6 +47,33 @@ const ART_ASSETS = Object.freeze({
           "y": 0.468
         }
       }
+    },
+    "zuhause": {
+      "url": "assets/art/zuhause.png",
+      "width": 2048,
+      "height": 1152,
+      "hotspots": {
+        "messages": {
+          "x": 0.299805,
+          "y": 0.342882
+        },
+        "form": {
+          "x": 0.319824,
+          "y": 0.46441
+        },
+        "computer": {
+          "x": 0.427246,
+          "y": 0.685764
+        },
+        "invoice": {
+          "x": 0.710449,
+          "y": 0.568576
+        },
+        "coffee": {
+          "x": 0.861816,
+          "y": 0.381944
+        }
+      }
     }
   },
   "portraits": {

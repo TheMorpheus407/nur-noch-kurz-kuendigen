@@ -1,1215 +1,828 @@
-/* =====================================================================
-   Nur noch kurz kündigen — Graphic-Novel-Bühne
-   Ruhiger Akten-Look: Creme #EEE7D8 · Petrol #28666A · Pflaume #51364F
-   Koralle #EF806D · dunkle Kontur #25232B.
-   Bildmotive und die sprechende Figur sind der Fokus: dünne Konturen,
-   keine schweren Schlagschatten. Desktop: Bildbühne (16:9, ohne
-   Beschnitt) und Interaktionsfläche nebeneinander; schmale Ansichten
-   zeigen das Bild vollständig und die Hotspots als Liste.
-   ===================================================================== */
+/* =========================================================================
+   css/style.css — „Nur noch kurz kündigen“
+   Die gesamte Browserfläche IST die Szene. Creme/Petrol/Pflaume/Koralle.
+   ========================================================================= */
 
 :root {
-  --cream: #EEE7D8;
-  --paper: #F6F1E4;
-  --petrol: #28666A;
-  --petrol-dark: #1E4F52;
-  --plum: #51364F;
-  --plum-dark: #3D2940;
-  --coral: #EF806D;
-  --coral-dark: #D96A57;
-  --ink: #25232B;
-  --ink-soft: #4A4653;
-  --muted: #DDD5C2;
-  --focus: #EF806D;
-  --focus-on-dark: #EEE7D8;
-  --radius: 10px;
+  --creme: #f4ecd8;
+  --creme-2: #efe4c9;
+  --petrol: #2f6f6b;
+  --petrol-2: #3d8a84;
+  --pflaume: #6d4a6f;
+  --pflaume-2: #8a5f8a;
+  --koralle: #e2694f;
+  --koralle-2: #ef8a6f;
+  --tinte: #241f2b;
+  --tinte-2: #3a3342;
+  --papier: #fbf6ea;
+  --linie: #241f2b;
+  --ok: #2f6f6b;
+  --warn: #b06a3a;
+  --focus: #e2694f;
+  --shadow: rgba(36, 31, 43, 0.28);
+  --radius: 4px;
+  --hud-h: 48px;
+  --dialog-h: clamp(150px, 24vh, 230px);
+  --font: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --t: 180ms;
 }
 
 * { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
-
-body {
+html, body {
   margin: 0;
-  font-family: system-ui, "Segoe UI", Arial, sans-serif;
-  color: var(--ink);
-  background: var(--cream);
-  line-height: 1.55;
-  /* sehr dezente Registerstruktur, rein dekorativ */
-  background-image:
-    linear-gradient(rgba(37, 35, 43, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 35, 43, 0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-/* ---------- Zugänglichkeit ---------- */
-
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: var(--ink);
-  color: var(--cream);
-  padding: 0.6rem 1.1rem;
-  z-index: 20;
-  font-weight: 700;
-}
-
-.skip-link:focus {
-  left: 0.5rem;
-  top: 0.5rem;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
   padding: 0;
-  border: 0;
-  clip: rect(0 0 0 0);
+  height: 100%;
   overflow: hidden;
-  white-space: nowrap;
+  background: var(--creme);
+  color: var(--tinte);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* ---------- Spielkopf ---------- */
+/* Robuste 100vh-Rückfallebene + 100dvh */
+html { height: 100vh; height: 100dvh; }
+body { height: 100vh; height: 100dvh; }
 
-.page-head {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0.85rem 1rem 0.7rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.6rem 1.5rem;
-  border-bottom: 2px solid var(--ink);
-}
+button { font-family: var(--font-ui); }
 
-.head-titles {
-  flex: 1 1 20rem;
-  min-width: 0;
-}
-
-.kicker {
-  margin: 0 0 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--plum);
-}
-
-.page-head h1 {
-  margin: 0;
-  font-size: clamp(1.35rem, 3.2vw, 1.8rem);
-  line-height: 1.12;
-  color: var(--ink);
-  /* Aktenkopf: eine klare Stempelkante statt dicker Rahmen */
-  border-bottom: 3px solid var(--ink);
-  display: inline-block;
-  padding-bottom: 0.15rem;
-}
-
-/* unauffällige Herstellungsnotiz, kein Spielinhalt */
-.disclaimer {
-  margin: 0.4rem 0 0;
-  font-size: 0.75rem;
-  color: var(--ink-soft);
-}
-
-.head-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-left: auto;
-}
-
-/* ---------- Raumnavigation (primär, im Kopf) ---------- */
-
-.room-nav {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.room-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+/* ---------- Buttons ---------- */
+.btn {
+  appearance: none;
+  border: 2px solid var(--tinte);
+  background: var(--papier);
+  color: var(--tinte);
+  padding: 10px 16px;
   min-height: 44px;
-  padding: 0.4rem 0.9rem;
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: 8px;
+  min-width: 44px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: 2px 2px 0 var(--tinte);
+  transition: transform var(--t) ease, box-shadow var(--t) ease, background var(--t) ease;
+  line-height: 1.1;
 }
+.btn:hover { background: var(--creme-2); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--tinte); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: 2px 2px 0 var(--tinte); }
+.btn-primary { background: var(--koralle); color: #fff8f2; border-color: var(--tinte); }
+.btn-primary:hover { background: var(--koralle-2); }
+.btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.btn-ghost:hover { background: rgba(36,31,43,0.06); }
 
-.room-btn:hover {
-  background: #E9E0CB;
-}
-
-.room-btn[aria-current="true"] {
-  background: var(--petrol);
-  color: var(--cream);
-}
-
-.room-btn[aria-current="true"]:hover {
-  background: var(--petrol-dark);
-  color: var(--cream);
-}
-
-.room-btn[aria-disabled="true"] {
-  background: var(--muted);
-  color: var(--ink-soft);
-  cursor: not-allowed;
-}
-
-.room-btn:focus-visible {
+:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
+  border-radius: 3px;
 }
 
-.room-btn[aria-current="true"]:focus-visible {
-  outline-color: var(--focus-on-dark);
+/* ---------- Startansicht ---------- */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  background: url("../assets/art/zuhause.png") center / cover no-repeat var(--creme);
+  z-index: 50;
+  padding: clamp(16px, 4vw, 48px);
+}
+.start-inner {
+  width: min(560px, 100%);
+  max-width: 560px;
+  text-align: left;
+  background: var(--papier);
+  border: 3px solid var(--tinte);
+  border-radius: 2px;
+  box-shadow: 6px 6px 0 var(--tinte);
+  padding: clamp(20px, 3vw, 32px) clamp(20px, 3vw, 32px);
+}
+.start-title {
+  font-size: clamp(30px, 5.2vw, 52px);
+  margin: 0 0 10px;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+.start-sub {
+  font-size: 17px;
+  color: var(--tinte-2);
+  margin: 0 0 22px;
+}
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-start;
+}
+.start-note {
+  min-height: 1.2em;
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--warn);
 }
 
-/* Besuchsmarkierung: gefüllter Punkt = Raum bereits betreten */
-.room-mark {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  background: transparent;
-  flex: 0 0 auto;
-}
-
-.room-btn.visited .room-mark {
-  background: currentColor;
-}
-
-/* ---------- Grundraster / Bühnen-Layout ---------- */
-
-main {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0.9rem 1rem 2rem;
-}
-
-/* Desktop: Bildbühne und Interaktionsfläche nebeneinander,
-   das aktuelle Gespräch bleibt ohne langes Scrollen sichtbar. */
+/* ---------- Spielfläche ---------- */
 .game {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: start;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--creme);
 }
 
-.stage-col,
-.panel-col {
-  min-width: 0;
-  display: grid;
-  gap: 0.9rem;
-  align-content: start;
-}
-
-/* ---------- Szene / Bildbühne ---------- */
-
-.scene {
-  margin: 0;
-}
-
-/* Bühne: volles 16:9, Bild vollständig und unverzerrt (kein cover/Beschnitt) */
+/* Bühne: bildfüllend, Dialog überlagert unten */
 .stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: var(--cream);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius);
+  position: absolute;
+  inset: 0;
   overflow: hidden;
+  background: var(--creme);
 }
-
-.stage-bg {
-  display: block;
+.stage-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-/* ---------- Hotspots: kleine Marken an den Bildankern ---------- */
-
+/* Hotspot-Ebene: deckt exakt die sichtbare Bühne ab.
+   Die Koordinaten werden in JS über denselben object-fit-Ausgleich
+   transformiert (siehe js/ui.js -> projectPoint). */
+.hotspots {
+  position: absolute;
+  inset: 0;
+}
 .hotspot {
   position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  min-height: 44px;
-  max-width: 175px;
-  padding: 0.35rem 0.65rem;
-  font: inherit;
-  font-size: 0.85rem;
-  text-align: left;
-  color: var(--ink);
-  background: rgba(246, 241, 228, 0.94);
-  border: 2px solid var(--ink);
-  border-left: 4px solid var(--petrol);
-  border-radius: 8px;
-  cursor: pointer;
-  overflow-wrap: break-word;
-  /* Zentrierung auf den Bildanker; Hover/Fokus bauen darauf auf */
   transform: translate(-50%, -50%);
-}
-
-.hotspot:hover {
-  background: #E9E0CB;
-}
-
-.hotspot:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.hotspot .hotspot-kind {
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--plum);
-}
-
-.hotspot .hotspot-label {
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-/* Besuchte und gefundene Orte bleiben erkennbar (Marken, keine Flächen) */
-.hotspot.is-visited {
-  border-left-color: var(--plum);
-}
-
-.hotspot.is-collected {
-  border-left-color: var(--coral-dark);
-  background: #F7E4DE;
-}
-
-.hotspot.is-locked,
-.hotspot[aria-disabled="true"] {
-  background: var(--muted);
-  color: var(--ink-soft);
-  border-left-color: #B9AF9B;
-  cursor: not-allowed;
-}
-
-/* ---------- Rauminfo (sekundär, kompakt) ---------- */
-
-.room-info {
-  margin: 0;
-  border-left: 4px solid var(--plum);
-  padding: 0.45rem 0.85rem;
-}
-
-.room-info h2 {
-  margin: 0 0 0.15rem;
-  font-size: 0.95rem;
-  color: var(--plum);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.room-info p {
-  margin: 0;
-  font-size: 0.92rem;
-  color: var(--ink-soft);
-  overflow-wrap: break-word;
-}
-
-/* ---------- Fundstellen-Info ---------- */
-
-.hotspot-info {
-  margin: 0;
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-left: 4px solid var(--petrol);
-  border-radius: 8px;
-  padding: 0.6rem 0.9rem;
-}
-
-.hotspot-info h3 {
-  margin: 0 0 0.25rem;
-  font-size: 0.95rem;
-  color: var(--petrol-dark);
-}
-
-.hotspot-info p {
-  margin: 0;
-  overflow-wrap: break-word;
-}
-
-/* ---------- Status und Fortschritt ---------- */
-
-.status {
-  min-height: 1.4rem;
-  margin: 0;
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.progress {
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--plum);
-}
-
-/* ---------- Panels (Interaktionsfläche) ---------- */
-
-.panel {
-  margin: 0;
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius);
-  padding: 0.9rem 1rem;
-}
-
-.panel[hidden] { display: none; }
-
-/* Hintergrundzustand erhalten, aber nur die oberste Fläche nimmt Platz ein. */
-.panel--dim {
-  display: none;
-}
-
-.panel-head {
+  width: 56px;
+  height: 56px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  border-bottom: 2px solid var(--ink);
-  padding-bottom: 0.5rem;
-  margin-bottom: 0.7rem;
+  justify-content: center;
+}
+.hotspot .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(251,246,234,0.85);
+  border: 2px solid var(--tinte);
+  box-shadow: 0 0 0 4px rgba(226,105,79,0.35);
+  transition: transform var(--t) ease, box-shadow var(--t) ease;
+}
+.hotspot:hover .dot,
+.hotspot:focus-visible .dot {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 7px rgba(226,105,79,0.5);
+}
+.hotspot .label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--tinte);
+  color: var(--papier);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t) ease;
+}
+.hotspot:hover .label,
+.hotspot:focus-visible .label { opacity: 1; }
+@media (hover: none) {
+  .hotspot .label { opacity: 1; bottom: auto; top: calc(100% + 4px); }
 }
 
-.panel-head h2 {
+/* Porträt-Nahaufnahme: Graphic-Novel, cremefarbener Papiergrund.
+   Darf unten unter die Dialogfläche reichen. */
+.portrait {
+  position: absolute;
+  right: clamp(8px, 3vw, 48px);
+  bottom: calc(var(--dialog-h) - 28px);
+  width: min(34vw, 460px);
+  height: clamp(280px, 58vh, 620px);
+  border: 3px solid var(--tinte);
+  border-radius: 2px;
+  box-shadow: 6px 6px 0 var(--tinte);
+  overflow: hidden;
+  background: var(--papier);
+  z-index: 5;
+  transition: opacity var(--t) ease, transform var(--t) ease;
+}
+.portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* ---------- HUD oben ---------- */
+.hud {
+  position: relative;
+  z-index: 20;
+  height: var(--hud-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(244,236,216,0.72), rgba(244,236,216,0.28));
+  border-bottom: 2px solid rgba(36,31,43,0.18);
+}
+.hud-place {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tinte);
+  letter-spacing: 0.01em;
+}
+.hud-right { display: flex; gap: 6px; }
+.hud-btn {
+  appearance: none;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--tinte);
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t) ease, border-color var(--t) ease;
+}
+.hud-btn:hover { background: rgba(36,31,43,0.08); border-color: rgba(36,31,43,0.2); }
+.hud-btn[aria-pressed="true"] { background: var(--petrol); color: #fff; border-color: var(--tinte); }
+.hud-ico { font-size: 18px; line-height: 1; }
+
+/* ---------- Dialogleiste unten ---------- */
+.dialog {
+  position: relative;
+  z-index: 15;
+  margin-top: auto;
+  height: var(--dialog-h);
+  background: var(--papier);
+  border-top: 3px solid var(--tinte);
+  box-shadow: 0 -8px 24px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  padding: 10px 18px 12px;
+  gap: 6px;
+}
+.dialog > * {
+  width: min(1100px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+.dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dialog-speaker {
+  display: inline-block;
+  background: var(--petrol);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 2px;
+  border: 2px solid var(--tinte);
+}
+.dialog-speaker:empty { display: none; }
+.btn-replay {
+  appearance: none;
+  border: 2px solid var(--tinte);
+  background: var(--creme-2);
+  color: var(--tinte);
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  margin-left: auto;
+}
+.btn-replay:hover { background: var(--koralle-2); color: #fff; }
+.dialog-text {
   margin: 0;
-  font-size: 1.05rem;
-  color: var(--plum);
+  font-size: clamp(18px, 1.5vw, 22px);
+  line-height: 1.45;
+  color: var(--tinte);
+  max-width: 72ch;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 4px;
+}
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.dialog-actions .btn { font-size: 15px; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--dialog-h) + 14px);
+  transform: translateX(-50%) translateY(8px);
+  background: var(--tinte);
+  color: var(--papier);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  padding: 9px 16px;
+  border-radius: 3px;
+  box-shadow: 0 8px 24px var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t) ease, transform var(--t) ease;
+  z-index: 40;
+  max-width: min(90vw, 520px);
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Overlays (native dialog) ---------- */
+.overlay {
+  border: 3px solid var(--tinte);
+  border-radius: 6px;
+  box-shadow: 8px 8px 0 var(--tinte);
+  background: var(--papier);
+  color: var(--tinte);
+  padding: 0;
+  width: min(92vw, 720px);
+  max-height: min(86vh, 720px);
+}
+.overlay::backdrop {
+  background: rgba(36,31,43,0.55);
+  backdrop-filter: blur(2px);
+}
+.overlay-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 10px;
+  border-bottom: 2px solid rgba(36,31,43,0.14);
+}
+.overlay-title {
+  margin: 0;
+  font-size: clamp(19px, 2.2vw, 24px);
+  line-height: 1.15;
+}
+.overlay-source {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--tinte-2);
+  font-family: var(--font-ui);
+}
+.overlay-close {
+  appearance: none;
+  border: 2px solid var(--tinte);
+  background: var(--creme-2);
+  color: var(--tinte);
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+.overlay-close:hover { background: var(--koralle); color: #fff; }
+.overlay-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 18px 18px;
+  border-top: 2px solid rgba(36,31,43,0.14);
+  justify-content: flex-end;
+}
+
+/* Dokument */
+.doc-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  max-height: 52vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.doc-passage {
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-left: 6px solid var(--petrol);
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.doc-passage .doc-passage-id {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--tinte-2);
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.panel-actions {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  margin-top: 0.8rem;
-}
-
-/* Weiter/Schließen ist die primäre Dialogaktion: breit und klar */
-.panel-actions button.primary {
-  flex: 1 1 10rem;
-}
-
-/* ---------- Dialog ---------- */
-
-.dialogue-body {
-  min-height: 3rem;
-}
-
-.dialogue-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.9rem;
-  margin: 0 0 0.4rem;
-}
-
-/* Portrait: deutlich größer, vollständig, natürliche Proportionen,
-   keine Verzerrung/Filter */
-.speaker-portrait {
-  flex: 0 0 auto;
-  width: 220px;
-  height: 220px;
-  max-height: 220px;
-  object-fit: contain;
-  background: var(--cream);
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-}
-
-/* Bildfehler: JS setzt hidden — trotz aller Display-Regeln unsichtbar */
-.speaker-portrait[hidden] {
-  display: none !important;
-}
-
-/* Zeile ohne Portrait: keine leere Bildspalte, kein zusätzlicher Abstand */
-.dialogue-line:not(:has(.speaker-portrait:not([hidden]))) {
-  gap: 0;
-}
-
-/* Sprechernamen: eigene Zeile über dem Text, kurze Registermarke */
-.dialogue-speaker {
-  flex: 0 0 100%;
-  display: inline-block;
-  background: var(--petrol);
-  color: var(--cream);
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 2px solid var(--ink);
-  border-radius: 6px;
-  padding: 0.15rem 0.65rem;
-  margin-bottom: 0.4rem;
-}
-
-.dialogue-speaker.is-alex {
-  background: var(--plum);
-}
-
-.dialogue-speaker.is-alexplus {
-  background: var(--coral-dark);
-  color: var(--cream);
-}
-
-.dialogue-text {
-  flex: 1 1 auto;
-  font-size: 1.125rem;
-  line-height: 1.5;
-  max-width: 46ch;
-  margin: 0;
-  overflow-wrap: break-word;
-}
-
-/* Bewusster Lesemoment (z. B. zwischen Löschung und Zufriedenheitsfrage) */
-.dialogue-pause {
-  margin: 0.4rem 0;
-  padding: 0.8rem 0;
-  text-align: center;
-  font-size: 1.4rem;
-  letter-spacing: 0.6em;
-  color: var(--plum);
-  border-top: 2px dashed var(--ink);
-  border-bottom: 2px dashed var(--ink);
-}
-
-/* ---------- Buttons ---------- */
-
-button {
-  font: inherit;
-  min-height: 44px;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  border: 2px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-  overflow-wrap: break-word;
-}
-
-button:hover {
-  background: #E9E0CB;
-}
-
-button:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
-}
-
-button.primary {
-  background: var(--petrol);
-  color: var(--cream);
-  border-color: var(--ink);
-  font-weight: 700;
-}
-
-button.primary:hover {
-  background: var(--petrol-dark);
-  color: var(--cream);
-}
-
-button.primary:focus-visible {
-  outline-color: var(--focus-on-dark);
-}
-
-button.danger {
-  background: var(--coral);
-  color: var(--ink);
-  font-weight: 700;
-}
-
-button.danger:hover {
-  background: var(--coral-dark);
-  color: var(--cream);
-}
-
-button.ghost {
-  background: transparent;
-}
-
-button.ghost:hover {
-  background: #E9E0CB;
-}
-
-button[aria-disabled="true"] {
-  background: var(--muted);
-  color: var(--ink-soft);
-  cursor: not-allowed;
-}
-
-/* ---------- Stimmen (Audio) ---------- */
-
-#btn-audio {
-  font-weight: 700;
-  background: var(--coral);
-}
-
-#btn-audio:hover {
-  background: var(--coral-dark);
-  color: var(--cream);
-}
-
-#btn-audio[aria-pressed="true"] {
-  background: var(--petrol);
-  color: var(--cream);
-}
-
-#btn-audio[aria-pressed="true"]:hover {
-  background: var(--petrol-dark);
-  color: var(--cream);
-}
-
-/* Replay-Button direkt in der Dialog-/Verfahrenszeile */
-.audio-replay {
-  flex: 0 0 auto;
-  align-self: flex-start;
-  min-height: 0;
-  padding: 0.15rem 0.7rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-/* ---------- Beweisordner ---------- */
-
-.card {
-  background: var(--cream);
-  border: 2px solid var(--ink);
-  border-left: 5px solid var(--coral);
-  border-radius: 8px;
-  padding: 0.65rem 0.9rem;
-  margin: 0.7rem 0;
-}
-
-.card h3 {
-  margin: 0 0 0.35rem;
-  font-size: 1rem;
-  color: var(--plum);
-}
-
-.card p {
-  margin: 0 0 0.3rem;
-  overflow-wrap: break-word;
-}
-
-.card .card-meta {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  font-style: italic;
-}
-
-.evidence-empty,
-.log-empty {
-  font-style: italic;
-  color: var(--ink-soft);
-}
-
-/* ---------- Verlauf ---------- */
-
-.log-list {
-  margin: 0;
-  padding-left: 1.4rem;
-  max-height: 24rem;
+/* Formular */
+.form-body {
+  padding: 14px 18px;
   overflow-y: auto;
-}
-
-.log-list li {
-  margin: 0 0 0.7rem;
-  overflow-wrap: break-word;
-}
-
-.log-speaker {
-  font-weight: 700;
-  color: var(--petrol-dark);
-}
-
-/* ---------- Widerspruchsverfahren ---------- */
-
-.round-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
-  color: var(--plum);
-}
-
-.claim-by {
-  margin: 0.75rem 0 0.3rem;
-  font-weight: 700;
-  font-size: 0.88rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
-blockquote.claim {
-  margin: 0 0 0.9rem;
-  padding: 0.65rem 0.9rem;
-  border: 2px solid var(--ink);
-  border-left: 5px solid var(--petrol);
-  background: var(--cream);
-  border-radius: 8px;
-  font-size: 1.05rem;
-  overflow-wrap: break-word;
-}
-
-.card-pick {
+  max-height: 52vh;
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  background: var(--cream);
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-  padding: 0.6rem 0.85rem;
-  margin: 0.55rem 0;
+  flex-direction: column;
+  gap: 12px;
 }
-
-.card-pick .card-pick-text {
-  flex: 1 1 14rem;
-  min-width: 0;
-}
-
-.card-pick .card-pick-text strong {
-  display: block;
-  color: var(--plum);
-}
-
-.card-pick .card-pick-text p {
-  margin: 0.2rem 0 0;
-  font-size: 0.92rem;
-  color: var(--ink-soft);
-  overflow-wrap: break-word;
-}
-
-.feedback-box {
-  border: 2px solid var(--ink);
-  border-left: 5px solid var(--coral);
-  background: #F7E4DE;
-  border-radius: 8px;
-  padding: 0.65rem 0.9rem;
-  margin: 0.7rem 0;
-  overflow-wrap: break-word;
-}
-
-/* Programmgesteuerter Fokus auf der Rückmeldung (tabindex=-1):
-   klar sichtbar, ohne die übrigen Fokusregeln zu verändern. */
-.feedback-box:focus {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.success-box {
-  border: 2px solid var(--ink);
-  border-left: 5px solid var(--petrol);
-  background: #DFE9E4;
-  border-radius: 8px;
-  padding: 0.65rem 0.9rem;
-  margin: 0.7rem 0;
-  overflow-wrap: break-word;
-}
-
-.badge {
-  display: inline-block;
-  background: var(--petrol);
-  color: var(--cream);
-  border: 2px solid var(--ink);
-  font-weight: 700;
-  border-radius: 999px;
-  padding: 0.15rem 0.85rem;
-  margin: 0 0 0.5rem;
-}
-
-.badge.is-done {
-  background: var(--plum);
-}
-
-/* ---------- Entscheidung ---------- */
-
-.decision-prompt {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0.4rem 0 0.9rem;
-}
-
-.decision-options {
-  display: grid;
-  gap: 0.7rem;
-  margin: 0 0 0.5rem;
-}
-
-.decision-options button {
-  font-size: 1.05rem;
-  font-weight: 700;
-  padding: 0.75rem 1rem;
-  text-align: left;
-}
-
-.decision-options button[data-ending="A"] {
-  background: var(--plum);
-  color: var(--cream);
-}
-
-.decision-options button[data-ending="A"]:hover {
-  background: var(--plum-dark);
-  color: var(--cream);
-}
-
-.decision-options button[data-ending="B"] {
-  background: var(--coral);
-  color: var(--ink);
-}
-
-.decision-options button[data-ending="B"]:hover {
-  background: var(--coral-dark);
-  color: var(--cream);
-}
-
-/* ---------- Abschluss ---------- */
-
-.ending-note {
-  margin: 0 0 0.9rem;
-  overflow-wrap: break-word;
-}
-
-.ending-actions {
+.form-option {
   display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-
-/* ---------- Sichtbares Endmotiv in der Bühne (A/B) ----------
-   Reine Darstellungsklassen: sie entstehen nur über
-   UI.applyEndingView und werden von closeAllPanels (Laden,
-   Checkpoint, Neustart) entfernt. Kein State, kein Ton,
-   keine Animation. */
-.ending-view {
-  display: none;
-}
-
-.stage:has(> .ending-view) {
-  min-height: 300px;
-  aspect-ratio: 16 / 9;
-}
-
-.game:has(.ending-view) .room-info,
-.game:has(.ending-view) .hotspot-info,
-.game:has(.ending-view) .stage-col > .status,
-.game:has(.ending-view) .progress {
-  display: none;
-}
-
-/* Der bestätigte Schlussdialog braucht keine alten Fundstellen,
-   Raumhinweise oder sichtbaren Interaktionsmarker neben der Figur. */
-.game:has(.dialogue--ending:not([hidden])) .stage-hotspots,
-.game:has(.dialogue--ending:not([hidden])) .room-info,
-.game:has(.dialogue--ending:not([hidden])) .hotspot-info,
-.game:has(.dialogue--ending:not([hidden])) .stage-col > .status,
-.game:has(.dialogue--ending:not([hidden])) .progress {
-  display: none;
-}
-
-.game:has(.ending-view) .stage-bg {
-  display: none;
-}
-
-.game:has(.ending-view) .stage-hotspots {
-  display: none;
-}
-
-.game:has(.ending-view) .ending-view {
-  display: grid;
-  place-items: center;
-  position: absolute;
-  inset: 0;
-  padding: 1rem;
-  overflow: hidden;
-}
-
-/* Ende A: ruhige dunkle, leere Terminalfläche — Abwesenheit,
-   kein Plus-Portrait, keine Störanimation, kein Blinken. */
-.ending-view--A {
-  background:
-    linear-gradient(rgba(246, 241, 228, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(246, 241, 228, 0.05) 1px, transparent 1px),
-    var(--ink);
-  background-size: 28px 28px, 28px 28px, auto;
-}
-
-.ending-absence {
-  font-size: 1.6rem;
-  line-height: 1;
-  color: rgba(246, 241, 228, 0.4);
-}
-
-/* Ende B: schlichtes privates Gerätefenster, keine NEBENBEI-Marke. */
-.ending-device {
-  display: grid;
-  justify-items: center;
-  gap: 0.55rem;
-  max-width: 100%;
-  width: min(260px, 100%);
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: 10px;
-  padding: 0.8rem;
-}
-
-.ending-device-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--plum);
-}
-
-.ending-portrait {
-  width: 150px;
-  height: 150px;
-  max-height: 150px;
-}
-
-.ending-device-caption {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  text-align: center;
-  overflow-wrap: break-word;
-}
-
-/* ---------- Aktionen und Sekundärmenü ---------- */
-
-.toolbar {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  align-items: stretch;
-  border-top: 2px solid var(--ink);
-  padding-top: 0.9rem;
-}
-
-.toolbar > button {
-  flex: 1 1 auto;
-}
-
-/* Natives details/summary-Menü für sekundäre Funktionen */
-.menu-secondary {
-  flex: 1 1 auto;
-}
-
-.menu-secondary summary {
-  list-style: none;
-  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 44px;
-  padding: 0.45rem 0.9rem;
-  border: 2px dashed var(--ink);
-  border-radius: 8px;
-  font-weight: 600;
-  background: transparent;
-  color: var(--ink);
+  gap: 12px;
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 12px 14px;
   cursor: pointer;
+  transition: background var(--t) ease, border-color var(--t) ease;
 }
+.form-option:hover { background: var(--creme-2); }
+.form-option.selected { border-color: var(--koralle); background: #fbe6dd; }
+.form-option input { width: 20px; height: 20px; accent-color: var(--koralle); }
+.form-option label { font-size: 16px; cursor: pointer; }
 
-.menu-secondary summary::-webkit-details-marker {
-  display: none;
-}
-
-.menu-secondary summary::before {
-  content: "▸";
-  font-size: 0.85rem;
-}
-
-.menu-secondary[open] summary {
-  border-style: solid;
-  background: var(--paper);
-}
-
-.menu-secondary[open] summary::before {
-  content: "▾";
-}
-
-.menu-secondary summary:hover {
-  background: #E9E0CB;
-}
-
-.menu-secondary summary:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.menu-list {
+/* Challenge */
+.ch-frame { display: flex; flex-direction: column; }
+.ch-cols {
   display: grid;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px 18px;
+  min-height: 0;
 }
-
-.menu-list button {
-  width: 100%;
+.ch-col { overflow-y: auto; max-height: 48vh; padding: 3px; }
+.ch-col-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinte-2);
+}
+.ch-list { display: flex; flex-direction: column; gap: 8px; }
+.ch-item {
+  border: 2px solid var(--tinte);
+  background: var(--creme);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background var(--t) ease, border-color var(--t) ease;
   text-align: left;
-}
-
-/* ---------- Fallback ohne Bild: Hotspots als Liste ---------- */
-
-.stage--list {
-  aspect-ratio: auto;
-  padding: 0.6rem;
-}
-
-.stage--list .stage-bg { display: none; }
-
-.stage--list .stage-hotspots { display: grid; gap: 0.6rem; }
-
-.stage--list .hotspot,
-.stage--list .hotspot:hover,
-.stage--list .hotspot:active {
-  position: static;
   width: 100%;
-  max-width: none;
-  min-height: 48px;
-  transform: none;
+  font-family: var(--font);
+}
+.ch-item:hover { background: var(--creme-2); }
+.ch-item.selected { border-color: var(--koralle); background: #fbe6dd; box-shadow: 2px 2px 0 var(--koralle); }
+.ch-item .ch-sub { display: block; font-family: var(--font-ui); font-size: 12px; color: var(--tinte-2); margin-top: 3px; }
+.ch-feedback {
+  margin: 0 18px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  background: #f3e2d3;
+  border: 2px solid var(--warn);
+  font-size: 15px;
+  line-height: 1.45;
+  min-height: 1.2em;
+}
+.ch-feedback:empty { display: none; }
+
+/* Diagnose */
+.overlay-diagnostic { width: min(94vw, 1000px); max-height: 92dvh; }
+.diag-frame { display: grid; grid-template-columns: 1fr 1fr; }
+.diag-frame > .overlay-head, .diag-results, .diag-frame > .overlay-foot,
+.diag-frame > .overlay-tools, .diag-frame > .overlay-notice { grid-column: 1 / -1; }
+.diag-controls, .diag-tests {
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.diag-controls { border-bottom: 2px solid rgba(36,31,43,0.12); }
+.diag-tests { border-bottom: 2px solid rgba(36,31,43,0.12); }
+.diag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+.diag-row .diag-label { font-size: 16px; font-weight: 600; }
+.diag-row .diag-desc { font-size: 13px; color: var(--tinte-2); margin-top: 2px; font-family: var(--font-ui); }
+.switch {
+  appearance: none;
+  border: 2px solid var(--tinte);
+  background: var(--creme-2);
+  width: 58px;
+  height: 44px;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background var(--t) ease;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--tinte);
+  transition: transform var(--t) ease;
+}
+.switch[aria-checked="true"] { background: var(--petrol); }
+.switch[aria-checked="true"]::after { transform: translateX(26px); background: #fff; }
+.diag-status {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 2px solid var(--tinte);
+}
+.diag-status.on { background: var(--petrol); color: #fff; }
+.diag-status.off { background: var(--creme-2); color: var(--tinte); }
+.diag-results {
+  padding: 12px 18px;
+  overflow-y: auto;
+  max-height: 32vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.diag-result {
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-left: 6px solid var(--petrol);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.diag-result .diag-result-head {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--tinte-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
 }
 
-/* ---------- Schmale Fenster: Bühne über Interaktion ---------- */
+/* Choice: Gesprächsentscheidung am unteren Bildschirmbereich,
+   ohne dunkles/verwischtes Backdrop. Raum und Figur bleiben sichtbar. */
+.overlay-choice {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(1100px, 96vw);
+  max-height: min(62vh, 560px);
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -10px 30px var(--shadow);
+}
+.overlay-choice::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+.choice-options {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 56vh;
+}
+.choice-option {
+  border: 2px solid var(--tinte);
+  background: var(--creme);
+  border-radius: 4px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font);
+  transition: background var(--t) ease, transform var(--t) ease;
+}
+.choice-option:hover { background: var(--creme-2); transform: translateX(2px); }
+.choice-option .choice-label { font-size: 17px; font-weight: 700; }
+.choice-option .choice-desc { font-size: 14px; color: var(--tinte-2); margin-top: 5px; line-height: 1.4; }
 
-/* Auf der Bildbühne bleiben die Motive sichtbar. Die vollständigen Namen
-   stehen für Tastatur/Zeiger am Marker und immer im zugänglichen Namen. */
-@media (min-width: 901px) {
-  .stage-hotspots { counter-reset: hotspot; }
-  .stage:not(.stage--list) .hotspot {
-    counter-increment: hotspot;
-    width: 44px;
-    height: 44px;
-    min-height: 44px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    align-items: center;
-    justify-content: center;
-  }
-  .stage:not(.stage--list) .hotspot > span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    clip-path: inset(50%);
-    overflow: hidden;
-  }
-  .stage:not(.stage--list) .hotspot::before {
-    content: counter(hotspot);
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: var(--paper);
-    color: var(--ink);
-    font-weight: 800;
-  }
-  .stage:not(.stage--list) .hotspot.is-visited::before { border-color: var(--plum); }
-  .stage:not(.stage--list) .hotspot.is-collected::before { background: var(--coral); }
-  .stage:not(.stage--list) .hotspot:hover::after,
-  .stage:not(.stage--list) .hotspot:focus-visible::after {
-    content: attr(data-label);
-    position: absolute;
-    bottom: 46px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: max-content;
-    max-width: 190px;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--ink);
-    border-radius: 4px;
-    background: var(--paper);
-    text-align: center;
-    font-weight: 700;
-  }
+/* Transfer */
+.tr-status {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tr-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 15px;
+}
+.tr-step .tr-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--creme-2); border: 2px solid var(--tinte); flex: 0 0 auto;
+}
+.tr-step.done .tr-dot { background: var(--petrol); }
+.tr-step.active .tr-dot { background: var(--koralle); }
+.tr-actions { padding: 0 18px 14px; display: flex; flex-wrap: wrap; gap: 10px; }
 
-  /* Fix V01: In beiden Räumen liegen erster/letzter Marker außen.
-     Nur ihre Hinweisbox zum Bildinneren ausrichten; Anker bleiben gleich. */
-  .stage:not(.stage--list) .hotspot:is(:first-child, :last-child)::after {
-    transform: none;
+/* Nachricht */
+.msg-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  max-height: 56vh;
+}
+.msg-text {
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: 16px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* Ende */
+.done-frame { text-align: center; padding: 10px 18px 0; }
+.done-text {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--tinte-2);
+  margin: 10px auto 18px;
+  max-width: 46ch;
+}
+
+/* Notizen */
+.notes-body {
+  padding: 14px 18px;
+  overflow-y: auto;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.notes-section h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinte-2);
+}
+.notes-list { display: flex; flex-direction: column; gap: 6px; }
+.notes-item {
+  background: var(--creme);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.notes-empty { font-size: 14px; color: var(--tinte-2); font-style: italic; }
+
+/* Menü */
+.menu-list {
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.menu-list .btn { text-align: left; }
+
+/* Bestätigung */
+.confirm-frame { padding: 6px 18px 0; }
+.confirm-text {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 10px 0 16px;
+  color: var(--tinte);
+}
+
+/* Credits */
+.credits-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; }
+.credits-body p { margin: 0; font-size: 15px; line-height: 1.5; }
+.credits-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--creme-2); padding: 1px 5px; border-radius: 3px; }
+
+/* ---------- Schmale Displays / kleine Höhe ---------- */
+@media (max-width: 768px) {
+  :root { --dialog-h: clamp(140px, 30vh, 200px); }
+  .ch-cols { grid-template-columns: 1fr; }
+  .ch-col { max-height: 28vh; }
+  .diag-frame { display: flex; flex-direction: column; }
+  .diag-row { flex-wrap: wrap; }
+  .diag-row > div:first-child { flex: 1 1 100%; }
+  .diag-status { margin-right: auto; }
+  .portrait {
+    width: min(58vw, 280px);
+    height: min(46vh, 340px);
+    right: 8px;
+    bottom: calc(var(--dialog-h) - 16px);
   }
-  .stage:not(.stage--list) .hotspot:first-child::after {
-    left: 0;
-  }
-  .stage:not(.stage--list) .hotspot:last-child::after {
-    left: auto;
-    right: 0;
+  .hud { padding: 0 8px; }
+  .hud-place { font-size: 13px; }
+  .dialog { padding: 8px 12px 10px; }
+  .dialog-text { font-size: 17px; }
+  .overlay { width: 96vw; }
+  .overlay-choice { width: 96vw; }
+}
+@media (max-width: 420px) {
+  :root { --dialog-h: clamp(130px, 34vh, 180px); }
+  .start-screen { align-items: flex-end; justify-content: center; padding: 16px; }
+  .start-inner { padding: 24px 18px; }
+  .start-actions { flex-direction: column; }
+  .start-actions .btn { width: 100%; }
+  .dialog-actions { gap: 8px; }
+  .dialog-actions .btn { flex: 1 1 auto; font-size: 14px; padding: 8px 10px; }
+  .hud-btn { width: 44px; height: 44px; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  :root { --dialog-h: clamp(120px, 26vh, 160px); --hud-h: 44px; }
+  .dialog-text { font-size: 16px; }
+  .portrait {
+    width: min(28vw, 220px);
+    height: min(42vh, 260px);
   }
 }
 
-@media (max-width: 900px) {
-  .game {
-    grid-template-columns: 1fr;
-    gap: 0.65rem;
-  }
-
-  /* Bild vollständig in natürlicher Höhe; Hotspots als sichere Liste */
-  .stage {
-    aspect-ratio: auto;
-  }
-
-  .stage-bg {
-    height: auto;
-  }
-
-  .stage-hotspots {
-    display: grid;
-    gap: 0.6rem;
-    padding: 0.6rem;
-  }
-
-  .stage .hotspot,
-  .stage .hotspot:hover,
-  .stage .hotspot:active {
-    position: static;
-    width: 100%;
-    max-width: none;
-    min-height: 48px;
-    transform: none;
-  }
-
-  /* Im Gespräch ist das Raumbild Kontext, die Ortsliste erscheint beim
-     Schließen wieder. Kein verstecktes Scrollen und kein Bildbeschnitt. */
-  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-col > :not(.scene),
-  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-hotspots {
-    display: none;
-  }
-  .game:has(.panel:not([hidden]):not(.panel--dim)) .stage-bg {
-    max-height: 180px;
-    object-fit: contain;
-  }
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  .btn:active { transform: none; }
 }
 
-/* ---------- Sehr schmale Fenster (320px und aufwärts) ---------- */
-
-@media (max-width: 560px) {
-  .page-head {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.4rem;
-    padding: 0.55rem 1rem;
-  }
-
-  .head-titles { flex: 0 1 auto; }
-  .page-head h1 { font-size: 1.25rem; }
-  .kicker { font-size: 0.58rem; letter-spacing: 0.06em; }
-
-  .head-controls {
-    margin-left: 0;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .room-nav {
-    gap: 0.25rem;
-  }
-
-  .room-btn {
-    justify-content: space-between;
-    font-size: 0.75rem;
-    padding: 0.3rem 0.4rem;
-  }
-
-  .room-mark { display: none; }
-
-  #btn-audio {
-    width: auto;
-    font-size: 0.75rem;
-    padding: 0.3rem 0.4rem;
-  }
-
-  main { padding-top: 0.65rem; }
-
-  .panel {
-    padding: 0.65rem;
-  }
-
-  .panel-head { flex-wrap: nowrap; gap: 0.4rem; margin-bottom: 0.4rem; }
-  .panel-head h2 { font-size: 0.8rem; line-height: 1.25; }
-  .panel-head button { flex: 0 0 auto; font-size: 0.8rem; padding: 0.3rem 0.45rem; }
-
-  /* Dialog: Portrait über dem Text, Replay darunter */
-  .dialogue-line {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .speaker-portrait {
-    width: 112px;
-    height: 112px;
-    max-height: 112px;
-  }
-
-  /* Gerätefenster: Portrait bleibt innerhalb des Fensters,
-     kein horizontaler Überlauf bei 320px. */
-  .stage:has(> .ending-view) {
-    min-height: 240px;
-    aspect-ratio: auto;
-  }
-
-  .game:has(.ending-view) .ending-view {
-    padding: 0.65rem;
-  }
-
-  .ending-device {
-    width: min(200px, 100%);
-    padding: 0.6rem;
-  }
-
-  .ending-portrait {
-    width: 112px;
-    height: 112px;
-    max-height: 112px;
-  }
-
-  .dialogue-speaker {
-    flex: 0 0 auto;
-  }
-
-  .dialogue-text {
-    max-width: none;
-  }
-
-  .audio-replay {
-    align-self: auto;
-  }
-
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .card-pick {
-    flex-direction: column;
-    align-items: stretch;
-  }
+/* Mobile: responsive Spielaktionen für abgeschnittene Ziele.
+   Von der UI als .scene-actions-mobile erzeugt; Basisstil hier. */
+.scene-actions-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--papier);
+  border-top: 2px solid var(--tinte);
 }
+.scene-actions-mobile .btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  font-size: 14px;
+  padding: 8px 10px;
+}
+
+/* Integration: author display rules must respect native hidden. */
+[hidden] { display: none !important; }
+
+/* Secondary controls remain reachable while a native dialog is open. */
+.overlay-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 18px;
+  border-top: 1px solid rgba(36,31,43,.18);
+}
+.overlay-tools .btn { font-size: 14px; box-shadow: none; }
+.overlay-notice { margin: 0; padding: 10px 18px; color: var(--tinte); background: var(--creme-2); }
