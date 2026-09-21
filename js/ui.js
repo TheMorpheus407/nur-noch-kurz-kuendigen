@@ -992,6 +992,10 @@ const UI = (() => {
       // Nach einer neuen Beobachtung auch den äußeren mobilen Dialog folgen
       // lassen; ein unveränderter Rerender verschiebt weder Lesen noch Fokus.
       pendingDiagnosticResult.tabIndex = -1;
+      const stickyHeight = $$(".overlay-foot, .overlay-tools", el.dlg.diagnostic)
+        .filter(n => ["sticky", "fixed"].includes(getComputedStyle(n).position))
+        .reduce((sum, n) => sum + n.getBoundingClientRect().height, 0);
+      pendingDiagnosticResult.style.scrollMarginBottom = (stickyHeight + 12) + "px";
       pendingDiagnosticResult.focus({preventScroll: true});
       pendingDiagnosticResult.scrollIntoView({block: "nearest"});
       pendingDiagnosticResult = null;
