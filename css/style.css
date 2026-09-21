@@ -29,6 +29,10 @@
 }
 
 * { box-sizing: border-box; }
+* { scrollbar-width: thin; scrollbar-color: var(--petrol) var(--creme-2); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--creme-2); }
+::-webkit-scrollbar-thumb { background: var(--petrol); border: 2px solid var(--creme-2); }
 
 html, body {
   margin: 0;
@@ -276,7 +280,10 @@ button { font-family: var(--font-ui); }
   position: relative;
   z-index: 15;
   margin-top: auto;
-  height: var(--dialog-h);
+  height: auto;
+  min-height: var(--dialog-h);
+  max-height: 62dvh;
+  flex-shrink: 0;
   background: var(--papier);
   border-top: 3px solid var(--tinte);
   box-shadow: 0 -8px 24px var(--shadow);
@@ -324,11 +331,11 @@ button { font-family: var(--font-ui); }
 }
 .btn-replay:hover { background: var(--koralle-2); color: #fff; }
 .dialog-text {
-  margin: 0;
+  margin: 0 auto;
   font-size: clamp(18px, 1.5vw, 22px);
   line-height: 1.45;
   color: var(--tinte);
-  max-width: 72ch;
+  max-width: 1100px;
   overflow-y: auto;
   flex: 1;
   padding-right: 4px;
@@ -483,6 +490,11 @@ button { font-family: var(--font-ui); }
 }
 .ch-col { overflow-y: auto; max-height: 48vh; padding: 3px; }
 .ch-col-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--papier);
+  padding: 4px 0 8px;
   margin: 0 0 8px;
   font-size: 14px;
   font-family: var(--font-ui);
@@ -568,6 +580,7 @@ button { font-family: var(--font-ui); }
   transition: transform var(--t) ease;
 }
 .switch[aria-checked="true"] { background: var(--petrol); }
+.switch:disabled { opacity: .45; cursor: not-allowed; }
 .switch[aria-checked="true"]::after { transform: translateX(26px); background: #fff; }
 .diag-status {
   font-family: var(--font-ui);
@@ -698,10 +711,14 @@ button { font-family: var(--font-ui); }
 }
 
 /* Notizen */
+.notes-frame { display: flex; flex-direction: column; max-height: calc(min(86vh, 720px) - 6px); }
+.notes-frame > .overlay-head, .notes-frame > .overlay-foot { flex-shrink: 0; }
 .notes-body {
   padding: 14px 18px;
   overflow-y: auto;
   max-height: 60vh;
+  min-height: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -804,9 +821,12 @@ button { font-family: var(--font-ui); }
   padding: 8px 12px;
   background: var(--papier);
   border-top: 2px solid var(--tinte);
+  max-height: 25dvh;
+  overflow-y: auto;
+  flex-shrink: 0;
 }
 .scene-actions-mobile .btn {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 44px;
   font-size: 14px;
   padding: 8px 10px;

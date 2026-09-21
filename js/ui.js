@@ -79,6 +79,8 @@ const UI = (() => {
   let currentPortrait = null;
   let portraitScene = null;
   let savedRevision = null;
+  let dialogContentKey = null;
+  let diagnosticResultsKey = null;
   let voiceEnabled = false;
 
   /* ---------- GameState-Brücke ---------- */
@@ -226,7 +228,14 @@ const UI = (() => {
     const py = ny * nh;
     const vx = (px - offX) / visW;
     const vy = (py - offY) / visH;
-    return { left: (vx * 100) + "%", top: (vy * 100) + "%", visible: vx > 0.06 && vx < 0.94 && vy > 0.08 && vy < 0.72 };
+    const bounds = stage.getBoundingClientRect();
+    const pointX = bounds.left + vx * sw, pointY = bounds.top + vy * sh;
+    const hudBottom = el.hud.getBoundingClientRect().bottom;
+    const dialogTop = el.dialog.hidden ? bounds.bottom : el.dialog.getBoundingClientRect().top;
+    const radius = 28; // half of the actual 56px hotspot button
+    return { left: (vx * 100) + "%", top: (vy * 100) + "%", visible:
+      pointX - radius >= bounds.left && pointX + radius <= bounds.right &&
+      pointY - radius >= Math.max(bounds.top, hudBottom) && pointY + radius <= Math.min(bounds.bottom, dialogTop) };
   }
 
   /* ---------- Hotspot-Auflösung ----------
@@ -236,6 +245,8 @@ const UI = (() => {
     const target = action && action.action && action.action.target;
     let pos = null;
     let label = (action && action.label) || "";
+    // Raumwechsel sind Navigation, keine Handlung am abgebildeten Gegenstand.
+    if (["toPlus", "toMira", "backHome", "backReception", "backRoom"].includes(target)) return {pos: null, label, target};
     if (target && typeof ART_ASSETS !== "undefined" && ART_ASSETS.rooms && ART_ASSETS.rooms[sceneId]) {
       const room = ART_ASSETS.rooms[sceneId];
       const hs = room.hotspots && room.hotspots[target];
@@ -336,6 +347,7 @@ const UI = (() => {
   /* ---------- Dialogleiste ---------- */
   function renderDialog(v) {
     const line = v && v.line;
+    const nextKey = line ? line.id : v.mode + ":" + (v.objective && v.objective.text || "");
     if (line) {
       text(el.dialogSpeaker, line.speaker || "");
       text(el.dialogText, line.text || "");
@@ -349,6 +361,7 @@ const UI = (() => {
       el.btnReplay.hidden = true;
     }
     el.dialog.hidden = !["dialogue", "explore"].includes(v.mode);
+    if (nextKey !== dialogContentKey) { el.dialogText.scrollTop = 0; dialogContentKey = nextKey; }
     renderDialogActions(v);
   }
 
@@ -407,8 +420,18 @@ const UI = (() => {
     if (!wasOpen) focusOverlay(d);
   }
   function focusOverlay(d) {
-    const items = $$("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)", d).filter(n => !n.hidden && n.getClientRects().length);
-    const item = items.find(n => !n.hasAttribute("data-close")) || items[0];
+    const visible = n => {
+      if (n.hidden || !n.getClientRects().length) return false;
+      const r = n.getBoundingClientRect();
+      const x = Math.max(0, Math.min(innerWidth - 1, r.left + r.width / 2));
+      const y = Math.max(0, Math.min(innerHeight - 1, r.top + r.height / 2));
+      const top = document.elementFromPoint(x, y);
+      return r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth && (top === n || n.contains(top));
+    };
+    const items = $$("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)", d).filter(visible);
+    const item = (d.id === "dlg-confirm" && items.find(n => n.id === "btn-confirm-no")) ||
+      items.find(n => !n.hasAttribute("data-close") && !n.closest(".overlay-tools")) ||
+      items.find(n => n.hasAttribute("data-close")) || items[0];
     if (item) item.focus({preventScroll: true});
   }
   function closeOverlay(id) {
@@ -635,9 +658,11 @@ const UI = (() => {
     }
     // Beobachtungen / Ergebnisse
     const results = $("#diag-results");
+    const previousScroll = results.scrollTop;
     clear(results);
     const obs = (dg.observations || []).slice();
     if (dg.latestResults && !obs.some(o => JSON.stringify(o) === JSON.stringify(dg.latestResults))) obs.push(dg.latestResults);
+    const nextResultsKey = JSON.stringify(obs);
     if (obs.length) {
       for (const o of obs) {
         const box = make("div", "diag-result");
@@ -661,6 +686,8 @@ const UI = (() => {
       }
     }
     openOverlay("diagnostic");
+    results.scrollTop = nextResultsKey !== diagnosticResultsKey ? results.scrollHeight : previousScroll;
+    diagnosticResultsKey = nextResultsKey;
   }
 
   /* ---------- Choice ---------- */
@@ -925,9 +952,9 @@ const UI = (() => {
       }
     }
     updateHud(v);
-    renderHotspots(v);
     renderPortrait(v);
     renderDialog(v);
+    renderHotspots(v);
 
     // Modus-spezifische Overlays öffnen (nur wenn view sie liefert)
     if (uiOverlay === "menu") openMenu();
@@ -955,7 +982,7 @@ const UI = (() => {
     const replacement = focusedId && document.getElementById(focusedId) ||
       (focusedKey && $$("[data-focus-key]").find(n => n.dataset.focusKey === focusedKey));
     if (replacement && !replacement.disabled && replacement.getClientRects().length &&
-        (!activeOverlay || el.dlg[activeOverlay].contains(replacement))) replacement.focus({preventScroll: true});
+        (!activeOverlay || el.dlg[activeOverlay].contains(replacement))) replacement.focus();
     else if (activeOverlay && !el.dlg[activeOverlay].contains(document.activeElement)) focusOverlay(el.dlg[activeOverlay]);
 
     lastRenderedPhase = v.phase;
