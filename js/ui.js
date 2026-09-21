@@ -193,7 +193,10 @@ const UI = (() => {
     const on = GameAudio.toggle();
     setVoice(on);
     if (!on) stopAudio();
-    else if (!el.game.hidden && view() && view().line) replayLine();
+    else {
+      const line = view() && view().line;
+      if (!el.game.hidden && line && line.voice && GameAudio.hasLine(line.id)) replayLine();
+    }
   }
 
   /* ---------- Bildkoordinatentransformation ----------
