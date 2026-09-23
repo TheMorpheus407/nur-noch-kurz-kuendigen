@@ -155,7 +155,7 @@ const CONTENT = (() => {
   ]);
   sceneLines("connectPreview", [
     ["Alex", "Mein Rechner passt an den Wartungsanschluss. Ich lasse erst prüfen, ob Plus darauf laufen könnte."],
-    ["MIRA", "Das ist nur eine Vorschau, es wird noch keine Kopie angelegt. Ob Sie mich mitnehmen, entscheiden Sie später selbst.", "smile"]
+    ["MIRA", "Das ist nur eine Vorschau, es wird noch keine Kopie angelegt. Ob Sie Plus mitnehmen, entscheiden Sie später selbst.", "smile"]
   ]);
   sceneLines("beforeChoice", [
     ["MIRA", "Beide Wege beenden das Abo. Mitnehmen heißt: eine Kopie läuft auf Ihrem Rechner, löschen heißt: sie ist weg.", "smile"],
