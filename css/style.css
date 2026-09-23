@@ -634,14 +634,14 @@ button { font-family: var(--font-ui); }
 /* Challenge: Kreuzverhör */
 .overlay-challenge { width: min(94vw, 1100px); max-height: min(88vh, 760px); }
 .overlay-challenge::backdrop { background: rgba(36,31,43,0.42); backdrop-filter: none; }
-.ch-frame { display: flex; flex-direction: column; max-height: calc(min(92vh, 900px) - 6px); }
+.ch-frame { display: flex; flex-direction: column; max-height: calc(100vh - 24px); }
 .ch-frame > .overlay-head, .ch-feedback, .ch-hint, .ch-frame > .overlay-foot,
 .ch-frame > .overlay-tools { flex-shrink: 0; }
-.ch-head { padding-bottom: 12px; }
+.ch-head { padding-bottom: 6px; }
 .ch-kicker {
-  margin: 0 0 4px;
+  margin: 0;
   font-family: var(--font-ui);
-  font-size: clamp(22px, 3vw, 34px);
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.14em;
   color: var(--tinte);
@@ -663,12 +663,13 @@ button { font-family: var(--font-ui); }
 .ch-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: 14px;
   padding: 14px 18px;
   min-height: 0;
   flex: 1 1 auto;
 }
-.ch-col { overflow-y: auto; min-height: 0; max-height: 44vh; padding: 3px; scrollbar-gutter: stable; }
+.ch-col { overflow-y: auto; min-height: 0; max-height: none; padding: 3px; scrollbar-gutter: stable; }
 .ch-col-title {
   position: sticky;
   top: 0;
@@ -1616,14 +1617,15 @@ button { font-family: var(--font-ui); }
 }
 
 /* P6a: Dokumente als Reiter im Kreuzverhör */
-.ch-doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; position: sticky; top: 0; z-index: 2; background: var(--creme); padding: 4px 0 8px; }
+.ch-doc-tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; margin-bottom: 6px; position: sticky; top: 0; z-index: 2; background: var(--creme); padding: 4px 0 8px; }
 .ch-doc-tab {
   border: 2px solid var(--tinte);
   background: var(--creme);
   color: var(--tinte);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  padding: 6px 10px;
+  white-space: nowrap;
+  padding: 5px 9px;
   border-radius: 8px 8px 0 0;
   cursor: pointer;
 }
@@ -1636,6 +1638,9 @@ button { font-family: var(--font-ui); }
   outline: 3px solid var(--koralle);
   outline-offset: 2px;
 }
+#dlg-challenge .overlay-title { font-size: 20px; margin: 2px 0; }
+#dlg-challenge .overlay-tools { padding-top: 4px; padding-bottom: 4px; }
+#dlg-challenge .overlay-foot { padding-top: 8px; padding-bottom: 8px; }
 .ch-selection { margin: 0 18px; padding: 8px 12px; border: 2px dashed var(--tinte); border-radius: 4px; font-size: 15px; background: var(--papier); }
 
 .ch-feedback.flash { animation: ch-flash 600ms ease; }

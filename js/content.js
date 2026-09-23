@@ -220,25 +220,25 @@ const CONTENT = (() => {
       {id:"maintenance",label:"Wartungsfach",x:.822,y:.468}, {id:"toMira",label:"Zum Empfang",x:.91,y:.34}]}
   };
   const documents = [
-    {id:"messages",title:"Maras Einladung und die Absage",source:"Dein Rechner · Nachrichten",passages:[
+    {id:"messages",title:"Maras Einladung und die Absage",short:"Absage an Mara",source:"Dein Rechner · Nachrichten",passages:[
       {id:"invite",text:"Mara lädt Alex für Freitag um 16 Uhr zum Kennenlernen in ihre Werkstatt ein. Sie möchte seinen Entwurf sehen."},
       {id:"sent",text:"Gesendet automatisch von Plus, in Alex' Namen: Hallo Mara, danke für die Einladung. Leider muss ich absagen. Ich wünsche euch weiterhin viel Erfolg. — Alex"}]},
-    {id:"invoice",title:"Dein Abo bei NEBENBEI",source:"Dein Rechner · Abrechnung",passages:[
+    {id:"invoice",title:"Dein Abo bei NEBENBEI",short:"Abrechnung",source:"Dein Rechner · Abrechnung",passages:[
       {id:"price",text:"Digitales Abbild Plus · monatlicher Betrag 49,90 Euro."},
       {id:"rule",text:"Neue Laufzeiten müssen vom Kunden persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."}]},
-    {id:"receipt",title:"Deine Kündigungsbestätigung",source:"NEBENBEI · Eingang nach deinem Absenden",passages:[
+    {id:"receipt",title:"Deine Kündigungsbestätigung",short:"Kündigung",source:"NEBENBEI · Eingang nach deinem Absenden",passages:[
       {id:"cancel",text:"09:00 · Kündigung eingegangen · Alex am eigenen Gerät · persönlich bestätigt: Ja."}]},
-    {id:"order",title:"Wer hat welchen Auftrag geschickt?",source:"Kundencenter · Auftragsprotokoll am Terminal",passages:[
+    {id:"order",title:"Wer hat welchen Auftrag geschickt?",short:"Auftragsprotokoll",source:"Kundencenter · Auftragsprotokoll am Terminal",passages:[
       {id:"cancel",text:"09:00 · Kündigung · Ausgelöst von Alex am eigenen Gerät · persönlich bestätigt: Ja."},
       {id:"extend",text:"09:01 · Zwölf weitere Monate · Ausgelöst von Plus, automatischer Auftrag · persönlich bestätigt: Nein."}]},
-    {id:"cancellation",title:"Abo beendet",source:"MIRA · Korrigierter Vertragsstand",passages:[
+    {id:"cancellation",title:"Abo beendet",short:"Abo beendet",source:"MIRA · Korrigierter Vertragsstand",passages:[
       {id:"result",text:"Automatische Verlängerung storniert. Kündigung wirksam. Weitere Monatszahlungen: aus. Entscheidung über die gespeicherte Kopie: noch offen."}]},
-    {id:"rolfBase",title:"Das Schild an Rolfs Rechner",source:"Vorführraum · Unter dem Standfuß",passages:[
+    {id:"rolfBase",title:"Das Schild an Rolfs Rechner",short:"Rolfs Schild",source:"Vorführraum · Unter dem Standfuß",passages:[
       {id:"owner",text:"Eigener Rechner und Speicher: Rolf. Lokaler Betrieb. Anbieterzugang: keiner. Dienstvertrag beendet. Kein Abo."}]},
-    {id:"manual",title:"Eine Kopie mitnehmen",source:"Kundencenter · Wartungsanleitung im Fach",passages:[
+    {id:"manual",title:"Eine Kopie mitnehmen",short:"Anleitung",source:"Kundencenter · Wartungsanleitung im Fach",passages:[
       {id:"order",text:"Vor der Löschung beim Anbieter auf einen eigenen Rechner übertragen. Lokalen Start prüfen. Erst nach erfolgreicher Prüfung die Anbieterkopie löschen."},
       {id:"rights",text:"Der Transfer nimmt keine Kontozugänge, Vertretungsrechte oder automatische Cloudverbindung mit. Der eigene Rechner führt die Kopie lokal aus."}]},
-    {id:"preview",title:"Vorschau auf deinem Rechner",source:"Wartungsanschluss · Geräteprüfung",passages:[
+    {id:"preview",title:"Vorschau auf deinem Rechner",short:"Vorschau",source:"Wartungsanschluss · Geräteprüfung",passages:[
       {id:"target",text:"Ziel: Alex' eigener kleiner Rechner. Lokale Ausführung möglich. Übernommen würden Plus' gespeicherte Erinnerungen und eigene Entwürfe."},
       {id:"excluded",text:"Ausgeschlossen: Kontozugänge, Vertretungsrechte, automatische Cloudverbindung. Noch keine Kopie übertragen; dies ist nur eine Vorschau."}]}
   ];

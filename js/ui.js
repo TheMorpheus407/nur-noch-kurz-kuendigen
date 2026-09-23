@@ -788,8 +788,9 @@ const UI = (() => {
       const tabs = make("div", "ch-doc-tabs");
       for (const d of ch.documents) {
         const isActive = (d.id === active.id);
-        const t = make("button", "ch-doc-tab" + (isActive ? " active" : ""), d.title || "");
+        const t = make("button", "ch-doc-tab" + (isActive ? " active" : ""), d.short || d.title || "");
         t.type = "button";
+        t.title = d.title || "";
         t.setAttribute("aria-pressed", String(isActive));
         t.addEventListener("click", () => {
           if (challengeDoc === d.id) return;
@@ -802,7 +803,6 @@ const UI = (() => {
       docs.appendChild(tabs);
       // Nur die Passagen des aktiven Dokuments
       const card = make("div", "ch-card");
-      card.appendChild(make("div", "ch-card-tab", active.title || ""));
       const passages = make("div", "ch-card-passages");
       if (active.passages && active.passages.length) {
         for (const p of active.passages) {
