@@ -792,6 +792,17 @@ const UI = (() => {
       card.appendChild(passages);
       docs.appendChild(card);
     }
+    // Auswahl-Zeile
+    const selEl = $("#ch-selection");
+    if (selEl) {
+      const truncate = (s) => { s = s || ""; return s.length > 70 ? s.slice(0, 70) + "…" : s; };
+      const selStmt = (ch.statements || []).find((s) => s.id === ch.selectedStatement);
+      const selDoc = (ch.documents || []).find((d) => d.id === ch.selectedDocument);
+      const selPas = selDoc && selDoc.passages ? selDoc.passages.find((p) => p.id === ch.selectedPassage) : null;
+      const stmtPart = selStmt ? truncate(selStmt.text) : "Behauptung wählen";
+      const pasPart = selPas ? truncate(selPas.text) : "Beleg wählen";
+      selEl.textContent = "Deine Auswahl: " + stmtPart + " ↔ " + pasPart;
+    }
     // Feedback
     text($("#ch-feedback"), ch.feedback || "");
     // Vorlegen-Button

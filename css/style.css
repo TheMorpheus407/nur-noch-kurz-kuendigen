@@ -1636,3 +1636,4 @@ button { font-family: var(--font-ui); }
   outline: 3px solid var(--koralle);
   outline-offset: 2px;
 }
+.ch-selection { margin: 0 18px; padding: 8px 12px; border: 2px dashed var(--tinte); border-radius: 4px; font-size: 15px; background: var(--papier); }

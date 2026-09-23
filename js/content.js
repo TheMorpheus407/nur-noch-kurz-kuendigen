@@ -74,7 +74,7 @@ const CONTENT = (() => {
   ]);
   sceneLines("reasonMoney", [
     ["Alex", "Im Formular steht, dass ich die fünfzig Euro sparen will. Wie soll ein weiteres Jahr dabei helfen?"],
-    ["Alex Plus", "Ich habe kalkuliert, dass meine Dienstleistung deine Nerven stärkt. Die Frage, ob du das willst, war ein ineffizienter Prozess.", "worried"]
+    ["Alex Plus", "Ich habe kalkuliert, dass meine Dienstleistung deine Nerven schont. Die Frage, ob du das willst, war ein ineffizienter Prozess.", "worried"]
   ]);
   sceneLines("meetRolf", [
     ["Rolf", "Wenn ihr fertig seid: Einer von euch blockiert mein Licht.", "gentle-bend"],
@@ -246,7 +246,7 @@ const CONTENT = (() => {
     title:"Was stimmt an MIRAs Übersicht nicht?",
     statements:[{id:"arrived",text:"Ihre Kündigung um neun ist angekommen."},{id:"personal",text:"Sie persönlich haben zwölf weitere Monate bestätigt."},{id:"price",text:"Ihr Abo kostet monatlich 49,90 Euro."}],
     correct:{statementId:"personal",documentId:"order",passageId:"extend"},
-    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",doc_messages:"Diese Absage hat Plus an Mara geschickt – mit der Verlängerung um 09:01 hat sie nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat."},
+    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Das ist deine eigene Kündigung um 09:00. MIRA redet aber über die zwölf weiteren Monate – schau dir den Auftrag um 09:01 an und wer ihn ausgelöst hat.",doc_messages:"Diese Absage hat Plus an Mara geschickt – mit der Verlängerung um 09:01 hat sie nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat."},
     round2:{
       title:"Durfte Plus überhaupt verlängern?",
       statements:[
