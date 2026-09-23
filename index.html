@@ -45,17 +45,17 @@
         <span id="hud-place" class="hud-place" aria-live="off"></span>
       </div>
       <div class="hud-right">
-        <button id="btn-notes" class="hud-btn" type="button" aria-label="Notizen" title="Notizen">
-          <span class="hud-ico" aria-hidden="true">✎</span>
+        <button id="btn-notes" class="hud-btn hud-btn-label" type="button" aria-label="Notizen" title="Notizen">
+          <span class="hud-label">Notizen</span>
         </button>
-        <button id="btn-voice" class="hud-btn" type="button" aria-label="Stimmen umschalten" title="Stimmen" aria-pressed="false">
-          <span class="hud-ico" aria-hidden="true">♪</span>
+        <button id="btn-voice" class="hud-btn hud-btn-label" type="button" aria-label="Stimmen umschalten" title="Stimmen" aria-pressed="false">
+          <span class="hud-label">Ton: aus</span>
         </button>
-        <button id="btn-fullscreen" class="hud-btn" type="button" aria-label="Vollbild umschalten" title="Vollbild" hidden>
-          <span class="hud-ico" aria-hidden="true">⛶</span>
+        <button id="btn-fullscreen" class="hud-btn hud-btn-label" type="button" aria-label="Vollbild umschalten" title="Vollbild" hidden>
+          <span class="hud-label">Vollbild</span>
         </button>
-        <button id="btn-menu" class="hud-btn" type="button" aria-label="Menü" title="Menü">
-          <span class="hud-ico" aria-hidden="true">☰</span>
+        <button id="btn-menu" class="hud-btn hud-btn-label" type="button" aria-label="Menü" title="Menü">
+          <span class="hud-label">Menü</span>
         </button>
       </div>
     </header>
@@ -64,9 +64,12 @@
     <section class="dialog" id="dialog" aria-live="polite" aria-atomic="false">
       <div class="dialog-head">
         <span id="dialog-speaker" class="dialog-speaker"></span>
-        <button id="btn-replay" class="btn-replay" type="button" aria-label="Stimme wiederholen" title="Stimme wiederholen" hidden>
-          <span aria-hidden="true">↻</span>
-        </button>
+        <span class="dialog-head-right">
+          <button id="btn-replay" class="btn-replay" type="button" aria-label="Stimme wiederholen" title="Stimme wiederholen" hidden>
+            <span aria-hidden="true">↻</span>
+          </button>
+          <span class="dialog-advance" aria-hidden="true">▼</span>
+        </span>
       </div>
       <p id="dialog-text" class="dialog-text"></p>
       <div class="dialog-actions" id="dialog-actions"></div>

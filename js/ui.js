@@ -78,6 +78,8 @@ const UI = (() => {
   let uiOverlay = null;           // Menü/Notizen über unverändertem Spielzustand
   let currentPortrait = null;
   let portraitScene = null;
+  let portraitUrl = null;      // aktive Sprite-URL (für Einblend-Trigger)
+  let portraitTimer = null;
   let savedRevision = null;
   let dialogContentKey = null;
   let diagnosticResultsKey = null;
@@ -180,12 +182,16 @@ const UI = (() => {
   }
   function setVoice(enabled) {
     voiceEnabled = !!enabled;
-    if (el.btnVoice) el.btnVoice.setAttribute("aria-pressed", String(!!enabled));
+    if (el.btnVoice) {
+      el.btnVoice.setAttribute("aria-pressed", String(!!enabled));
+      el.btnVoice.setAttribute("aria-label", "Stimmen " + (enabled ? "ausschalten" : "einschalten"));
+      const lab = el.btnVoice.querySelector(".hud-label");
+      if (lab) lab.textContent = "Ton: " + (enabled ? "an" : "aus");
+    }
     if (el.btnStartVoice) {
       el.btnStartVoice.setAttribute("aria-pressed", String(!!enabled));
       el.btnStartVoice.textContent = "Stimmen: " + (enabled ? "an" : "aus");
     }
-    if (el.btnVoice) el.btnVoice.setAttribute("aria-label", "Stimmen " + (enabled ? "ausschalten" : "einschalten"));
     if (el.btnMenuVoice) { el.btnMenuVoice.textContent = "Stimmen: " + (enabled ? "an" : "aus"); el.btnMenuVoice.setAttribute("aria-pressed", String(!!enabled)); }
   }
   function toggleVoice() {
@@ -339,12 +345,27 @@ const UI = (() => {
     if (resolved) currentPortrait = resolved;
     const pr = currentPortrait;
     if (pr) {
-      el.portraitImg.src = pr.url;
+      const changed = pr.url !== portraitUrl;
+      portraitUrl = pr.url;
       el.portraitImg.alt = pr.alt;
       el.portrait.hidden = false;
+      if (changed) {
+        el.portraitImg.src = pr.url;
+        // Kurze Einblendung (opacity 0→1, translateY 14px→0) bei jedem Bildwechsel
+        el.portrait.classList.remove("show");
+        el.portrait.style.transform = "translateX(-50%) translateY(14px)";
+        if (portraitTimer) clearTimeout(portraitTimer);
+        portraitTimer = setTimeout(() => {
+          el.portrait.classList.add("show");
+          el.portrait.style.transform = "";
+          portraitTimer = null;
+        }, 20);
+      }
     } else {
       el.portrait.hidden = true;
+      el.portrait.classList.remove("show");
       el.portraitImg.removeAttribute("src");
+      portraitUrl = null;
     }
   }
 
@@ -353,14 +374,18 @@ const UI = (() => {
     const line = v && v.line;
     const nextKey = line ? line.id : v.mode + ":" + (v.objective && v.objective.text || "");
     if (line) {
-      text(el.dialogSpeaker, line.speaker || "");
+      const speaker = line.speaker || "";
+      text(el.dialogSpeaker, speaker);
       text(el.dialogText, line.text || "");
+      if (speaker) el.dialog.setAttribute("data-speaker", speaker);
+      else el.dialog.removeAttribute("data-speaker");
       el.dialog.hidden = false;
       // Replay nur wenn voice + Clip vorhanden
       const canReplay = line.voice && typeof GameAudio !== "undefined" && GameAudio.hasLine(line.id);
       el.btnReplay.hidden = !canReplay;
     } else {
       text(el.dialogSpeaker, "");
+      el.dialog.removeAttribute("data-speaker");
       text(el.dialogText, v.mode === "explore" && v.objective ? v.objective.text : "");
       el.btnReplay.hidden = true;
     }
@@ -1051,7 +1076,16 @@ const UI = (() => {
     el.btnNotes.addEventListener("click", () => renderNotes(view()));
     el.btnVoice.addEventListener("click", toggleVoice);
     el.btnMenu.addEventListener("click", openMenu);
-    el.btnReplay.addEventListener("click", replayLine);
+    el.btnReplay.addEventListener("click", (e) => { e.stopPropagation(); replayLine(); });
+    // Klick auf die Dialogbox (außer auf Buttons darin) = Weiter,
+    // nur im Dialogmodus und nur die von view() angebotene next-Aktion.
+    el.dialog.addEventListener("click", (e) => {
+      if (e.target.closest && e.target.closest("button")) return;
+      const v = view();
+      if (!v || v.mode !== "dialogue") return;
+      const next = (v.actions || []).find((a) => a.action && a.action.type === "next");
+      if (next) onAction(next);
+    });
     el.btnFullscreen.addEventListener("click", async () => {
       try {
         if (document.fullscreenElement) await document.exitFullscreen();

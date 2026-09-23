@@ -26,6 +26,12 @@
   --font: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --t: 180ms;
+  --spk-mira: #2f6f6a;
+  --spk-plus: #6b3a5c;
+  --spk-rolf: #4f7a3a;
+  --spk-alex: #d9644a;
+  --spk-mara: #2d4a7a;
+  --spk-other: #5a5364;
 }
 
 * { box-sizing: border-box; }
@@ -179,163 +185,211 @@ button { font-family: var(--font-ui); }
   justify-content: center;
 }
 .hotspot .dot {
-  width: 14px;
-  height: 14px;
+  position: relative;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: rgba(251,246,234,0.85);
+  background: rgba(251,246,234,0.92);
   border: 2px solid var(--tinte);
-  box-shadow: 0 0 0 4px rgba(226,105,79,0.35);
-  transition: transform var(--t) ease, box-shadow var(--t) ease;
+  box-shadow: 0 0 0 3px rgba(226,105,79,0.55);
+  transition: transform var(--t) ease;
+}
+.hotspot .dot::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 2px solid var(--koralle);
+  animation: hotspot-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes hotspot-pulse {
+  0%   { transform: scale(0.55); opacity: 0.95; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
 }
 .hotspot:hover .dot,
 .hotspot:focus-visible .dot {
-  transform: scale(1.35);
-  box-shadow: 0 0 0 7px rgba(226,105,79,0.5);
+  transform: scale(1.25);
 }
 .hotspot .label {
   position: absolute;
-  bottom: calc(100% + 6px);
+  bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--tinte);
-  color: var(--papier);
+  background: var(--papier);
+  color: var(--tinte);
+  font-family: var(--font-ui);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 5px 10px;
+  border: 2px solid var(--tinte);
   border-radius: 3px;
+  box-shadow: 2px 2px 0 var(--tinte);
   white-space: nowrap;
-  opacity: 0;
   pointer-events: none;
-  transition: opacity var(--t) ease;
-}
-.hotspot:hover .label,
-.hotspot:focus-visible .label { opacity: 1; }
-@media (hover: none) {
-  .hotspot .label { opacity: 1; bottom: auto; top: calc(100% + 4px); }
+  opacity: 1;
 }
 
-/* Porträt-Nahaufnahme: Graphic-Novel, cremefarbener Papiergrund.
-   Darf unten unter die Dialogfläche reichen. */
+/* Freigestelltes Figuren-Sprite: ohne Rahmen/Hintergrund, unten verankert,
+   hinter der Dialogbox. Kurze Einblendung bei jedem Bildwechsel. */
 .portrait {
   position: absolute;
-  right: clamp(8px, 3vw, 48px);
-  bottom: calc(var(--dialog-h) - 28px);
-  width: min(34vw, 460px);
-  height: clamp(280px, 58vh, 620px);
-  border: 3px solid var(--tinte);
-  border-radius: 2px;
-  box-shadow: 6px 6px 0 var(--tinte);
-  overflow: hidden;
-  background: var(--papier);
-  z-index: 5;
-  transition: opacity var(--t) ease, transform var(--t) ease;
+  left: 62%;
+  bottom: 0;
+  transform: translateX(-50%);
+  height: min(80vh, calc(100dvh - var(--hud-h) - 12px));
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.portrait.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 .portrait-img {
-  width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  width: auto;
   display: block;
+  object-fit: contain;
+  object-position: bottom center;
 }
 
-/* ---------- HUD oben ---------- */
+/* ---------- HUD oben (schwebt über der Bühne) ---------- */
 .hud {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   height: var(--hud-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 14px;
-  background: linear-gradient(180deg, rgba(244,236,216,0.72), rgba(244,236,216,0.28));
-  border-bottom: 2px solid rgba(36,31,43,0.18);
+  background: transparent;
+  border-bottom: none;
 }
 .hud-place {
-  font-size: 15px;
-  font-weight: 600;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--tinte);
   letter-spacing: 0.01em;
+  background: rgba(250,244,230,0.93);
+  border: 2px solid var(--tinte);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--tinte);
+  padding: 5px 12px;
 }
-.hud-right { display: flex; gap: 6px; }
+.hud-right { display: flex; gap: 8px; }
 .hud-btn {
   appearance: none;
-  border: 2px solid transparent;
-  background: transparent;
+  border: 2px solid var(--tinte);
+  background: rgba(250,244,230,0.93);
   color: var(--tinte);
-  width: 44px;
-  height: 44px;
-  border-radius: 4px;
+  min-height: 34px;
+  border-radius: 999px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--t) ease, border-color var(--t) ease;
+  padding: 6px 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--tinte);
+  transition: background var(--t) ease, transform var(--t) ease, box-shadow var(--t) ease;
 }
-.hud-btn:hover { background: rgba(36,31,43,0.08); border-color: rgba(36,31,43,0.2); }
-.hud-btn[aria-pressed="true"] { background: var(--petrol); color: #fff; border-color: var(--tinte); }
-.hud-ico { font-size: 18px; line-height: 1; }
+.hud-btn:hover { background: var(--creme-2); }
+.hud-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--tinte); }
+.hud-btn[aria-pressed="true"] { background: var(--petrol); color: #fff; }
+.hud-label { line-height: 1; }
 
-/* ---------- Dialogleiste unten ---------- */
+/* ---------- Dialogbox: Overlay IM Bild, unten zentriert ---------- */
 .dialog {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
   z-index: 15;
-  margin-top: auto;
-  height: auto;
-  min-height: var(--dialog-h);
+  width: min(1100px, calc(100% - 32px));
   max-height: 62dvh;
-  flex-shrink: 0;
-  background: var(--papier);
-  border-top: 3px solid var(--tinte);
-  box-shadow: 0 -8px 24px var(--shadow);
+  background: rgba(250,244,230,0.93);
+  border: 3px solid var(--tinte);
+  border-radius: 6px;
+  box-shadow: 8px 8px 0 var(--tinte);
   display: flex;
   flex-direction: column;
-  padding: 10px 18px 12px;
-  gap: 6px;
-}
-.dialog > * {
-  width: min(1100px, 100%);
-  margin-left: auto;
-  margin-right: auto;
+  padding: 26px 22px 16px;
+  gap: 8px;
+  cursor: pointer;
 }
 .dialog-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+  margin-bottom: -4px;
 }
 .dialog-speaker {
   display: inline-block;
-  background: var(--petrol);
+  background: var(--spk-other);
   color: #fff;
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 2px;
+  padding: 5px 14px;
+  border-radius: 3px;
   border: 2px solid var(--tinte);
 }
+/* Sprecher-Reiter: Farbe je data-speaker (MIRA/Alex Plus/Rolf/Alex/Mara) */
+.dialog[data-speaker="MIRA"] .dialog-speaker { background: var(--spk-mira); }
+.dialog[data-speaker="Alex Plus"] .dialog-speaker { background: var(--spk-plus); }
+.dialog[data-speaker="Rolf"] .dialog-speaker { background: var(--spk-rolf); }
+.dialog[data-speaker="Alex"] .dialog-speaker { background: var(--spk-alex); }
+.dialog[data-speaker="Mara"] .dialog-speaker { background: var(--spk-mara); }
+.dialog[data-speaker="Erzähler"] .dialog-speaker,
+.dialog[data-speaker="System"] .dialog-speaker,
+.dialog[data-speaker="Gesendete Nachricht"] .dialog-speaker { display: none; }
+.dialog[data-speaker="Erzähler"] .dialog-text { font-style: italic; }
 .dialog-speaker:empty { display: none; }
+.dialog-head-right {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .btn-replay {
   appearance: none;
   border: 2px solid var(--tinte);
   background: var(--creme-2);
   color: var(--tinte);
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
-  margin-left: auto;
 }
 .btn-replay:hover { background: var(--koralle-2); color: #fff; }
+.dialog-advance {
+  color: var(--tinte);
+  font-size: 14px;
+  line-height: 1;
+  animation: dialog-blink 1.1s steps(2, start) infinite;
+}
+@keyframes dialog-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
 .dialog-text {
-  margin: 0 auto;
-  font-size: clamp(18px, 1.5vw, 22px);
+  margin: 0;
+  font-size: clamp(1.1rem, 1.55vw, 1.5rem);
   line-height: 1.45;
   color: var(--tinte);
-  max-width: 1100px;
   overflow-y: auto;
   flex: 1;
   padding-right: 4px;
@@ -786,14 +840,17 @@ button { font-family: var(--font-ui); }
   .diag-row > div:first-child { flex: 1 1 100%; }
   .diag-status { margin-right: auto; }
   .portrait {
-    width: min(58vw, 280px);
-    height: min(46vh, 340px);
-    right: 8px;
-    bottom: calc(var(--dialog-h) - 16px);
+    left: 62%;
+    height: 55vh;
   }
   .hud { padding: 0 8px; }
-  .hud-place { font-size: 13px; }
-  .dialog { padding: 8px 12px 10px; }
+  .hud-place { font-size: 12px; padding: 4px 9px; }
+  .hud-btn { min-height: 32px; padding: 5px 10px; font-size: 12px; }
+  .dialog {
+    width: calc(100% - 16px);
+    bottom: 8px;
+    padding: 22px 12px 12px;
+  }
   .dialog-text { font-size: 17px; }
   .overlay { width: calc(100vw - 16px); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
   .overlay-choice { width: 96vw; }
@@ -806,15 +863,11 @@ button { font-family: var(--font-ui); }
   .start-actions .btn { width: 100%; }
   .dialog-actions { gap: 8px; }
   .dialog-actions .btn { flex: 1 1 auto; font-size: 14px; padding: 8px 10px; }
-  .hud-btn { width: 44px; height: 44px; }
 }
 @media (max-height: 480px) and (orientation: landscape) {
   :root { --dialog-h: clamp(120px, 26vh, 160px); --hud-h: 44px; }
   .dialog-text { font-size: 16px; }
-  .portrait {
-    width: min(28vw, 220px);
-    height: min(42vh, 260px);
-  }
+  .portrait { height: 50vh; }
 }
 
 /* ---------- Reduced motion ---------- */

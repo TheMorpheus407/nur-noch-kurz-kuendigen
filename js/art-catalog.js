@@ -78,17 +78,17 @@ const ART_ASSETS = Object.freeze({
   },
   "portraits": {
     "MIRA": {
-      "url": "assets/art/mira-neutral.png",
+      "url": "assets/art/sprites/mira-neutral.png",
       "width": 1008,
       "height": 976
     },
     "Alex Plus": {
-      "url": "assets/art/alex-plus-neutral.png",
+      "url": "assets/art/sprites/alex-plus-neutral.png",
       "width": 968,
       "height": 944
     },
     "Rolf": {
-      "url": "assets/art/rolf-gentle-bend.png",
+      "url": "assets/art/sprites/rolf-gentle-bend.png",
       "width": 1024,
       "height": 1024
     }
@@ -96,36 +96,36 @@ const ART_ASSETS = Object.freeze({
   "expressions": {
     "MIRA": {
       "smile": {
-        "url": "assets/art/mira-smile.png",
+        "url": "assets/art/sprites/mira-smile.png",
         "width": 1024,
         "height": 1024
       },
       "skeptical": {
-        "url": "assets/art/mira-skeptical.png",
+        "url": "assets/art/sprites/mira-skeptical.png",
         "width": 1024,
         "height": 1024
       },
       "surprised": {
-        "url": "assets/art/mira-surprised.png",
+        "url": "assets/art/sprites/mira-surprised.png",
         "width": 1024,
         "height": 1024
       }
     },
     "Alex Plus": {
       "worried": {
-        "url": "assets/art/alex-plus-worried.png",
+        "url": "assets/art/sprites/alex-plus-worried.png",
         "width": 1024,
         "height": 1024
       },
       "relieved": {
-        "url": "assets/art/alex-plus-relieved.png",
+        "url": "assets/art/sprites/alex-plus-relieved.png",
         "width": 1024,
         "height": 1024
       }
     },
     "Rolf": {
       "gentle-bend": {
-        "url": "assets/art/rolf-gentle-bend.png",
+        "url": "assets/art/sprites/rolf-gentle-bend.png",
         "width": 1024,
         "height": 1024
       }
