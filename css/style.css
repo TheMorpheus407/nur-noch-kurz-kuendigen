@@ -1709,3 +1709,17 @@ button { font-family: var(--font-ui); }
   #dlg-diagnostic .diag-tests { display: none; }
   #dlg-diagnostic .diag-frame > .overlay-foot, #dlg-diagnostic .diag-frame > .overlay-tools { grid-column: 1; }
 }
+
+/* P18 · Schmale Bildschirme (Smartphone, 390×844): Kreuzverhör und Wartungsterminal reparieren.
+   Auf schmalen Bildschirmen scrollt der ganze Dialog, nicht innere Spalten. */
+@media (max-width: 899px) {
+  #dlg-challenge, #dlg-diagnostic { overflow-y: auto; max-height: 100vh; }
+  #dlg-challenge .ch-frame { max-height: none; }
+  #dlg-challenge .ch-cols { display: block; overflow: visible; flex: none; min-height: 0; }
+  #dlg-challenge .ch-col { max-height: none; overflow: visible; }
+  #dlg-diagnostic .diag-frame { display: block; max-height: none; height: auto; overflow: visible; }
+  #dlg-diagnostic .diag-controls { display: block; overflow: visible; max-height: none; }
+  #dlg-diagnostic .diag-results { max-height: none; overflow: visible; }
+  #dlg-diagnostic .diag-pair-head { flex-wrap: wrap; }
+  #dlg-diagnostic .diag-compare { grid-template-columns: 1fr; }
+}
