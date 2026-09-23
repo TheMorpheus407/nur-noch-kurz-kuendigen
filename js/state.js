@@ -203,11 +203,11 @@ const GameState = (() => {
         if(c.statementId!==correct.statementId)key=c.statementId;
         else if(c.documentId==="receipt")key="receipt";
         else if(c.documentId==="invoice"&&c.passageId==="rule")key="rule";
-        else if(c.documentId!=="order")key="other";
+        else if(c.documentId!=="order")key=("doc_"+c.documentId) in CONTENT.challenge.feedback?"doc_"+c.documentId:"other";
       }else{
         if(c.statementId!=="r2_agency")key=c.statementId;
         else if(c.passageId==="extend")key="extend";
-        else if(c.documentId!=="invoice"||c.passageId!=="rule")key="other";
+        else if(c.documentId!=="invoice"||c.passageId!=="rule")key=("doc_"+c.documentId) in CONTENT.challenge.round2.feedback?"doc_"+c.documentId:"other";
       }
       c.feedback=feedbackPool[key]||feedbackPool.other;return success({success:false,message:c.feedback});
     }

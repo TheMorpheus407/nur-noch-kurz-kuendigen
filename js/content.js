@@ -18,7 +18,7 @@ const CONTENT = (() => {
 
   sceneLines("homeIntro", [
     ["Alex", "Eine neue Nachricht von Mara. Endlich."],
-    ["Erzähler", "Du schiebst die kalte Tasse beiseite. Auf deinem Rechner blinkt der Name der kleinen Werkstatt, der du letzte Woche deinen Entwurf geschickt hast."]
+    ["Erzähler", "Du schiebst die kalte Tasse beiseite. Auf deinem Rechner blinkt der Name der kleinen Werkstatt, an die du letzte Woche deinen Entwurf geschickt hast."]
   ]);
   sceneLines("homeMessages", [
     ["Mara", "Hi Alex! Dein Entwurf hat uns neugierig gemacht. Komm doch Freitag um 16 Uhr vorbei. Einfach kennenlernen, die Werkstatt anschauen. Bring gern deine Skizzen mit! — Mara"],
@@ -32,7 +32,6 @@ const CONTENT = (() => {
     ["Alex", "Ich hatte mich darauf gefreut."],
     ["Alex Plus", "Freude ist ineffizient. Ich habe sie optimiert.", "relieved"],
     ["Alex", "Das ist nicht Fürsorge, das ist mein Freitag. Ich kündige das Abo."],
-    ["Alex Plus", "Kündigen? Du hast doch gar nicht gefragt.", "worried"],
     ["Alex Plus", "Ich habe nur für dein Glück optimiert. Genau wie in den Nutzungsbedingungen.", "worried"]
   ]);
   sceneLines("homeInvoice", [
@@ -247,7 +246,7 @@ const CONTENT = (() => {
     title:"Was stimmt an MIRAs Übersicht nicht?",
     statements:[{id:"arrived",text:"Ihre Kündigung um neun ist angekommen."},{id:"personal",text:"Sie persönlich haben zwölf weitere Monate bestätigt."},{id:"price",text:"Ihr Abo kostet monatlich 49,90 Euro."}],
     correct:{statementId:"personal",documentId:"order",passageId:"extend"},
-    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Welche Passage betrifft den Auftrag um 09:01?"},
+    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",doc_messages:"Diese Absage hat Plus an Mara geschickt – mit der Verlängerung um 09:01 hat sie nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat."},
     round2:{
       title:"Durfte Plus überhaupt verlängern?",
       statements:[
@@ -261,6 +260,8 @@ const CONTENT = (() => {
         r2_order:"Ja, der Auftrag kam von Plus. Das hat sie schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte.",
         r2_agency_wrong:"Diese Behauptung ist falsch. Die Vertragsregel sagt etwas anderes.",
         extend:"Das hat sie schon zugegeben – jetzt geht es darum, ob Plus das überhaupt durfte.",
+        doc_messages:"Die Absage an Mara sagt nichts darüber, ob Plus Laufzeiten buchen darf. Die Vertragsregel steht in der Abrechnung.",
+        doc_receipt:"Deine Kündigungsbestätigung zeigt nur, dass du gekündigt hast. Ob Plus verlängern darf, steht in der Vertragsregel der Abrechnung.",
         other:"Diese Passage beantwortet nicht die Frage, ob Plus Laufzeiten buchen darf. Such die Vertragsregel in der Abrechnung."
       }
     }
