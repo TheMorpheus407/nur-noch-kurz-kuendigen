@@ -1164,3 +1164,428 @@ button { font-family: var(--font-ui); }
 }
 .overlay-tools .btn { font-size: 14px; box-shadow: none; }
 .overlay-notice { margin: 0; padding: 10px 18px; color: var(--tinte); background: var(--creme-2); }
+
+/* ---------- P5a: Wartungsterminal ---------- */
+#dlg-diagnostic .diag-frame,
+#dlg-transfer .tr-frame {
+  border: 14px solid var(--petrol);
+  border-radius: 18px;
+  box-shadow: 0 0 0 3px var(--tinte), 6px 6px 0 var(--tinte);
+  background-color: #10302d;
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 4px);
+  color: #d8f3e6;
+  font-family: ui-monospace, "DejaVu Sans Mono", "Liberation Mono", Menlo, Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.5;
+}
+#dlg-diagnostic .diag-frame *,
+#dlg-transfer .tr-frame * {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+#dlg-diagnostic .overlay-head,
+#dlg-transfer .overlay-head {
+  background: transparent;
+  border-bottom: 1px dashed #2f6f6a;
+  padding: 14px 18px 12px;
+}
+#dlg-diagnostic .overlay-title,
+#dlg-transfer .overlay-title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ff0cf;
+  font-size: 20px;
+  margin: 18px 0 8px;
+}
+#dlg-diagnostic .overlay-title::before,
+#dlg-transfer .overlay-title::before {
+  content: "NEBENBEI · WARTUNG";
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--koralle);
+  margin-bottom: 6px;
+}
+#dlg-diagnostic .overlay-source,
+#dlg-transfer .overlay-source {
+  color: #bfe3d4;
+}
+#dlg-diagnostic .diag-controls,
+#dlg-diagnostic .diag-tests,
+#dlg-diagnostic .diag-results,
+#dlg-transfer .tr-status,
+#dlg-transfer .tr-actions {
+  background: transparent;
+  border-color: #2f6f6a;
+  padding: 12px 18px;
+}
+#dlg-diagnostic .diag-row,
+#dlg-transfer .tr-step {
+  background: transparent;
+  border-bottom: 1px dashed #2f6f6a;
+  color: #d8f3e6;
+  padding: 10px 0;
+}
+#dlg-diagnostic .diag-row:last-child,
+#dlg-transfer .tr-step:last-child {
+  border-bottom: none;
+}
+#dlg-diagnostic .diag-label,
+#dlg-transfer .tr-step {
+  color: #d8f3e6;
+}
+#dlg-diagnostic .diag-desc {
+  color: #9cc9b9;
+}
+#dlg-diagnostic .diag-status {
+  color: #9ff0cf;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+}
+#dlg-diagnostic .switch,
+#dlg-diagnostic .diag-tests .btn,
+#dlg-transfer .tr-actions .btn,
+#dlg-diagnostic .btn,
+#dlg-transfer .btn {
+  background: #1d4d48;
+  border: 2px solid #9ff0cf;
+  color: #e8fff4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 0 #0a1f1d;
+  padding: 10px 14px;
+  min-height: 44px;
+  cursor: pointer;
+}
+#dlg-diagnostic .switch:hover,
+#dlg-diagnostic .diag-tests .btn:hover,
+#dlg-transfer .tr-actions .btn:hover,
+#dlg-diagnostic .btn:hover,
+#dlg-transfer .btn:hover {
+  background: #27655f;
+}
+#dlg-diagnostic .switch:focus-visible,
+#dlg-diagnostic .diag-tests .btn:focus-visible,
+#dlg-transfer .tr-actions .btn:focus-visible,
+#dlg-diagnostic .btn:focus-visible,
+#dlg-transfer .btn:focus-visible {
+  outline: 3px solid var(--koralle);
+  outline-offset: 2px;
+}
+#dlg-diagnostic .btn-primary,
+#dlg-transfer .btn-primary {
+  background: var(--koralle);
+  color: var(--tinte);
+  border-color: #ffd7c9;
+}
+#dlg-diagnostic .btn-primary:hover,
+#dlg-transfer .btn-primary:hover {
+  background: #f4917a;
+}
+#dlg-diagnostic .diag-result {
+  background: transparent;
+  border: 1px dashed #2f6f6a;
+  color: #d8f3e6;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+#dlg-diagnostic .diag-result::before {
+  content: "> ";
+  color: #9ff0cf;
+}
+#dlg-diagnostic .diag-result-head {
+  color: #9ff0cf;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+}
+#dlg-diagnostic .diag-result:last-child {
+  animation: p5a-blink 600ms ease-out;
+}
+@keyframes p5a-blink {
+  0% { background: #2f6f6a; }
+  100% { background: transparent; }
+}
+#dlg-transfer .tr-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #555;
+  border: 2px solid #9ff0cf;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+#dlg-transfer .tr-step.done .tr-dot {
+  background: #6fe3a8;
+  box-shadow: 0 0 8px rgba(111,227,168,0.7);
+}
+#dlg-diagnostic .overlay-foot,
+#dlg-transfer .overlay-foot {
+  background: transparent;
+  border-top: 1px dashed #2f6f6a;
+  padding: 12px 18px;
+}
+#dlg-diagnostic .overlay-foot .btn,
+#dlg-transfer .overlay-foot .btn {
+  background: #1d4d48;
+  border: 2px solid #9ff0cf;
+  color: #e8fff4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 0 #0a1f1d;
+}
+@media (max-width: 700px) {
+  #dlg-diagnostic .diag-frame,
+  #dlg-transfer .tr-frame {
+    border-width: 8px;
+    border-radius: 12px;
+    box-shadow: 0 0 0 2px var(--tinte), 4px 4px 0 var(--tinte);
+  }
+}
+
+/* ---------- P5b: Fenster, Papier, Endkarte ---------- */
+
+/* 1) #dlg-form und #dlg-message: Fenster eines Retro-Mailprogramms auf Alex' Laptop */
+#dlg-form .form-frame,
+#dlg-message .msg-frame {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(min(86vh, 720px) - 6px);
+  background: var(--creme);
+  border: 3px solid var(--tinte);
+  border-radius: 6px;
+  box-shadow: 6px 6px 0 var(--tinte);
+  overflow: hidden;
+}
+
+#dlg-form .overlay-head,
+#dlg-message .overlay-head {
+  position: relative;
+  align-items: center;
+  padding: 12px 18px 12px 58px;
+  background: var(--petrol);
+  color: var(--creme);
+  border-bottom: 3px solid var(--tinte);
+}
+
+/* Drei kleine Fensterknöpfe (Koralle, Creme, Pflaume) links in der Titelleiste */
+#dlg-form .overlay-head::before,
+#dlg-message .overlay-head::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--koralle);
+  box-shadow:
+    17px 0 0 var(--creme),
+    34px 0 0 var(--pflaume);
+}
+
+#dlg-form .overlay-title,
+#dlg-message .overlay-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--creme);
+}
+
+#dlg-form .overlay-source {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: rgba(244, 236, 216, 0.82);
+}
+
+#dlg-form .overlay-close,
+#dlg-message .overlay-close {
+  background: var(--creme);
+  color: var(--tinte);
+  border-color: var(--tinte);
+}
+
+/* Radiooptionen als große klickbare Zeilen */
+#dlg-form .form-body,
+#dlg-message .msg-body {
+  padding: 16px 18px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#dlg-form .form-option {
+  padding: 14px 16px;
+  background: var(--papier);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#dlg-form .form-option:hover { background: var(--creme-2); }
+#dlg-form .form-option.selected {
+  border-color: var(--koralle);
+  background: #fbe6dd;
+}
+#dlg-form .form-option input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--koralle);
+  flex: 0 0 auto;
+}
+#dlg-form .form-option span { font-size: 16px; }
+
+#dlg-message .msg-text {
+  background: var(--papier);
+  border: 2px solid var(--tinte);
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: 16px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+#dlg-form .overlay-foot,
+#dlg-message .overlay-foot {
+  padding: 14px 18px 18px;
+  border-top: 2px solid rgba(36, 31, 43, 0.14);
+  background: var(--creme);
+}
+
+#dlg-form .btn-primary,
+#dlg-message .btn-primary {
+  background: var(--koralle);
+  color: var(--tinte);
+  border: 2px solid var(--tinte);
+  box-shadow: 2px 2px 0 var(--tinte);
+}
+#dlg-form .btn-primary:hover,
+#dlg-message .btn-primary:hover { background: var(--koralle-2); }
+
+/* 2) #dlg-document: ausgedrucktes Blatt Papier */
+#dlg-document .doc-frame {
+  background-color: #fbf6ea;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0 27px,
+    rgba(36, 31, 43, 0.05) 27px 28px
+  );
+  border: 2px solid var(--tinte);
+  border-radius: 3px;
+  box-shadow: 8px 10px 0 rgba(36, 31, 43, 0.35);
+  transform: rotate(-0.8deg);
+}
+
+#dlg-document .overlay-head {
+  padding: 22px 26px 12px;
+  border-bottom: 1px solid rgba(36, 31, 43, 0.35);
+}
+
+#dlg-document .overlay-title {
+  margin: 0;
+  font-family: var(--font);
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.1;
+  color: var(--tinte);
+}
+
+#dlg-document .overlay-source {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--tinte-2);
+}
+
+#dlg-document .overlay-close {
+  background: var(--papier);
+  border-color: var(--tinte);
+}
+
+#dlg-document .doc-body {
+  padding: 18px 26px;
+  max-height: 56vh;
+}
+
+/* Passagen: ohne Kästchen-Optik, nur Abstand + feine Linie links in Koralle */
+#dlg-document .doc-passage {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-left: 2px solid var(--koralle);
+  padding: 2px 0 2px 16px;
+  margin: 0 0 18px;
+}
+#dlg-document .doc-passage p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--tinte);
+}
+#dlg-document .doc-passage:last-child { margin-bottom: 0; }
+
+#dlg-document .overlay-foot {
+  padding: 14px 26px 20px;
+  border-top: 1px solid rgba(36, 31, 43, 0.22);
+}
+
+/* 3) #dlg-done: letzte Seite eines Comics */
+#dlg-done .done-frame {
+  text-align: center;
+  padding: 28px 22px 0;
+}
+
+#dlg-done .overlay-title {
+  display: inline-block;
+  margin: 0 auto 20px;
+  padding: 14px 30px;
+  font-family: var(--font);
+  font-size: clamp(34px, 5vw, 42px);
+  line-height: 1.05;
+  color: var(--tinte);
+  background: var(--creme);
+  border: 3px solid var(--tinte);
+  border-radius: 6px;
+  box-shadow: 5px 5px 0 var(--koralle);
+  transform: rotate(-2deg);
+}
+
+#dlg-done .done-text {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--tinte-2);
+  margin: 0 auto 22px;
+  max-width: 46ch;
+}
+
+#dlg-done .overlay-foot {
+  justify-content: center;
+  padding: 0 18px 22px;
+  border-top: none;
+}
+
+/* 4) Lesbarkeit: Fokus sichtbar, ≥16px im Inhalt */
+#dlg-form .form-option:focus-visible,
+#dlg-form .form-option input:focus-visible,
+#dlg-message .msg-text:focus-visible,
+#dlg-document .doc-passage:focus-visible {
+  outline: 3px solid var(--koralle);
+  outline-offset: 2px;
+}
+#dlg-form .overlay-close:focus-visible,
+#dlg-message .overlay-close:focus-visible,
+#dlg-document .overlay-close:focus-visible,
+#dlg-form .btn:focus-visible,
+#dlg-message .btn:focus-visible,
+#dlg-document .btn:focus-visible,
+#dlg-done .btn:focus-visible {
+  outline: 3px solid var(--koralle);
+  outline-offset: 2px;
+}
+
+/* Auf ≤700px: Drehungen weglassen */
+@media (max-width: 700px) {
+  #dlg-document .doc-frame { transform: none; }
+  #dlg-done .overlay-title { transform: none; }
+}
