@@ -283,10 +283,10 @@ const UI = (() => {
   function homographyToMatrix3d(h) {
     // column-major, wie CSS matrix3d es erwartet
     return "matrix3d(" + [
-      h[0], h[1], 0, h[3],
-      h[4], h[5], 0, h[7],
+      h[0], h[3], 0, h[6],
+      h[1], h[4], 0, h[7],
       0, 0, 1, 0,
-      h[8], h[9], 0, h[10]
+      h[2], h[5], 0, h[8]
     ].join(",") + ")";
   }
 
@@ -729,7 +729,7 @@ const UI = (() => {
     if (ch.statements && ch.statements.length) {
       for (const s of ch.statements) {
         const sel = (ch.selectedStatement === s.id);
-        const b = make("button", "ch-item" + (sel ? " selected" : ""), s.text || "");
+        const b = make("button", "ch-statement" + (sel ? " selected" : ""), s.text || "");
         b.type = "button";
         b.dataset.focusKey = focusKey(s.action);
         b.setAttribute("aria-pressed", String(sel));
@@ -744,23 +744,24 @@ const UI = (() => {
     clear(docs);
     if (ch.documents && ch.documents.length) {
       for (const d of ch.documents) {
-        const head = make("div", "ch-item", d.title || "");
-        head.style.cursor = "default";
-        head.style.background = "var(--creme-2)";
-        docs.appendChild(head);
+        const card = make("div", "ch-card");
+        card.appendChild(make("div", "ch-card-tab", d.title || ""));
+        const passages = make("div", "ch-card-passages");
         if (d.passages && d.passages.length) {
           for (const p of d.passages) {
             const sel = (ch.selectedDocument === d.id && ch.selectedPassage === p.id);
-            const b = make("button", "ch-item" + (sel ? " selected" : ""), p.text || "");
+            const b = make("button", "ch-passage" + (sel ? " selected" : ""), p.text || "");
             b.type = "button";
             b.dataset.focusKey = focusKey(p.action);
             b.setAttribute("aria-pressed", String(sel));
             b.addEventListener("click", () => {
               if (p.action) onAction(p.action);
             });
-            docs.appendChild(b);
+            passages.appendChild(b);
           }
         }
+        card.appendChild(passages);
+        docs.appendChild(card);
       }
     }
     // Feedback

@@ -121,9 +121,9 @@ button { font-family: var(--font-ui); }
   user-select: none;
   -webkit-user-drag: none;
 }
-.start-figure-alex { left: 16%; transform: rotate(-1.5deg); z-index: 1; }
-.start-figure-mira { left: 42%; height: 114%; z-index: 2; }
-.start-figure-rolf { left: 66%; transform: rotate(1.5deg); z-index: 1; }
+.start-figure-alex { left: 40%; transform: rotate(-1.5deg); z-index: 1; }
+.start-figure-mira { left: 58%; height: 114%; z-index: 2; }
+.start-figure-rolf { left: 78%; transform: rotate(1.5deg); z-index: 1; }
 .start-inner {
   position: relative;
   z-index: 2;
@@ -271,8 +271,8 @@ button { font-family: var(--font-ui); }
   position: absolute;
   left: 0;
   top: 0;
-  width: 100px;
-  height: 60px;
+  width: 420px;
+  height: 300px;
   transform-origin: 0 0;
   pointer-events: none;
   z-index: 3;
@@ -295,7 +295,7 @@ button { font-family: var(--font-ui); }
   align-items: center;
   gap: 5px;
   font-weight: 700;
-  font-size: 10px;
+  font-size: 20px;
   border-bottom: 1px solid rgba(244,236,216,0.4);
   padding-bottom: 3px;
 }
@@ -311,8 +311,8 @@ button { font-family: var(--font-ui); }
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0.15; }
 }
-.laptop-screen .lp-sub { font-size: 9px; opacity: 0.85; }
-.laptop-screen .lp-body { font-size: 9px; overflow: hidden; }
+.laptop-screen .lp-sub { font-size: 22px; opacity: 0.85; }
+.laptop-screen .lp-body { font-size: 22px; overflow: hidden; }
 .laptop-screen .lp-red { color: #ffb3a3; font-weight: 700; }
 .laptop-screen .lp-ok { color: #bfe8d9; font-weight: 700; }
 
@@ -633,7 +633,7 @@ button { font-family: var(--font-ui); }
 /* Challenge: Kreuzverhör */
 .overlay-challenge { width: min(94vw, 1100px); max-height: min(88vh, 760px); }
 .overlay-challenge::backdrop { background: rgba(36,31,43,0.42); backdrop-filter: none; }
-.ch-frame { display: flex; flex-direction: column; max-height: calc(min(88vh, 760px) - 6px); }
+.ch-frame { display: flex; flex-direction: column; max-height: calc(min(92vh, 900px) - 6px); }
 .ch-frame > .overlay-head, .ch-feedback, .ch-hint, .ch-frame > .overlay-foot,
 .ch-frame > .overlay-tools { flex-shrink: 0; }
 .ch-head { padding-bottom: 12px; }
@@ -667,7 +667,7 @@ button { font-family: var(--font-ui); }
   min-height: 0;
   flex: 1 1 auto;
 }
-.ch-col { overflow-y: auto; min-height: 0; max-height: 48vh; padding: 3px; scrollbar-gutter: stable; }
+.ch-col { overflow-y: auto; min-height: 0; max-height: 56vh; padding: 3px; scrollbar-gutter: stable; }
 .ch-col-title {
   position: sticky;
   top: 0;
@@ -688,8 +688,8 @@ button { font-family: var(--font-ui); }
   border: 2px solid var(--tinte);
   background: var(--creme);
   border-radius: 10px 10px 10px 2px;
-  padding: 10px 14px;
-  font-size: 15px;
+  padding: 12px 16px;
+  font-size: 17px;
   line-height: 1.4;
   cursor: pointer;
   transition: background var(--t) ease, border-color var(--t) ease;
@@ -738,7 +738,7 @@ button { font-family: var(--font-ui); }
   background: var(--tinte);
   color: var(--papier);
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.03em;
   padding: 5px 12px;
@@ -752,8 +752,8 @@ button { font-family: var(--font-ui); }
   border: 2px solid var(--tinte);
   background: var(--papier);
   border-radius: 4px;
-  padding: 8px 10px;
-  font-size: 14px;
+  padding: 10px 12px;
+  font-size: 16px;
   line-height: 1.4;
   cursor: pointer;
   transition: background var(--t) ease, border-color var(--t) ease;
