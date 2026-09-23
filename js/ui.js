@@ -72,6 +72,8 @@ const UI = (() => {
   let lastLineId = null;          // für Audio-Wechsel
   let challengeDoc = null;        // aktives Dokument im Kreuzverhör (UI-Zustand)
   let challengeDocRound = null;   // Runde, in der challengeDoc gesetzt wurde
+  let challengeScrollKey = null;  // "Runde:aktivesDokument" – zuletzt gescrollt zurückgesetzter Zustand
+  let challengeStmtRound = null;  // Runde, in der die Behauptungsspalte zuletzt zurückgesetzt wurde
   let lastRenderedPhase = null;
   let lastRenderedScene = null;
   let lastRenderedMode = null;
@@ -554,6 +556,7 @@ const UI = (() => {
     }, 1100);
   }
   let shakeTimer = null;
+  let flashTimer = null;
   function shakeChallengePanel(message) {
     const panel = el.dlg.challenge && el.dlg.challenge.querySelector(".ch-frame");
     if (panel) {
@@ -566,6 +569,18 @@ const UI = (() => {
         panel.classList.remove("shake");
         shakeTimer = null;
       }, 350);
+    }
+    // Auch bei wiederholtem Fehlschlag sichtbar reagieren: Feedback kurz aufblitzen
+    const fb = $("#ch-feedback");
+    if (fb) {
+      fb.classList.remove("flash");
+      void fb.offsetWidth;
+      fb.classList.add("flash");
+      if (flashTimer) clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => {
+        fb.classList.remove("flash");
+        flashTimer = null;
+      }, 600);
     }
     if (message) toast(message, 3600);
   }
@@ -716,6 +731,12 @@ const UI = (() => {
   function renderChallenge(v) {
     const ch = v && v.challenge;
     if (!ch) { closeOverlay("challenge"); return; }
+    // Behauptungsspalte zurücksetzen, wenn sich die Runde geändert hat
+    if (challengeStmtRound !== ch.round) {
+      const stCol = $("#ch-statements").closest(".ch-col");
+      if (stCol) stCol.scrollTop = 0;
+      challengeStmtRound = ch.round;
+    }
     text($("#ch-title"), ch.title || "Frage");
     // Rundenanzeige
     const roundEl = $("#ch-round");
@@ -756,6 +777,13 @@ const UI = (() => {
         activeId = ch.documents[ch.documents.length - 1].id;
       }
       const active = ch.documents.find((d) => d.id === activeId) || ch.documents[ch.documents.length - 1];
+      // Scrollposition zurücksetzen, wenn sich aktives Dokument ODER Runde geändert haben
+      const scrollKey = ch.round + ":" + active.id;
+      if (challengeScrollKey !== scrollKey) {
+        const col = $("#ch-docs").closest(".ch-col");
+        if (col) col.scrollTop = 0;
+        challengeScrollKey = scrollKey;
+      }
       // Reiterleiste: alle Dokumente immer sichtbar
       const tabs = make("div", "ch-doc-tabs");
       for (const d of ch.documents) {
@@ -805,6 +833,9 @@ const UI = (() => {
     }
     // Feedback
     text($("#ch-feedback"), ch.feedback || "");
+    // Hinweiszeile nur, solange noch keine Behauptung gewählt ist (bleibt mehr Platz für Unterlagen)
+    const hintEl = $(".ch-hint");
+    if (hintEl) hintEl.hidden = !!ch.selectedStatement;
     // Vorlegen-Button
     const present = $("#btn-ch-present");
     const canPresent = !!findAction(v, "presentEvidence");

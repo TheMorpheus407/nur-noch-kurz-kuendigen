@@ -248,7 +248,7 @@ const CONTENT = (() => {
     correct:{statementId:"personal",documentId:"order",passageId:"extend"},
     feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Das ist deine eigene Kündigung um 09:00. MIRA redet aber über die zwölf weiteren Monate – schau dir den Auftrag um 09:01 an und wer ihn ausgelöst hat.",doc_messages:"Diese Absage hat Plus an Mara geschickt – mit der Verlängerung um 09:01 hat sie nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat."},
     round2:{
-      title:"Durfte Plus überhaupt verlängern?",
+      title:"Durfte Plus dein Abo überhaupt verlängern?",
       statements:[
         {id:"r2_agency",text:"Plus darf in Ihrem Namen neue Laufzeiten buchen."},
         {id:"r2_tasks",text:"Plus bearbeitet Ihre Termine und Nachrichten."},
@@ -259,7 +259,7 @@ const CONTENT = (() => {
         r2_tasks:"Das stimmt. Plus bearbeitet Termine und Nachrichten. Aber das gibt ihm kein Recht, Laufzeiten zu buchen.",
         r2_order:"Ja, der Auftrag kam von Plus. Das hat sie schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte.",
         r2_agency_wrong:"Diese Behauptung ist falsch. Die Vertragsregel sagt etwas anderes.",
-        extend:"Das hat sie schon zugegeben – jetzt geht es darum, ob Plus das überhaupt durfte.",
+        extend:"Dass der Auftrag von Plus kam, hat MIRA schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte – die Vertragsregel steht in deiner Abrechnung (Reiter „Dein Abo bei NEBENBEI“).",
         doc_messages:"Die Absage an Mara sagt nichts darüber, ob Plus Laufzeiten buchen darf. Die Vertragsregel steht in der Abrechnung.",
         doc_receipt:"Deine Kündigungsbestätigung zeigt nur, dass du gekündigt hast. Ob Plus verlängern darf, steht in der Vertragsregel der Abrechnung.",
         other:"Diese Passage beantwortet nicht die Frage, ob Plus Laufzeiten buchen darf. Such die Vertragsregel in der Abrechnung."
@@ -291,7 +291,7 @@ const CONTENT = (() => {
     form:{text:"Du willst das Abo beenden. Die Abrechnung und die Kündigung findest du am Schreibtisch.",hints:["Auf der Abrechnung stehen Preis und Vertragsregel.","Wähle im Formular einen Grund und sende es selbst ab."]},
     reception:{text:"Du hast gekündigt. Kläre, warum trotzdem eine neue Laufzeit auftaucht.",hints:["MIRA kann die Übersicht und den einzelnen Auftrag zeigen.","Sprich auch mit Plus, bevor du den Auftrag bei MIRA ansprichst."]},
     case:{text:"Wer hat den Auftrag um 09:01 ausgelöst?",hints:["Das Terminal zeigt mehr als die Kontoübersicht.","Vergleiche bei beiden Aufträgen den Auslöser und die persönliche Bestätigung.","Welche Zeile widerspricht der Behauptung, du selbst hättest verlängert?"]},
-    caseRound2:{text:"Durfte Plus überhaupt verlängern?",hints:["Schau in die Vertragsregel der Abrechnung.","Die Regel sagt, wer Laufzeiten bestätigen darf.","Das digitale Abbild darf keine neue Laufzeit buchen."]},
+    caseRound2:{text:"Durfte Plus dein Abo überhaupt verlängern?",hints:["Schau in die Vertragsregel der Abrechnung.","Die Regel sagt, wer Laufzeiten bestätigen darf.","Das digitale Abbild darf keine neue Laufzeit buchen."]},
     diagnosis:{text:"Dein Abo ist beendet. Sprich mit Plus darüber, warum er deine Kündigung übergangen hat.",hints:["Beobachte zunächst eine Testmail und eine persönliche Antwort.","Die beiden Einstellungen steuern unterschiedliche Dinge.","Wiederhole nach dem Abschalten den jeweils passenden Test. Eine Einstellung zu ändern ist noch keine Beobachtung."]},
     relationship:{text:"Zum ersten Mal antwortet Plus ohne Verkaufsphrase.",hints:["Du kannst nach seinem Brief fragen oder ihm Raum lassen."]},
     discovery:{text:"Der Vertrag ist beendet. Gibt es für die Kopie eine Möglichkeit außerhalb der Firma?",hints:["Rolf arbeitet hier nicht mehr. Wie läuft er trotzdem weiter?","Untersuche seinen Standfuß und die Wartungsanleitung.","Dein eigener Rechner kann am Wartungsanschluss geprüft werden. Die Vorschau kopiert noch nichts."]},

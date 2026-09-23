@@ -1616,7 +1616,7 @@ button { font-family: var(--font-ui); }
 }
 
 /* P6a: Dokumente als Reiter im Kreuzverhör */
-.ch-doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ch-doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; position: sticky; top: 0; z-index: 2; background: var(--creme); padding: 4px 0 8px; }
 .ch-doc-tab {
   border: 2px solid var(--tinte);
   background: var(--creme);
@@ -1637,3 +1637,6 @@ button { font-family: var(--font-ui); }
   outline-offset: 2px;
 }
 .ch-selection { margin: 0 18px; padding: 8px 12px; border: 2px dashed var(--tinte); border-radius: 4px; font-size: 15px; background: var(--papier); }
+
+.ch-feedback.flash { animation: ch-flash 600ms ease; }
+@keyframes ch-flash { 0% { background: #f7c9bb; } 100% { background: inherit; } }
