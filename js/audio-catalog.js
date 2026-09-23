@@ -1,229 +1,278 @@
 "use strict";
-// Asset metadata; local Qwen3-TTS, selected voices, same-cast revisions and processing in provenance.
 const AUDIO_CATALOG = Object.freeze({
-  "ankunft-01": {
-    "url": "assets/audio/ankunft-01.wav",
-    "speaker": "MIRA",
-    "duration": 5.426583333333333
-  },
-  "ankunft-03": {
-    "url": "assets/audio/ankunft-03.wav",
-    "speaker": "MIRA",
-    "duration": 4.56
-  },
-  "ankunft-04": {
-    "url": "assets/audio/ankunft-04.wav",
+  "homeMessages032-07": {
+    "url": "assets/audio/homeMessages032-07.wav",
     "speaker": "Alex Plus",
-    "duration": 4.4
+    "duration": 3.1067916666666666
   },
-  "ankunft-06": {
-    "url": "assets/audio/ankunft-06.wav",
+  "homeMessages032-08": {
+    "url": "assets/audio/homeMessages032-08.wav",
     "speaker": "Alex Plus",
-    "duration": 3.76
+    "duration": 6.56
   },
-  "ankunft-07": {
-    "url": "assets/audio/ankunft-07.wav",
-    "speaker": "MIRA",
-    "duration": 11.28
-  },
-  "ankunft-08": {
-    "url": "assets/audio/ankunft-08.wav",
-    "speaker": "MIRA",
-    "duration": 6.1525
-  },
-  "ankunft-10": {
-    "url": "assets/audio/ankunft-10.wav",
-    "speaker": "MIRA",
-    "duration": 8.24
-  },
-  "mira-01": {
-    "url": "assets/audio/mira-01.wav",
-    "speaker": "MIRA",
-    "duration": 6.08
-  },
-  "mira-03": {
-    "url": "assets/audio/mira-03.wav",
-    "speaker": "MIRA",
-    "duration": 4.668458333333334
-  },
-  "mira-04": {
-    "url": "assets/audio/mira-04.wav",
-    "speaker": "MIRA",
-    "duration": 6.08
-  },
-  "mira-06": {
-    "url": "assets/audio/mira-06.wav",
-    "speaker": "MIRA",
-    "duration": 5.6
-  },
-  "alexplus-01": {
-    "url": "assets/audio/alexplus-01.wav",
-    "speaker": "Alex Plus",
-    "duration": 5.227791666666667
-  },
-  "alexplus-03": {
-    "url": "assets/audio/alexplus-03.wav",
-    "speaker": "Alex Plus",
-    "duration": 5.3375
-  },
-  "alexplus-05": {
-    "url": "assets/audio/alexplus-05.wav",
-    "speaker": "Alex Plus",
-    "duration": 4.64
-  },
-  "rolf-01": {
-    "url": "assets/audio/rolf-01.wav",
-    "speaker": "Rolf",
-    "duration": 2.88
-  },
-  "rolf-03": {
-    "url": "assets/audio/rolf-03.wav",
-    "speaker": "Rolf",
-    "duration": 6.08
-  },
-  "rolf-04": {
-    "url": "assets/audio/rolf-04.wav",
-    "speaker": "Rolf",
-    "duration": 11.6
-  },
-  "rolf-06": {
-    "url": "assets/audio/rolf-06.wav",
-    "speaker": "Rolf",
-    "duration": 3.84
-  },
-  "rolf-07": {
-    "url": "assets/audio/rolf-07.wav",
-    "speaker": "Rolf",
-    "duration": 4.72
-  },
-  "miranachw2-01": {
-    "url": "assets/audio/miranachw2-01.wav",
-    "speaker": "MIRA",
-    "duration": 7.074625
-  },
-  "miranachw2-02": {
-    "url": "assets/audio/miranachw2-02.wav",
-    "speaker": "MIRA",
-    "duration": 7.52
-  },
-  "miranachw2-04": {
-    "url": "assets/audio/miranachw2-04.wav",
-    "speaker": "MIRA",
-    "duration": 7.12
-  },
-  "alexplusnachw2-01": {
-    "url": "assets/audio/alexplusnachw2-01.wav",
-    "speaker": "Alex Plus",
-    "duration": 5.28
-  },
-  "alexplusnachw2-02": {
-    "url": "assets/audio/alexplusnachw2-02.wav",
-    "speaker": "Alex Plus",
-    "duration": 9.28
-  },
-  "alexplusnachw2-04": {
-    "url": "assets/audio/alexplusnachw2-04.wav",
-    "speaker": "Alex Plus",
-    "duration": 11.12
-  },
-  "alexplusnachw2-05": {
-    "url": "assets/audio/alexplusnachw2-05.wav",
-    "speaker": "Alex Plus",
-    "duration": 7.04
-  },
-  "alexplusnachw2-07": {
-    "url": "assets/audio/alexplusnachw2-07.wav",
+  "homeMessages032-10": {
+    "url": "assets/audio/homeMessages032-10.wav",
     "speaker": "Alex Plus",
     "duration": 3.600041666666667
   },
-  "w1-01": {
-    "url": "assets/audio/w1-01.wav",
+  "homeMessages032-12": {
+    "url": "assets/audio/homeMessages032-12.wav",
+    "speaker": "Alex Plus",
+    "duration": 4.501291666666667
+  },
+  "receptionIntro032-01": {
+    "url": "assets/audio/receptionIntro032-01.wav",
+    "speaker": "MIRA",
+    "duration": 1.52
+  },
+  "receptionIntro032-03": {
+    "url": "assets/audio/receptionIntro032-03.wav",
+    "speaker": "MIRA",
+    "duration": 6.720041666666667
+  },
+  "receptionIntro032-05": {
+    "url": "assets/audio/receptionIntro032-05.wav",
+    "speaker": "MIRA",
+    "duration": 6.333333333333333
+  },
+  "receptionIntro032-07": {
+    "url": "assets/audio/receptionIntro032-07.wav",
+    "speaker": "MIRA",
+    "duration": 8.4
+  },
+  "receptionIntro032-08": {
+    "url": "assets/audio/receptionIntro032-08.wav",
+    "speaker": "MIRA",
+    "duration": 4.4
+  },
+  "meetPlus032-02": {
+    "url": "assets/audio/meetPlus032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 1.84
+  },
+  "meetPlus032-04": {
+    "url": "assets/audio/meetPlus032-04.wav",
+    "speaker": "Alex Plus",
+    "duration": 7.0601666666666665
+  },
+  "reasonSelf032-02": {
+    "url": "assets/audio/reasonSelf032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 5.28
+  },
+  "reasonMoney032-02": {
+    "url": "assets/audio/reasonMoney032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 8.199916666666667
+  },
+  "meetRolf032-01": {
+    "url": "assets/audio/meetRolf032-01.wav",
+    "speaker": "Rolf",
+    "duration": 3.28
+  },
+  "meetRolf032-03": {
+    "url": "assets/audio/meetRolf032-03.wav",
+    "speaker": "Rolf",
+    "duration": 5.92
+  },
+  "earlyRolf032-02": {
+    "url": "assets/audio/earlyRolf032-02.wav",
+    "speaker": "Rolf",
+    "duration": 4.88
+  },
+  "earlyRolf032-04": {
+    "url": "assets/audio/earlyRolf032-04.wav",
+    "speaker": "Rolf",
+    "duration": 5.92
+  },
+  "caseRound2032-02": {
+    "url": "assets/audio/caseRound2032-02.wav",
+    "speaker": "MIRA",
+    "duration": 3.0729583333333332
+  },
+  "caseRound2032-03": {
+    "url": "assets/audio/caseRound2032-03.wav",
     "speaker": "MIRA",
     "duration": 6.48
   },
-  "w1-02": {
-    "url": "assets/audio/w1-02.wav",
+  "caseRound2032-05": {
+    "url": "assets/audio/caseRound2032-05.wav",
     "speaker": "MIRA",
-    "duration": 6.0
+    "duration": 6.56
   },
-  "w2-01": {
-    "url": "assets/audio/w2-01.wav",
+  "caseSuccess032-02": {
+    "url": "assets/audio/caseSuccess032-02.wav",
     "speaker": "MIRA",
-    "duration": 8.176166666666667
+    "duration": 5.68
   },
-  "w2-02": {
-    "url": "assets/audio/w2-02.wav",
+  "caseSuccess032-03": {
+    "url": "assets/audio/caseSuccess032-03.wav",
     "speaker": "MIRA",
-    "duration": 4.818375
+    "duration": 7.894458333333334
   },
-  "w2-03": {
-    "url": "assets/audio/w2-03.wav",
+  "salesLoop032-02": {
+    "url": "assets/audio/salesLoop032-02.wav",
     "speaker": "Alex Plus",
     "duration": 3.28
   },
-  "w2-04": {
-    "url": "assets/audio/w2-04.wav",
-    "speaker": "MIRA",
-    "duration": 5.580375
-  },
-  "w3v-01": {
-    "url": "assets/audio/w3v-01.wav",
-    "speaker": "MIRA",
-    "duration": 6.08
-  },
-  "w3v-02": {
-    "url": "assets/audio/w3v-02.wav",
+  "salesLoop032-04": {
+    "url": "assets/audio/salesLoop032-04.wav",
     "speaker": "Alex Plus",
-    "duration": 3.948375
+    "duration": 3.28
   },
-  "w3-01": {
-    "url": "assets/audio/w3-01.wav",
+  "salesLoop032-06": {
+    "url": "assets/audio/salesLoop032-06.wav",
     "speaker": "MIRA",
-    "duration": 10.16
+    "duration": 2.4
   },
-  "w3-02": {
-    "url": "assets/audio/w3-02.wav",
+  "salesLoop032-07": {
+    "url": "assets/audio/salesLoop032-07.wav",
     "speaker": "MIRA",
-    "duration": 7.84
+    "duration": 6.633291666666667
   },
-  "endeA-01": {
-    "url": "assets/audio/endeA-01.wav",
-    "speaker": "MIRA",
-    "duration": 8.08
-  },
-  "endeA-02": {
-    "url": "assets/audio/endeA-02.wav",
+  "testSalesOn032-01": {
+    "url": "assets/audio/testSalesOn032-01.wav",
     "speaker": "Alex Plus",
-    "duration": 4.56
+    "duration": 3.28
   },
-  "endeA-03": {
-    "url": "assets/audio/endeA-03.wav",
-    "speaker": "MIRA",
-    "duration": 3.5200416666666667
-  },
-  "endeA-04": {
-    "url": "assets/audio/endeA-04.wav",
-    "speaker": "MIRA",
-    "duration": 4.438416666666667
-  },
-  "endeB-01": {
-    "url": "assets/audio/endeB-01.wav",
-    "speaker": "MIRA",
-    "duration": 6.4
-  },
-  "endeB-02": {
-    "url": "assets/audio/endeB-02.wav",
+  "testSalesOff032-01": {
+    "url": "assets/audio/testSalesOff032-01.wav",
     "speaker": "Alex Plus",
-    "duration": 5.52
+    "duration": 6.772541666666666
   },
-  "endeB-04": {
-    "url": "assets/audio/endeB-04.wav",
+  "afterTest032-02": {
+    "url": "assets/audio/afterTest032-02.wav",
     "speaker": "Alex Plus",
-    "duration": 6.48
+    "duration": 2.4
   },
-  "endeB-06": {
-    "url": "assets/audio/endeB-06.wav",
+  "afterTest032-04": {
+    "url": "assets/audio/afterTest032-04.wav",
     "speaker": "Alex Plus",
-    "duration": 2.2422916666666666
+    "duration": 0.64
+  },
+  "afterTest032-06": {
+    "url": "assets/audio/afterTest032-06.wav",
+    "speaker": "Alex Plus",
+    "duration": 5.92
+  },
+  "afterTest032-08": {
+    "url": "assets/audio/afterTest032-08.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.04
+  },
+  "letterRead032-02": {
+    "url": "assets/audio/letterRead032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 4.48
+  },
+  "letterRead032-04": {
+    "url": "assets/audio/letterRead032-04.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.787
+  },
+  "letterPrivate032-02": {
+    "url": "assets/audio/letterPrivate032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.52625
+  },
+  "letterPrivate032-04": {
+    "url": "assets/audio/letterPrivate032-04.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.92
+  },
+  "closeout032-01": {
+    "url": "assets/audio/closeout032-01.wav",
+    "speaker": "MIRA",
+    "duration": 6.1117083333333335
+  },
+  "closeout032-03": {
+    "url": "assets/audio/closeout032-03.wav",
+    "speaker": "MIRA",
+    "duration": 2.56
+  },
+  "closeout032-04": {
+    "url": "assets/audio/closeout032-04.wav",
+    "speaker": "Alex Plus",
+    "duration": 4.080041666666666
+  },
+  "askRolf032-02": {
+    "url": "assets/audio/askRolf032-02.wav",
+    "speaker": "Rolf",
+    "duration": 6.286083333333333
+  },
+  "askRolf032-04": {
+    "url": "assets/audio/askRolf032-04.wav",
+    "speaker": "Rolf",
+    "duration": 5.737208333333333
+  },
+  "askRolf032-05": {
+    "url": "assets/audio/askRolf032-05.wav",
+    "speaker": "Rolf",
+    "duration": 6.937291666666667
+  },
+  "connectPreview032-02": {
+    "url": "assets/audio/connectPreview032-02.wav",
+    "speaker": "MIRA",
+    "duration": 6.281166666666667
+  },
+  "beforeChoice032-01": {
+    "url": "assets/audio/beforeChoice032-01.wav",
+    "speaker": "MIRA",
+    "duration": 7.04
+  },
+  "beforeChoice032-02": {
+    "url": "assets/audio/beforeChoice032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 6.72
+  },
+  "beforeChoice032-03": {
+    "url": "assets/audio/beforeChoice032-03.wav",
+    "speaker": "MIRA",
+    "duration": 3.761125
+  },
+  "deleteGoodbye032-02": {
+    "url": "assets/audio/deleteGoodbye032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.44
+  },
+  "deleteGoodbye032-04": {
+    "url": "assets/audio/deleteGoodbye032-04.wav",
+    "speaker": "Alex Plus",
+    "duration": 4.946583333333334
+  },
+  "deleteDone032-01": {
+    "url": "assets/audio/deleteDone032-01.wav",
+    "speaker": "MIRA",
+    "duration": 6.24
+  },
+  "takeAgreement032-02": {
+    "url": "assets/audio/takeAgreement032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 1.36
+  },
+  "takeAgreement032-03": {
+    "url": "assets/audio/takeAgreement032-03.wav",
+    "speaker": "MIRA",
+    "duration": 10.0
+  },
+  "localBoot032-02": {
+    "url": "assets/audio/localBoot032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 7.04
+  },
+  "takeDone032-01": {
+    "url": "assets/audio/takeDone032-01.wav",
+    "speaker": "MIRA",
+    "duration": 7.980958333333334
+  },
+  "takeDone032-02": {
+    "url": "assets/audio/takeDone032-02.wav",
+    "speaker": "Alex Plus",
+    "duration": 3.84
+  },
+  "lastTake032-01": {
+    "url": "assets/audio/lastTake032-01.wav",
+    "speaker": "Alex Plus",
+    "duration": 2.48
   }
 });
