@@ -1650,3 +1650,39 @@ button { font-family: var(--font-ui); }
 #dlg-diagnostic .diag-continue { display:block; width:100%; margin:10px 0; font-size:18px; background: var(--koralle); color: var(--tinte); border:3px solid var(--tinte); animation: diag-pulse 1.4s ease-in-out infinite; }
 @keyframes diag-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(233,106,80,0.7); } 50% { box-shadow: 0 0 0 8px rgba(233,106,80,0); } }
 #dlg-diagnostic .diag-done { color:#9ff0cf; font-weight:700; }
+
+/* P12 · Wartungsterminal zweispaltig: Testergebnisse immer sichtbar */
+@media (min-width: 900px) {
+  #dlg-diagnostic .diag-frame {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    column-gap: 16px;
+    max-height: calc(100vh - 24px);
+  }
+  #dlg-diagnostic .diag-frame > .overlay-head {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  #dlg-diagnostic .diag-controls {
+    grid-column: 1;
+    grid-row: 2;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  #dlg-diagnostic .diag-tests {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  #dlg-diagnostic .diag-results {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    max-height: none;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  #dlg-diagnostic .diag-frame > .overlay-foot,
+  #dlg-diagnostic .diag-frame > .overlay-tools {
+    grid-column: 1 / -1;
+  }
+}
