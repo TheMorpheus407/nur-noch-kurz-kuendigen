@@ -250,6 +250,46 @@ const UI = (() => {
       pointY - radius >= Math.max(bounds.top, hudBottom) && pointY + radius <= Math.min(bounds.bottom, dialogTop) };
   }
 
+  /* ---------- Homographie: Rechteck auf vier Pixelpunkte ----------
+     Löst das 8×8-Gleichungssystem für H (h33 = 1) per Gauß-Elimination.
+     Rückgabe: 9 Koeffizienten [h11..h33] oder null bei singulärem System. */
+  function solveHomography(src, dst) {
+    const A = [];
+    const B = [];
+    for (let i = 0; i < 4; i++) {
+      const x = src[i][0], y = src[i][1], X = dst[i][0], Y = dst[i][1];
+      A.push([x, y, 1, 0, 0, 0, -x * X, -y * X]); B.push(X);
+      A.push([0, 0, 0, x, y, 1, -x * Y, -y * Y]); B.push(Y);
+    }
+    const n = 8;
+    // Gauß-Elimination mit partieller Pivotwahl
+    for (let col = 0; col < n; col++) {
+      let piv = col;
+      for (let r = col + 1; r < n; r++) if (Math.abs(A[r][col]) > Math.abs(A[piv][col])) piv = r;
+      if (Math.abs(A[piv][col]) < 1e-12) return null;
+      if (piv !== col) { const tmp = A[col]; A[col] = A[piv]; A[piv] = tmp; const tb = B[col]; B[col] = B[piv]; B[piv] = tb; }
+      for (let r = 0; r < n; r++) {
+        if (r === col) continue;
+        const f = A[r][col] / A[col][col];
+        for (let c = col; c < n; c++) A[r][c] -= f * A[col][c];
+        B[r] -= f * B[col];
+      }
+    }
+    const h = [];
+    for (let r = 0; r < n; r++) h.push(B[r] / A[r][r]);
+    h.push(1); // h33
+    return h;
+  }
+  function homographyToMatrix3d(h) {
+    // column-major, wie CSS matrix3d es erwartet
+    return "matrix3d(" + [
+      h[0], h[1], 0, h[3],
+      h[4], h[5], 0, h[7],
+      0, 0, 1, 0,
+      h[8], h[9], 0, h[10]
+    ].join(",") + ")";
+  }
+
   /* ---------- Hotspot-Auflösung ----------
      Normalisierte Art-Hotspots haben Vorrang vor CONTENT-Koordinaten.
      action.target ist die Hotspot-ID; position aus der Action als Fallback. */
@@ -349,6 +389,7 @@ const UI = (() => {
     portraitScene = v.sceneId;
     const resolved = line ? resolvePortrait(line) : null;
     if (resolved) currentPortrait = resolved;
+    else if (line) currentPortrait = null;
     const pr = currentPortrait;
     if (pr) {
       const changed = pr.url !== portraitUrl;
@@ -373,6 +414,66 @@ const UI = (() => {
       el.portraitImg.removeAttribute("src");
       portraitUrl = null;
     }
+  }
+
+  /* ---------- Laptop-Bildschirm in der Szene „zuhause" ----------
+     Perspectivisch auf die Bildschirmfläche des Raumbilds gelegt.
+     Inhalt rein aus view() abgeleitet (Dokumente + Phase). */
+  const LAPTOP_SRC = [[0, 0], [420, 0], [420, 300], [0, 300]];
+  const LAPTOP_CORNERS = [
+    [0.151, 0.222], // oben links
+    [0.420, 0.178], // oben rechts
+    [0.447, 0.465], // unten rechts
+    [0.180, 0.544]  // unten links
+  ];
+  function renderLaptop(v) {
+    const lp = el.laptopScreen;
+    if (!lp) return;
+    const show = v && v.sceneId === "zuhause" && window.innerWidth > 700;
+    if (!show) {
+      lp.hidden = true;
+      return;
+    }
+    // Vier Ecken der Bildschirmfläche in Pixelkoordinaten der Bühne
+    const pts = LAPTOP_CORNERS.map((c) => {
+      const p = projectPoint(c[0], c[1]);
+      const stage = el.stage;
+      const sw = stage.clientWidth || 1;
+      const sh = stage.clientHeight || 1;
+      return [parseFloat(p.left) / 100 * sw, parseFloat(p.top) / 100 * sh];
+    });
+    const h = solveHomography(LAPTOP_SRC, pts);
+    if (h) {
+      lp.style.width = "420px";
+      lp.style.height = "300px";
+      lp.style.transform = homographyToMatrix3d(h);
+    }
+    // Inhalt je nach Stand
+    clear(lp);
+    const hasDoc = (id) => (v.documents || []).some((d) => d && d.id === id);
+    const phase = v.phase;
+    const head = make("div", "lp-head");
+    const body = make("div", "lp-body");
+    if (!hasDoc("messages")) {
+      const dot = make("span", "lp-dot");
+      head.appendChild(dot);
+      head.appendChild(make("span", "", "Posteingang"));
+      body.appendChild(make("div", "lp-sub", "1 neue Nachricht · Mara (Werkstatt)"));
+    } else if (!hasDoc("receipt")) {
+      head.appendChild(make("span", "", "Nachrichten"));
+      body.appendChild(make("div", "", "Mara: Komm Freitag um 16 Uhr vorbei!"));
+      body.appendChild(make("div", "lp-red", "Gesendet von Plus in deinem Namen: Absage"));
+    } else if (phase === "homeEnd" || phase === "done" || v.done) {
+      head.appendChild(make("span", "", "Nachrichten"));
+      body.appendChild(make("div", "lp-ok", "Nachricht an Mara: gesendet ✓"));
+    } else {
+      head.appendChild(make("span", "", "Nachrichten"));
+      body.appendChild(make("div", "", "Kündigung eingegangen · 09:00"));
+      body.appendChild(make("div", "lp-red", "Neue Laufzeit gebucht · 09:01 · 12 Monate"));
+    }
+    lp.appendChild(head);
+    lp.appendChild(body);
+    lp.hidden = false;
   }
 
   /* ---------- Dialogleiste ---------- */
@@ -434,6 +535,37 @@ const UI = (() => {
     }
     render();
     if (res.warning) toast(res.warning, 3600);
+  }
+
+  /* ---------- Show-Momente: Stempel & Wackeln ---------- */
+  let stampTimer = null;
+  function showStamp() {
+    const layer = el.stampLayer;
+    if (!layer) return;
+    clear(layer);
+    const s = make("div", "stamp", "EINSPRUCH!");
+    layer.appendChild(s);
+    if (stampTimer) clearTimeout(stampTimer);
+    stampTimer = setTimeout(() => {
+      clear(layer);
+      stampTimer = null;
+    }, 1100);
+  }
+  let shakeTimer = null;
+  function shakeChallengePanel(message) {
+    const panel = el.dlg.challenge && el.dlg.challenge.querySelector(".ch-frame");
+    if (panel) {
+      panel.classList.remove("shake");
+      // Reflow erzwingen, damit die Animation bei wiederholtem Fehlschlag neu startet
+      void panel.offsetWidth;
+      panel.classList.add("shake");
+      if (shakeTimer) clearTimeout(shakeTimer);
+      shakeTimer = setTimeout(() => {
+        panel.classList.remove("shake");
+        shakeTimer = null;
+      }, 350);
+    }
+    if (message) toast(message, 3600);
   }
 
   /* ---------- Overlays: Fokus-Verwaltung ---------- */
@@ -583,6 +715,14 @@ const UI = (() => {
     const ch = v && v.challenge;
     if (!ch) { closeOverlay("challenge"); return; }
     text($("#ch-title"), ch.title || "Frage");
+    // Rundenanzeige
+    const roundEl = $("#ch-round");
+    if (ch.round) {
+      text(roundEl, "Runde " + ch.round + " von 2");
+      roundEl.hidden = false;
+    } else {
+      roundEl.hidden = true;
+    }
     // Behauptungen
     const st = $("#ch-statements");
     clear(st);
@@ -632,8 +772,15 @@ const UI = (() => {
     present.onclick = () => {
       const v2 = view();
       const act = (v2 && v2.actions || []).find((a) => a.action && a.action.type === "presentEvidence");
-      if (act) onAction(act);
-      else toast("Wähle eine Behauptung und eine Passage.");
+      if (!act) { toast("Wähle eine Behauptung und eine Passage."); return; }
+      // presentEvidence direkt dispatchen, damit wir das Ergebnis (success) auswerten können
+      const res = dispatch(payload(act));
+      if (res && res.ok && res.success === true) {
+        showStamp();
+      } else if (res && res.ok && res.success === false) {
+        shakeChallengePanel(res.message);
+      }
+      handleDispatchResult(res);
     };
     openOverlay("challenge");
   }
@@ -993,6 +1140,7 @@ const UI = (() => {
     renderPortrait(v);
     renderDialog(v);
     renderHotspots(v);
+    renderLaptop(v);
 
     // Modus-spezifische Overlays öffnen (nur wenn view sie liefert)
     if (uiOverlay === "menu") openMenu();
@@ -1177,7 +1325,10 @@ const UI = (() => {
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         const v = view();
-        if (v) renderHotspots(v);
+        if (v) {
+          renderHotspots(v);
+          renderLaptop(v);
+        }
       }, 120);
     });
     el.stageImg.addEventListener("load", () => { const v = view(); if (v) renderHotspots(v); });
