@@ -83,9 +83,16 @@ const CONTENT = (() => {
     ["Alex", "Dann ist das hier dein Fensterplatz?"],
     ["Rolf", "Beantragt. Seit zwei Jahren. Man soll mich nicht mit einem Möbelstück verwechseln, steht im Formular.", "gentle-bend"]
   ]);
+  sceneLines("caseRound2", [
+    ["Alex", "Das Protokoll zeigt: Der Auftrag kam von Plus, nicht von mir. Persönlich bestätigt: Nein."],
+    ["MIRA", "Das räume ich ein. Der Auftrag kam von Plus.", "surprised"],
+    ["MIRA", "Aber Plus handelt schließlich in Ihrem Namen. Er darf für Sie neue Laufzeiten buchen. Das ist doch in Ordnung.", "smile"],
+    ["Alex", "Nein. Das darf er nicht. Ich brauche einen Beleg, dass das so im Vertrag steht."],
+    ["MIRA", "Dann zeigen Sie mir die Vertragsregel.", "skeptical"]
+  ]);
   sceneLines("caseSuccess", [
-    ["Alex", "Der Auftrag kam automatisch von Plus. Persönlich bestätigt: Nein."],
-    ["MIRA", "Sie haben recht. Die Übersicht hat den Kontonamen als Person übernommen. Ich habe ihr geglaubt.", "surprised"],
+    ["Alex", "Die Regel steht schwarz auf weiß: Neue Laufzeiten müssen persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."],
+    ["MIRA", "Sie haben recht. Plus durfte den Auftrag nicht auslösen. Ich habe die Vertragsregel übersehen.", "surprised"],
     ["MIRA", "Die Verlängerung ist storniert. Ihr Abo endet, weitere Monatszahlungen sind aus. Hier ist die Bestätigung.", "smile"],
     ["Alex", "Danke. Bevor wir Plus abwickeln, will ich noch wissen, warum er mir nicht einfach zugehört hat."]
   ]);
@@ -230,7 +237,23 @@ const CONTENT = (() => {
     title:"Was stimmt an MIRAs Übersicht nicht?",
     statements:[{id:"arrived",text:"Ihre Kündigung um neun ist angekommen."},{id:"personal",text:"Sie persönlich haben zwölf weitere Monate bestätigt."},{id:"price",text:"Ihr Abo kostet monatlich 49,90 Euro."}],
     correct:{statementId:"personal",documentId:"order",passageId:"extend"},
-    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Welche Passage betrifft den Auftrag um 09:01?"}
+    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Diese Passage zeigt nicht, wer die neue Laufzeit ausgelöst hat. Vergleiche die beiden Aufträge.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Welche Passage betrifft den Auftrag um 09:01?"},
+    round2:{
+      title:"Durfte Plus überhaupt verlängern?",
+      statements:[
+        {id:"r2_agency",text:"Plus darf in Ihrem Namen neue Laufzeiten buchen."},
+        {id:"r2_tasks",text:"Plus bearbeitet Ihre Termine und Nachrichten."},
+        {id:"r2_order",text:"Der Auftrag um 09:01 kam von Plus."}
+      ],
+      correct:{statementId:"r2_agency",documentId:"invoice",passageId:"rule"},
+      feedback:{
+        r2_tasks:"Das stimmt. Plus bearbeitet Termine und Nachrichten. Aber das gibt ihm kein Recht, Laufzeiten zu buchen.",
+        r2_order:"Ja, der Auftrag kam von Plus. Das hat sie schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte.",
+        r2_agency_wrong:"Diese Behauptung ist falsch. Die Vertragsregel sagt etwas anderes.",
+        extend:"Das hat sie schon zugegeben – jetzt geht es darum, ob Plus das überhaupt durfte.",
+        other:"Diese Passage beantwortet nicht die Frage, ob Plus Laufzeiten buchen darf. Such die Vertragsregel in der Abrechnung."
+      }
+    }
   };
   const diagnostic = {
     title:"Was ändert sich, wenn du die Einstellung änderst?",
@@ -257,6 +280,7 @@ const CONTENT = (() => {
     form:{text:"Du willst das Abo beenden. Die Abrechnung und die Kündigung findest du am Schreibtisch.",hints:["Auf der Abrechnung stehen Preis und Vertragsregel.","Wähle im Formular einen Grund und sende es selbst ab."]},
     reception:{text:"Du hast gekündigt. Kläre, warum trotzdem eine neue Laufzeit auftaucht.",hints:["MIRA kann die Übersicht und den einzelnen Auftrag zeigen.","Sprich auch mit Plus, bevor du den Auftrag bei MIRA ansprichst."]},
     case:{text:"Wer hat den Auftrag um 09:01 ausgelöst?",hints:["Das Terminal zeigt mehr als die Kontoübersicht.","Vergleiche bei beiden Aufträgen den Auslöser und die persönliche Bestätigung.","Welche Zeile widerspricht der Behauptung, du selbst hättest verlängert?"]},
+    caseRound2:{text:"Durfte Plus überhaupt verlängern?",hints:["Schau in die Vertragsregel der Abrechnung.","Die Regel sagt, wer Laufzeiten bestätigen darf.","Das digitale Abbild darf keine neue Laufzeit buchen."]},
     diagnosis:{text:"Dein Abo ist beendet. Sprich mit Plus darüber, warum er deine Kündigung übergangen hat.",hints:["Beobachte zunächst eine Testmail und eine persönliche Antwort.","Die beiden Einstellungen steuern unterschiedliche Dinge.","Wiederhole nach dem Abschalten den jeweils passenden Test. Eine Einstellung zu ändern ist noch keine Beobachtung."]},
     relationship:{text:"Zum ersten Mal antwortet Plus ohne Verkaufsphrase.",hints:["Du kannst nach seinem Brief fragen oder ihm Raum lassen."]},
     discovery:{text:"Der Vertrag ist beendet. Gibt es für die Kopie eine Möglichkeit außerhalb der Firma?",hints:["Rolf arbeitet hier nicht mehr. Wie läuft er trotzdem weiter?","Untersuche seinen Standfuß und die Wartungsanleitung.","Dein eigener Rechner kann am Wartungsanschluss geprüft werden. Die Vorschau kopiert noch nichts."]},

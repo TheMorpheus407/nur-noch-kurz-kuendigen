@@ -33,7 +33,7 @@ const GameState = (() => {
     const s={schema:SCHEMA,storyVersion:STORY,phase:"home",roomId:"zuhause",sequenceId:null,
       lineIndex:0,revision:0,mode:"dialogue",afterSequence:null,reason:null,documents:[],documentId:null,documentReturn:null,
       flags:{plusMet:false,rolfMet:false,computerCarried:false,caseSolved:false,rolfAsked:false,choiceReached:false,providerDeleted:false},
-      challenge:{statementId:null,documentId:null,passageId:null,feedback:null,resolved:false},
+      challenge:{round:1,statementId:null,documentId:null,passageId:null,feedback:null,resolved:false},
       diagnostic:{controls:{agency:true,sales:true},epochs:{agency:0,sales:0},observations:[],latestResults:null},
       confirmation:null,letterChoice:null,ending:null,endingConfirmed:false,transferStage:null,
       transferComplete:false,localBootVerified:false,deleteDone:false,takeDone:false,maraSent:false,done:false,history:[],actionLog:[]};
@@ -54,6 +54,7 @@ const GameState = (() => {
       case "plusReason":sequence(s,s.reason==="money"?"reasonMoney":"reasonSelf","introduceRolf");break;
       case "introduceRolf":sequence(s,"meetRolf","metBoth");break;
       case "metBoth":s.flags.plusMet=true;s.flags.rolfMet=true;s.mode="explore";break;
+      case "caseRound2Done":s.phase="case";s.mode="challenge";break;
       case "caseConfirmed":s.phase="caseSolved";s.mode="explore";break;
       case "diagnostic":s.phase="diagnosis";s.mode="diagnostic";break;
       case "testDone":s.mode="diagnostic";break;
@@ -114,8 +115,8 @@ const GameState = (() => {
     else if(target==="resumeDiagnostic")s.mode="diagnostic";
     else if(s.phase==="home"){
       if(target==="form"){s.phase="form";s.mode="form";}
-      else if(target==="messages")sequence(s,"homeMessages","messagesRead");
-      else if(target==="invoice")sequence(s,"homeInvoice","invoiceRead");
+      else if(target==="messages"){if(hasDoc(s,"messages"))showDocument(s,"messages");else sequence(s,"homeMessages","messagesRead");}
+      else if(target==="invoice"){if(hasDoc(s,"invoice"))showDocument(s,"invoice");else sequence(s,"homeInvoice","invoiceRead");}
       else sequence(s,target==="coffee"?"homeCoffee":"homeComputer","explore");
     }else if(target==="departure"){
       s.flags.computerCarried=true;s.roomId="empfang";s.phase="reception";sequence(s,"receptionIntro","explore");
@@ -172,7 +173,9 @@ const GameState = (() => {
       acquire(s,"receipt");sequence(s,"homeSent","homeSent");return success();
     }
     if(a.type==="selectStatement"){
-      if(s.mode!=="challenge"||!CONTENT.challenge.statements.some(x=>x.id===a.statementId))return fail("statement-unavailable");
+      const round=s.challenge.round||1;
+      const stmts=round===1?CONTENT.challenge.statements:CONTENT.challenge.round2.statements;
+      if(s.mode!=="challenge"||!stmts.some(x=>x.id===a.statementId))return fail("statement-unavailable");
       s.challenge.statementId=a.statementId;s.challenge.feedback=null;return success();
     }
     if(a.type==="selectPassage"){
@@ -180,17 +183,33 @@ const GameState = (() => {
       s.challenge.documentId=a.documentId;s.challenge.passageId=a.passageId;s.challenge.feedback=null;return success();
     }
     if(a.type==="presentEvidence"){
-      const c=s.challenge,correct=CONTENT.challenge.correct;
+      const c=s.challenge;
+      const round=c.round||1;
+      const correct=round===1?CONTENT.challenge.correct:CONTENT.challenge.round2.correct;
+      const feedbackPool=round===1?CONTENT.challenge.feedback:CONTENT.challenge.round2.feedback;
       if(s.mode!=="challenge"||c.resolved||!c.statementId||!c.documentId||!c.passageId||!hasDoc(s,c.documentId))return fail("evidence-unavailable");
       if(c.statementId===correct.statementId&&c.documentId===correct.documentId&&c.passageId===correct.passageId&&hasDoc(s,"invoice")&&s.flags.plusMet){
-        c.resolved=true;c.feedback=null;s.flags.caseSolved=true;acquire(s,"cancellation");sequence(s,"caseSuccess","caseConfirmed");return success({success:true});
+        if(round===1){
+          c.round=2;c.statementId=null;c.documentId=null;c.passageId=null;c.feedback=null;
+          acquire(s,"invoice");
+          sequence(s,"caseRound2","caseRound2Done");
+          return success({success:true});
+        }else{
+          c.resolved=true;c.feedback=null;s.flags.caseSolved=true;acquire(s,"cancellation");sequence(s,"caseSuccess","caseConfirmed");return success({success:true});
+        }
       }
       let key="wrongPassage";
-      if(c.statementId!==correct.statementId)key=c.statementId;
-      else if(c.documentId==="receipt")key="receipt";
-      else if(c.documentId==="invoice"&&c.passageId==="rule")key="rule";
-      else if(c.documentId!=="order")key="other";
-      c.feedback=CONTENT.challenge.feedback[key]||CONTENT.challenge.feedback.other;return success({success:false,message:c.feedback});
+      if(round===1){
+        if(c.statementId!==correct.statementId)key=c.statementId;
+        else if(c.documentId==="receipt")key="receipt";
+        else if(c.documentId==="invoice"&&c.passageId==="rule")key="rule";
+        else if(c.documentId!=="order")key="other";
+      }else{
+        if(c.statementId!=="r2_agency")key=c.statementId;
+        else if(c.passageId==="extend")key="extend";
+        else if(c.documentId!=="invoice"||c.passageId!=="rule")key="other";
+      }
+      c.feedback=feedbackPool[key]||feedbackPool.other;return success({success:false,message:c.feedback});
     }
     if(a.type==="testDiagnostic"){
       const test=CONTENT.diagnostic.tests.find(t=>t.id===a.testId);
@@ -309,6 +328,7 @@ const GameState = (() => {
     let key=s.phase;
     if(key==="home")key=hasDoc(s,"messages")?"form":"home";
     if(key==="homeSent")key="reception";
+    if(key==="case"&&s.challenge.round===2)key="caseRound2";
     if(key==="caseSolved")key="diagnosis";
     if(key==="preview")key="discovery";
     if(key==="wrapup")key="homeEnd";
@@ -339,11 +359,13 @@ const GameState = (() => {
     }
     if(s.mode==="challenge"){
       const c=s.challenge;
-      const statements=CONTENT.challenge.statements.map(x=>({...x,selected:c.statementId===x.id,
+      const round=c.round||1;
+      const roundData=round===1?{title:CONTENT.challenge.title,statements:CONTENT.challenge.statements}:CONTENT.challenge.round2;
+      const statements=roundData.statements.map(x=>({...x,selected:c.statementId===x.id,
         action:add("statement-"+x.id,x.text,payload("selectStatement",{statementId:x.id}))}));
       const documents=s.documents.map(id=>({...doc(id),passages:doc(id).passages.map(p=>({...p,selected:c.documentId===id&&c.passageId===p.id,
         action:add("passage-"+id+"-"+p.id,p.text,payload("selectPassage",{documentId:id,passageId:p.id}))}))}));
-      v.challenge={title:CONTENT.challenge.title,statements,documents,selectedStatement:c.statementId,selectedDocument:c.documentId,selectedPassage:c.passageId,feedback:c.feedback};
+      v.challenge={round,title:roundData.title,statements,documents,selectedStatement:c.statementId,selectedDocument:c.documentId,selectedPassage:c.passageId,feedback:c.feedback};
       if(c.statementId&&c.documentId&&c.passageId)add("presentEvidence","Diese Passage vorlegen",payload("presentEvidence"));
     }
     if(s.mode==="diagnostic"){
