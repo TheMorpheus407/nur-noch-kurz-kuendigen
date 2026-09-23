@@ -1178,6 +1178,17 @@ button { font-family: var(--font-ui); }
   font-size: 15px;
   line-height: 1.5;
 }
+#dlg-diagnostic .diag-frame {
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+#dlg-diagnostic .overlay-head,
+#dlg-diagnostic .diag-controls,
+#dlg-diagnostic .diag-tests,
+#dlg-diagnostic .overlay-foot {
+  flex-shrink: 0;
+}
 #dlg-diagnostic .diag-frame *,
 #dlg-transfer .tr-frame * {
   font-family: inherit;
@@ -1220,6 +1231,12 @@ button { font-family: var(--font-ui); }
   border-color: #2f6f6a;
   padding: 12px 18px;
 }
+#dlg-diagnostic .diag-results {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  max-height: 26vh;
+}
 #dlg-diagnostic .diag-row,
 #dlg-transfer .tr-step {
   background: transparent;
@@ -1243,6 +1260,14 @@ button { font-family: var(--font-ui); }
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 13px;
+}
+#dlg-diagnostic .diag-status.off {
+  background: #3a2a33;
+  color: #ffb3a3;
+}
+#dlg-diagnostic .diag-status.on {
+  background: #1f6f55;
+  color: #e8fff4;
 }
 #dlg-diagnostic .switch,
 #dlg-diagnostic .diag-tests .btn,
