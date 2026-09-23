@@ -201,6 +201,7 @@ button { font-family: var(--font-ui); }
 .hotspots {
   position: absolute;
   inset: 0;
+  z-index: 5;
 }
 .hotspot {
   position: absolute;
@@ -667,7 +668,7 @@ button { font-family: var(--font-ui); }
   min-height: 0;
   flex: 1 1 auto;
 }
-.ch-col { overflow-y: auto; min-height: 0; max-height: 56vh; padding: 3px; scrollbar-gutter: stable; }
+.ch-col { overflow-y: auto; min-height: 0; max-height: 44vh; padding: 3px; scrollbar-gutter: stable; }
 .ch-col-title {
   position: sticky;
   top: 0;
