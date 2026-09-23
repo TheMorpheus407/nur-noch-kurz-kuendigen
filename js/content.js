@@ -92,7 +92,7 @@ const CONTENT = (() => {
     ["MIRA", "Das räume ich ein. Der Auftrag kam von Plus.", "surprised"],
     ["MIRA", "Aber Plus handelt in Ihrem Namen. Neue Laufzeiten für Sie zu buchen, ist doch ganz normal.", "smile"],
     ["Alex", "Nein, das darf er nicht. Ich will den Beleg, dass das im Vertrag steht."],
-    ["MIRA", "Dann zeigen Sie mir die Regel.", "skeptical"]
+    ["MIRA", "Die Regel steht in Ihrer Abrechnung – die haben Sie ja gleich dabei. Und ich sage Ihnen, das Dokument weiß mehr als Sie.", "skeptical"]
   ]);
   sceneLines("caseSuccess", [
     ["Alex", "Die Regel steht schwarz auf weiß: Neue Laufzeiten müssen persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."],
@@ -259,7 +259,7 @@ const CONTENT = (() => {
         r2_tasks:"Das stimmt. Plus bearbeitet Termine und Nachrichten. Aber das gibt ihm kein Recht, Laufzeiten zu buchen.",
         r2_order:"Ja, der Auftrag kam von Plus. Das hat sie schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte.",
         r2_agency_wrong:"Diese Behauptung ist falsch. Die Vertragsregel sagt etwas anderes.",
-        extend:"Dass der Auftrag von Plus kam, hat MIRA schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte – die Vertragsregel steht in deiner Abrechnung (Reiter „Dein Abo bei NEBENBEI“).",
+        extend:"Dass der Auftrag von Plus kam, hat MIRA schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte – die Vertragsregel steht in deiner Abrechnung (Reiter „Abrechnung“).",
         doc_messages:"Die Absage an Mara sagt nichts darüber, ob Plus Laufzeiten buchen darf. Die Vertragsregel steht in der Abrechnung.",
         doc_receipt:"Deine Kündigungsbestätigung zeigt nur, dass du gekündigt hast. Ob Plus verlängern darf, steht in der Vertragsregel der Abrechnung.",
         other:"Diese Passage beantwortet nicht die Frage, ob Plus Laufzeiten buchen darf. Such die Vertragsregel in der Abrechnung."
