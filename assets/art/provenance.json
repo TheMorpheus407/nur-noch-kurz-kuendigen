@@ -263,6 +263,141 @@
         "status": "ACCEPT_FOR_BROWSER_INTEGRATION",
         "browser_overlay_verified": false
       }
+    },
+    {
+      "file": "sprites/alex-plus-neutral.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-alex-plus-neutral_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "59ad3591a24f8000e6410f18955de0d0bee9773d8ca6853985af3b5b0e57a9be",
+      "bytes": 938557,
+      "size": [
+        968,
+        944
+      ],
+      "derived_from": "alex-plus-neutral.png",
+      "derived_from_sha256": "7c95fed2cf5109035301e31c34c6222ded11f0e914abcf0eeae7db020657cb66",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": false
+    },
+    {
+      "file": "sprites/alex-plus-relieved.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-alex-plus-relieved_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "15c7d2ebbd15fe8f89e49900af8b6beda752fbad6ad32cbb8dde5ceb15bbd9bd",
+      "bytes": 1053960,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "alex-plus-relieved.png",
+      "derived_from_sha256": "bef7efef0c1ee5a3a51e5b86725e03bf84a4bbfac0c7fd8e04ce28c6fa275978",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "alex-plus-raw-character-001.safetensors",
+      "adapter_sha256": "38b8e4c772e512ffc9dc26face13e86e4239c5269ea95fa9be243a35858eb1ab",
+      "character": "Alex Plus"
+    },
+    {
+      "file": "sprites/alex-plus-worried.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-alex-plus-worried_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "693bcb21aeec6d18a974ebfb3764ae98e17c732a3531ca03088a7c7828fe1ca2",
+      "bytes": 1059181,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "alex-plus-worried.png",
+      "derived_from_sha256": "e0b353d554e67a6bf23c61a71c6b2489663dcc82eb10461dd98536d151e61db7",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "alex-plus-raw-character-001.safetensors",
+      "adapter_sha256": "38b8e4c772e512ffc9dc26face13e86e4239c5269ea95fa9be243a35858eb1ab",
+      "character": "Alex Plus"
+    },
+    {
+      "file": "sprites/mira-neutral.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-mira-neutral_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "1223dd5caaf7613fce5b860bf8241adc03abcdd6169fbc40f42ccf9b3ca895bb",
+      "bytes": 971291,
+      "size": [
+        1008,
+        976
+      ],
+      "derived_from": "mira-neutral.png",
+      "derived_from_sha256": "28925b2a1f30abb6eb2939d263c9cb7aa9162b159a299b7f965b4c9b505ff5dc",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": false
+    },
+    {
+      "file": "sprites/mira-skeptical.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-mira-skeptical_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "f5e5b67513bff9f758ddc7767b451909754f52b3c97954d565401538dcf93cc7",
+      "bytes": 1012163,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "mira-skeptical.png",
+      "derived_from_sha256": "4057f08d3bb0fc5c260699f690cb7bff27e607b099b376eac5cfaec6826cb339",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b"
+    },
+    {
+      "file": "sprites/mira-smile.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-mira-smile_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "c61c7e620a766e6d603c7f98de79752f637eb9cbbde927f798b795959df828f7",
+      "bytes": 1034017,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "mira-smile.png",
+      "derived_from_sha256": "53e1b48dbfa42dc41289d1265bc7c55413197338c1c7ac08eed5c55479689e22",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b"
+    },
+    {
+      "file": "sprites/mira-surprised.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-mira-surprised_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "4c61c16447f54c13f8cdacbaf0943d2444cc1664475aba4a58611fe4f3640434",
+      "bytes": 1148411,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "mira-surprised.png",
+      "derived_from_sha256": "f83b8e5acd43674c6c0f3bb9f926b1dd322774778c270c000fa9327562c3c105",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "mira-raw-character-003.safetensors",
+      "adapter_sha256": "7db758162000df998e6bfae152725e7baaf1b0ae112a9d4c802eed573bcb814b"
+    },
+    {
+      "file": "sprites/rolf-gentle-bend.png",
+      "source": "qa/polish-040/sprites/out/sprites-040a-rolf-gentle-bend_00001_.png",
+      "source_relative_to": "implementation",
+      "sha256": "d48064419700831349d2fb49d9193066b0f66fd1b4d66bbf99a59207a70acfbb",
+      "bytes": 1248176,
+      "size": [
+        1024,
+        1024
+      ],
+      "derived_from": "rolf-gentle-bend.png",
+      "derived_from_sha256": "bde03566d5f5f61b50382c39d09079b9667eca7ecf724189bcdeb8c3ed775782",
+      "processing": "Background removal in local ComfyUI 0.36 (LoadBackgroundRemovalModel/RemoveBackground, BiRefNet birefnet.safetensors sha256 9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154), InvertMask + JoinImageWithAlpha; graph qa/polish-040/sprites/birefnet-graph.json",
+      "lora_applied": true,
+      "adapter": "rolf-raw-character-001.safetensors",
+      "adapter_sha256": "5018dbe8045b63b001f600ea9a7709908c6191f6ef7fece6aabf2017e9c8497d",
+      "character": "Rolf"
     }
   ]
 }
