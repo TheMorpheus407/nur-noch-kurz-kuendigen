@@ -236,9 +236,9 @@ button { font-family: var(--font-ui); }
 .portrait {
   position: absolute;
   left: 62%;
-  bottom: 0;
+  bottom: 10vh;
   transform: translateX(-50%);
-  height: min(80vh, calc(100dvh - var(--hud-h) - 12px));
+  height: min(62vh, calc(100dvh - var(--hud-h) - 10vh));
   z-index: 4;
   pointer-events: none;
   opacity: 0;
@@ -316,21 +316,21 @@ button { font-family: var(--font-ui); }
   z-index: 15;
   width: min(1100px, calc(100% - 32px));
   max-height: 62dvh;
-  background: rgba(250,244,230,0.93);
+  background: rgba(250,244,230,0.97);
   border: 3px solid var(--tinte);
   border-radius: 6px;
   box-shadow: 8px 8px 0 var(--tinte);
   display: flex;
   flex-direction: column;
-  padding: 26px 22px 16px;
+  padding: 14px 22px 12px;
   gap: 8px;
   cursor: pointer;
 }
 .dialog-head {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 10px;
-  margin-bottom: -4px;
+  margin-bottom: 2px;
 }
 .dialog-speaker {
   display: inline-block;
@@ -342,8 +342,11 @@ button { font-family: var(--font-ui); }
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 5px 14px;
-  border-radius: 3px;
+  border-radius: 3px 3px 0 0;
   border: 2px solid var(--tinte);
+  border-bottom: none;
+  margin-top: -22px;
+  flex: 0 0 auto;
 }
 /* Sprecher-Reiter: Farbe je data-speaker (MIRA/Alex Plus/Rolf/Alex/Mara) */
 .dialog[data-speaker="MIRA"] .dialog-speaker { background: var(--spk-mira); }
@@ -397,10 +400,17 @@ button { font-family: var(--font-ui); }
 .dialog-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  justify-content: flex-end;
+  margin-top: -2px;
 }
-.dialog-actions .btn { font-size: 15px; }
+.dialog-actions .btn {
+  font-size: 13px;
+  padding: 5px 12px;
+  min-height: 30px;
+  box-shadow: 1px 1px 0 var(--tinte);
+}
 
 /* ---------- Toast ---------- */
 .toast {
@@ -687,7 +697,7 @@ button { font-family: var(--font-ui); }
   bottom: 0;
   transform: translateX(-50%);
   width: min(1100px, 96vw);
-  max-height: min(62vh, 560px);
+  max-height: 42vh;
   border-radius: 6px 6px 0 0;
   box-shadow: 0 -10px 30px var(--shadow);
 }
@@ -695,19 +705,24 @@ button { font-family: var(--font-ui); }
   background: transparent;
   backdrop-filter: none;
 }
+.overlay-choice .overlay-head {
+  padding: 10px 16px 8px;
+}
+.overlay-choice .overlay-title { font-size: clamp(17px, 1.8vw, 20px); }
+.overlay-choice .overlay-source { font-size: 13px; margin-top: 2px; }
 .choice-options {
-  padding: 14px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 10px 16px 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
   overflow-y: auto;
-  max-height: 56vh;
+  max-height: calc(42vh - 70px);
 }
 .choice-option {
   border: 2px solid var(--tinte);
   background: var(--creme);
   border-radius: 4px;
-  padding: 14px 16px;
+  padding: 10px 12px;
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -715,8 +730,8 @@ button { font-family: var(--font-ui); }
   transition: background var(--t) ease, transform var(--t) ease;
 }
 .choice-option:hover { background: var(--creme-2); transform: translateX(2px); }
-.choice-option .choice-label { font-size: 17px; font-weight: 700; }
-.choice-option .choice-desc { font-size: 14px; color: var(--tinte-2); margin-top: 5px; line-height: 1.4; }
+.choice-option .choice-label { font-size: 15px; font-weight: 700; }
+.choice-option .choice-desc { font-size: 13px; color: var(--tinte-2); margin-top: 4px; line-height: 1.35; }
 
 /* Transfer */
 .tr-status {
@@ -841,7 +856,8 @@ button { font-family: var(--font-ui); }
   .diag-status { margin-right: auto; }
   .portrait {
     left: 62%;
-    height: 55vh;
+    height: 48vh;
+    bottom: 8vh;
   }
   .hud { padding: 0 8px; }
   .hud-place { font-size: 12px; padding: 4px 9px; }
@@ -849,7 +865,7 @@ button { font-family: var(--font-ui); }
   .dialog {
     width: calc(100% - 16px);
     bottom: 8px;
-    padding: 22px 12px 12px;
+    padding: 12px 12px 10px;
   }
   .dialog-text { font-size: 17px; }
   .overlay { width: calc(100vw - 16px); max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
@@ -862,12 +878,12 @@ button { font-family: var(--font-ui); }
   .start-actions { flex-direction: column; }
   .start-actions .btn { width: 100%; }
   .dialog-actions { gap: 8px; }
-  .dialog-actions .btn { flex: 1 1 auto; font-size: 14px; padding: 8px 10px; }
+  .dialog-actions .btn { font-size: 13px; padding: 5px 10px; }
 }
 @media (max-height: 480px) and (orientation: landscape) {
   :root { --dialog-h: clamp(120px, 26vh, 160px); --hud-h: 44px; }
   .dialog-text { font-size: 16px; }
-  .portrait { height: 50vh; }
+  .portrait { height: 42vh; bottom: 6vh; }
 }
 
 /* ---------- Reduced motion ---------- */
