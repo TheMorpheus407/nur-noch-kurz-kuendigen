@@ -70,6 +70,8 @@ const UI = (() => {
 
   /* ---------- Zustand der UI (kein Story-State) ---------- */
   let lastLineId = null;          // für Audio-Wechsel
+  let challengeDoc = null;        // aktives Dokument im Kreuzverhör (UI-Zustand)
+  let challengeDocRound = null;   // Runde, in der challengeDoc gesetzt wurde
   let lastRenderedPhase = null;
   let lastRenderedScene = null;
   let lastRenderedMode = null;
@@ -743,26 +745,52 @@ const UI = (() => {
     const docs = $("#ch-docs");
     clear(docs);
     if (ch.documents && ch.documents.length) {
-      for (const d of ch.documents) {
-        const card = make("div", "ch-card");
-        card.appendChild(make("div", "ch-card-tab", d.title || ""));
-        const passages = make("div", "ch-card-passages");
-        if (d.passages && d.passages.length) {
-          for (const p of d.passages) {
-            const sel = (ch.selectedDocument === d.id && ch.selectedPassage === p.id);
-            const b = make("button", "ch-passage" + (sel ? " selected" : ""), p.text || "");
-            b.type = "button";
-            b.dataset.focusKey = focusKey(p.action);
-            b.setAttribute("aria-pressed", String(sel));
-            b.addEventListener("click", () => {
-              if (p.action) onAction(p.action);
-            });
-            passages.appendChild(b);
-          }
-        }
-        card.appendChild(passages);
-        docs.appendChild(card);
+      // Aktives Dokument bestimmen (reiner UI-Zustand)
+      let activeId;
+      if (challengeDoc != null && challengeDocRound === ch.round &&
+          ch.documents.some((d) => d.id === challengeDoc)) {
+        activeId = challengeDoc;
+      } else if (ch.selectedDocument) {
+        activeId = ch.selectedDocument;
+      } else {
+        activeId = ch.documents[ch.documents.length - 1].id;
       }
+      const active = ch.documents.find((d) => d.id === activeId) || ch.documents[ch.documents.length - 1];
+      // Reiterleiste: alle Dokumente immer sichtbar
+      const tabs = make("div", "ch-doc-tabs");
+      for (const d of ch.documents) {
+        const isActive = (d.id === active.id);
+        const t = make("button", "ch-doc-tab" + (isActive ? " active" : ""), d.title || "");
+        t.type = "button";
+        t.setAttribute("aria-pressed", String(isActive));
+        t.addEventListener("click", () => {
+          if (challengeDoc === d.id) return;
+          challengeDoc = d.id;
+          challengeDocRound = ch.round;
+          renderChallenge(view());
+        });
+        tabs.appendChild(t);
+      }
+      docs.appendChild(tabs);
+      // Nur die Passagen des aktiven Dokuments
+      const card = make("div", "ch-card");
+      card.appendChild(make("div", "ch-card-tab", active.title || ""));
+      const passages = make("div", "ch-card-passages");
+      if (active.passages && active.passages.length) {
+        for (const p of active.passages) {
+          const sel = (ch.selectedDocument === active.id && ch.selectedPassage === p.id);
+          const b = make("button", "ch-passage" + (sel ? " selected" : ""), p.text || "");
+          b.type = "button";
+          b.dataset.focusKey = focusKey(p.action);
+          b.setAttribute("aria-pressed", String(sel));
+          b.addEventListener("click", () => {
+            if (p.action) onAction(p.action);
+          });
+          passages.appendChild(b);
+        }
+      }
+      card.appendChild(passages);
+      docs.appendChild(card);
     }
     // Feedback
     text($("#ch-feedback"), ch.feedback || "");

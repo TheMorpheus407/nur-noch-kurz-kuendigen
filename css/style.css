@@ -1614,3 +1614,25 @@ button { font-family: var(--font-ui); }
   #dlg-document .doc-frame { transform: none; }
   #dlg-done .overlay-title { transform: none; }
 }
+
+/* P6a: Dokumente als Reiter im Kreuzverhör */
+.ch-doc-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ch-doc-tab {
+  border: 2px solid var(--tinte);
+  background: var(--creme);
+  color: var(--tinte);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+}
+.ch-doc-tab:hover { background: var(--creme-2); }
+.ch-doc-tab.active {
+  background: var(--tinte);
+  color: var(--creme);
+}
+.ch-doc-tab:focus-visible {
+  outline: 3px solid var(--koralle);
+  outline-offset: 2px;
+}
