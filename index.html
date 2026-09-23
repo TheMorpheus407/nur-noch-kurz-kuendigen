@@ -13,6 +13,11 @@
        Startansicht: kurz Titel + Beginnen + Stimmen. Kein Handbuch.
        ============================================================ -->
   <section id="start-screen" class="start-screen" role="dialog" aria-label="Spielstart">
+    <div class="start-figures" aria-hidden="true">
+      <img class="start-figure start-figure-alex" src="assets/art/sprites/alex-plus-neutral.png" alt="" draggable="false">
+      <img class="start-figure start-figure-mira" src="assets/art/sprites/mira-smile.png" alt="" draggable="false">
+      <img class="start-figure start-figure-rolf" src="assets/art/sprites/rolf-gentle-bend.png" alt="" draggable="false">
+    </div>
     <div class="start-inner">
       <h1 class="start-title">Nur noch kurz kündigen</h1>
       <p class="start-sub">Eine kurze Geschichte über ein Abo, das sich selbst verlängert.</p>
@@ -32,6 +37,7 @@
     <!-- Bühne: bildfüllendes Raumbild + Hotspot-Ebene -->
     <div class="stage" id="stage">
       <img id="stage-img" class="stage-img" alt="" draggable="false">
+      <div id="laptop-screen" class="laptop-screen" aria-hidden="true" hidden></div>
       <div id="hotspots" class="hotspots" aria-label="Anklickbare Stellen in der Szene"></div>
       <!-- Porträt-Nahaufnahme (Graphic-Novel), über der Bühne, unter dem Dialog -->
       <div id="portrait" class="portrait" hidden>
@@ -120,29 +126,32 @@
       </div>
     </dialog>
 
-    <!-- Challenge: Behauptung + Dokumentpassage -->
+    <!-- Challenge: Kreuzverhör — Behauptung + Dokumentpassage -->
+    <div id="stamp-layer" class="stamp-layer" aria-hidden="true"></div>
     <dialog id="dlg-challenge" class="overlay overlay-challenge" aria-labelledby="ch-title">
       <div class="ch-frame">
-        <header class="overlay-head">
+        <header class="overlay-head ch-head">
           <div>
+            <p class="ch-kicker">KREUZVERHÖR</p>
             <h2 id="ch-title" class="overlay-title"></h2>
-            <p class="overlay-source">Wähle eine Behauptung und die Stelle in deinen Unterlagen, die ihr widerspricht.</p>
+            <p id="ch-round" class="ch-round" hidden></p>
           </div>
           <button class="overlay-close" type="button" data-close="challenge" aria-label="Schließen">✕</button>
         </header>
         <div class="ch-cols">
-          <section class="ch-col" aria-label="Behauptungen">
-            <h3 class="ch-col-title">Behauptungen</h3>
+          <section class="ch-col" aria-label="MIRAs Behauptungen">
+            <h3 class="ch-col-title">MIRAs Behauptungen</h3>
             <div id="ch-statements" class="ch-list"></div>
           </section>
-          <section class="ch-col" aria-label="Dokumente">
-            <h3 class="ch-col-title">Dokumente</h3>
+          <section class="ch-col" aria-label="Deine Unterlagen">
+            <h3 class="ch-col-title">Deine Unterlagen</h3>
             <div id="ch-docs" class="ch-list"></div>
           </section>
         </div>
         <div id="ch-feedback" class="ch-feedback" role="status" aria-live="polite"></div>
+        <p class="ch-hint">1. Behauptung wählen · 2. Beleg wählen · 3. Einspruch!</p>
         <footer class="overlay-foot">
-          <button id="btn-ch-present" class="btn btn-primary" type="button">Passage vorlegen</button>
+          <button id="btn-ch-present" class="btn btn-primary" type="button">Einspruch!</button>
           <button class="btn" type="button" data-close="challenge">Schließen</button>
         </footer>
       </div>

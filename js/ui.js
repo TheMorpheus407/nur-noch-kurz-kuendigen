@@ -28,7 +28,9 @@ const UI = (() => {
     el.game = $("#game");
     el.stage = $("#stage");
     el.stageImg = $("#stage-img");
+    el.laptopScreen = $("#laptop-screen");
     el.hotspots = $("#hotspots");
+    el.stampLayer = $("#stamp-layer");
     el.sceneActions = $("#scene-actions-mobile");
     el.portrait = $("#portrait");
     el.portraitImg = $("#portrait-img");
@@ -279,6 +281,10 @@ const UI = (() => {
     if (!speaker) return null;
     // Alex als Ich-Figur: kein zufälliges NPC-Porträt
     if (speaker === "Alex") return null;
+    // Rolf ist im Vorführraum bereits als Ficus im Hintergrundbild zu sehen;
+    // ein zusätzliches Sprite würde einen zweiten Ficus erzeugen.
+    // Genügt das farbige Namensschild in der Dialogleiste.
+    if (speaker === "Rolf") return null;
     const base = ART_ASSETS.portraits[speaker];
     if (!base) return null;
     let url = base.url;
