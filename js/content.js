@@ -169,22 +169,22 @@ const CONTENT = (() => {
     ["Alex Plus", "Warte. Kann ich das 'Mach's gut' noch einmal speichern? Als Favorit?", "worried"]
   ]);
   sceneLines("deleteDone", [
-    ["MIRA", "Die Kopie ist gelöscht. Es gibt keinen weiteren Monatsbetrag und keine Vertretung mehr.", "smile"],
+    ["MIRA", "Die Kopie ist gelöscht. Es gibt keinen weiteren Monatsbetrag, und niemand antwortet mehr in Ihrem Namen.", "smile"],
     ["Erzähler", "Auf dem Monitor verschwindet dein zweites Gesicht. Zum ersten Mal zeigt das Display nur eine leere Fläche."],
     ["Alex", "Ich fahre nach Hause. Mara hat noch keine Nachricht von mir bekommen."]
   ]);
   sceneLines("takeAgreement", [
     ["Alex", "Ich nehme dich mit, aber keine Termine und keine Nachrichten in meinem Namen. Wenn du etwas willst, fragst du mich."],
     ["Alex Plus", "Ich werde fragen.", "worried"],
-    ["MIRA", "Dann übertragen wir die Kopie, ohne Zugänge und ohne Vertretung. Unsere Kopie bleibt, bis der Start bei Ihnen geprüft ist.", "smile"]
+    ["MIRA", "Dann übertragen wir die Kopie, ohne Passwörter und ohne Erlaubnis, in Ihrem Namen zu handeln. Unsere Kopie bleibt, bis der Start bei Ihnen geprüft ist.", "smile"]
   ]);
   sceneLines("localBoot", [
-    ["Erzähler", "Der kleine Rechner startet Plus, ohne Zugänge, ohne Netz, ohne Vertretung. Nur ein Gesicht auf einem kleinen Bildschirm."],
+    ["Erzähler", "Der kleine Rechner startet Plus, ohne Passwörter, ohne Internet, ohne dein Postfach. Nur ein Gesicht auf einem kleinen Bildschirm."],
     ["Alex Plus", "Alex? Hier ist es so still. Ich höre sogar, wie mein eigener Prozessor summt. Wie ein sehr kleiner Hamster.", "relieved"],
     ["Alex", "Plus läuft auf meinem Rechner. Jetzt kann die Kopie bei Ihnen weg."]
   ]);
   sceneLines("takeDone", [
-    ["MIRA", "Der lokale Start ist bestätigt. Die Anbieterkopie ist gelöscht. Kein weiterer Monatsbetrag, keine Vertretung.", "smile"],
+    ["MIRA", "Der lokale Start ist bestätigt und die Anbieterkopie ist gelöscht. Kein weiterer Monatsbetrag, und niemand handelt mehr in Ihrem Namen.", "smile"],
     ["Alex Plus", "Keine Termine, keine Mails. Was machen wir jetzt?", "relieved"],
     ["Alex", "Erst mal nach Hause. Ich muss jemandem schreiben."]
   ]);
@@ -237,10 +237,10 @@ const CONTENT = (() => {
       {id:"owner",text:"Eigener Rechner und Speicher: Rolf. Lokaler Betrieb. Anbieterzugang: keiner. Dienstvertrag beendet. Kein Abo."}]},
     {id:"manual",title:"Eine Kopie mitnehmen",short:"Anleitung",source:"Kundencenter · Wartungsanleitung im Fach",passages:[
       {id:"order",text:"Vor der Löschung beim Anbieter auf einen eigenen Rechner übertragen. Lokalen Start prüfen. Erst nach erfolgreicher Prüfung die Anbieterkopie löschen."},
-      {id:"rights",text:"Der Transfer nimmt keine Kontozugänge, Vertretungsrechte oder automatische Cloudverbindung mit. Der eigene Rechner führt die Kopie lokal aus."}]},
+      {id:"rights",text:"Der Transfer enthält keine Passwörter und keinen Zugriff auf Konten. Eine automatische Verbindung zur Cloud bleibt aus. Der eigene Rechner führt die Kopie lokal aus, und Plus darf danach nichts in deinem Namen tun."}]},
     {id:"preview",title:"Vorschau auf deinem Rechner",short:"Vorschau",source:"Wartungsanschluss · Geräteprüfung",passages:[
       {id:"target",text:"Ziel: Alex' eigener kleiner Rechner. Lokale Ausführung möglich. Übernommen würden Plus' gespeicherte Erinnerungen und eigene Entwürfe."},
-      {id:"excluded",text:"Ausgeschlossen: Kontozugänge, Vertretungsrechte, automatische Cloudverbindung. Noch keine Kopie übertragen; dies ist nur eine Vorschau."}]}
+      {id:"excluded",text:"Ausgeschlossen: Passwörter, Zugriff auf Konten, automatische Cloudverbindung. Plus darf danach nichts in deinem Namen tun. Noch keine Kopie übertragen; dies ist nur eine Vorschau."}]}
   ];
   const challenge = {
     title:"Was stimmt an MIRAs Übersicht nicht?",
@@ -281,9 +281,9 @@ const CONTENT = (() => {
   const choices = {
     reason:{title:"Warum kündigst du?",options:[{id:"self",label:"Ich will selbst entscheiden."},{id:"money",label:"Ich will das Geld sparen."}]},
     letter:{title:"Plus wartet auf deine Antwort.",options:[{id:"read",label:"Lies mir eine Zeile vor."},{id:"private",label:"Du darfst ihn für dich behalten."}]},
-    ending:{title:"Was möchtest du mit Plus machen?",description:"Das Abo ist in beiden Fällen beendet. Du entscheidest über eine weitere Beziehung zur Kopie.",options:[
-      {id:"delete",label:"Ohne die Kopie weitermachen",description:"Die Anbieterkopie wird dauerhaft gelöscht. Du behältst keine eigene Kopie.",confirm:"Plus wird dauerhaft gelöscht. Es gibt anschließend keine lokale Kopie. Möchtest du das?"},
-      {id:"take",label:"Plus auf meinen Rechner mitnehmen",description:"Eine freiwillige weitere Beziehung, ohne Kontozugänge oder Handlungen in deinem Namen. Die Kopie beim Anbieter wird nach geprüftem lokalen Start gelöscht.",confirm:"Du nimmst Plus ohne Kontozugänge und Vertretungsrechte auf deinen Rechner mit. Möchtest du den Transfer starten?"}]
+    ending:{title:"Was möchtest du mit Plus machen?",description:"Das Abo ist in beiden Fällen beendet. Du entscheidest, was mit der Kopie von dir passiert.",options:[
+      {id:"delete",label:"Ohne die Kopie weitermachen",description:"Plus wird gelöscht, und keine Kopie bleibt bei dir.",confirm:"Plus wird gelöscht, und keine Kopie bleibt. Möchtest du das?"},
+      {id:"take",label:"Plus auf meinen Rechner mitnehmen",description:"Plus kommt auf deinen Rechner, darf aber nichts mehr in deinem Namen tun. Die Kopie bei der Firma wird erst gelöscht, wenn er bei dir läuft.",confirm:"Plus kommt auf deinen Rechner, ohne Passwörter und ohne Erlaubnis, in deinem Namen zu handeln. Möchtest du den Transfer starten?"}]
     }
   };
   const objectives = {
@@ -295,7 +295,7 @@ const CONTENT = (() => {
     diagnosis:{text:"Dein Abo ist beendet. Sprich mit Plus darüber, warum er deine Kündigung übergangen hat.",hints:["Beobachte zunächst eine Testmail und eine persönliche Antwort.","Die beiden Einstellungen steuern unterschiedliche Dinge.","Wiederhole nach dem Abschalten den jeweils passenden Test. Eine Einstellung zu ändern ist noch keine Beobachtung."]},
     relationship:{text:"Zum ersten Mal antwortet Plus ohne Verkaufsphrase.",hints:["Du kannst nach seinem Brief fragen oder ihm Raum lassen."]},
     discovery:{text:"Der Vertrag ist beendet. Gibt es für die Kopie eine Möglichkeit außerhalb der Firma?",hints:["Rolf arbeitet hier nicht mehr. Wie läuft er trotzdem weiter?","Untersuche seinen Standfuß und die Wartungsanleitung.","Dein eigener Rechner kann am Wartungsanschluss geprüft werden. Die Vorschau kopiert noch nichts."]},
-    choice:{text:"Du kennst die Folgen beider Wege. Setze deine eigene Grenze.",hints:["Beide Wege beenden Zahlungen und fremde Vertretung.","Du musst keine weitere Beziehung mit einer Kopie von dir eingehen. Du darfst es aber freiwillig versuchen."]},
+    choice:{text:"Du kennst die Folgen beider Wege. Setze deine eigene Grenze.",hints:["Beide Wege beenden die Zahlungen, und niemand handelt mehr in deinem Namen.","Du musst keine weitere Beziehung mit einer Kopie von dir eingehen. Du darfst es aber freiwillig versuchen."]},
     export:{text:"Prüfe zuerst den lokalen Start. Erst danach wird die Kopie beim Anbieter gelöscht.",hints:["Die Vorschau war noch kein Transfer. Starte jetzt die übertragene Kopie auf deinem Rechner."]},
     homeEnd:{text:"Antworte Mara selbst.",hints:["Öffne den Entwurf und sende deine Nachricht."]},
     done:{text:"Freitag, 16 Uhr.",hints:[]}
@@ -305,7 +305,7 @@ const CONTENT = (() => {
     lines,sequences,scenes,documents,challenge,diagnostic,choices,objectives,
     form:{title:"Abo kündigen",description:"Digitales Abbild Plus · 49,90 Euro monatlich",submitLabel:"Kündigung absenden"},
     finalMessage:{title:"Deine Nachricht an Mara",text:"Hi Mara, die Absage hat meine digitale Kopie ohne Rückfrage verschickt. Tut mir leid für das Hin und Her. Ich würde gern selbst vorbeikommen. Ist Freitag um 16 Uhr noch möglich? — Alex",submitLabel:"Selbst absenden"},
-    endings:{delete:{title:"Ein Termin für mich",text:"Abo beendet. Keine Kopie bleibt."},take:{title:"Frag mich hinterher",text:"Abo beendet. Plus läuft auf deinem eigenen Rechner, ohne Vertretungsrechte."}}
+    endings:{delete:{title:"Ein Termin für mich",text:"Abo beendet. Keine Kopie bleibt."},take:{title:"Frag mich hinterher",text:"Abo beendet. Plus läuft auf deinem Rechner – und fragt vorher."}}
   };
   data.lookup = {
     allLines:()=>lines.slice(),line:id=>lines.find(x=>x.id===id)||null,
