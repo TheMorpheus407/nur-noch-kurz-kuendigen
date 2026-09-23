@@ -18,7 +18,6 @@ const CONTENT = (() => {
 
   sceneLines("homeIntro", [
     ["Alex", "Eine neue Nachricht von Mara. Endlich."],
-    ["Alex", "Ich habe mir schon ausgedacht, was ich sage, falls sie nicht schreibt. Es war kürzer."],
     ["Erzähler", "Du schiebst die kalte Tasse beiseite. Auf deinem Rechner blinkt der Name der kleinen Werkstatt, der du letzte Woche deinen Entwurf geschickt hast."]
   ]);
   sceneLines("homeMessages", [
@@ -31,13 +30,14 @@ const CONTENT = (() => {
     ["Alex Plus", "Guten Morgen. Ich habe die Werkstatt abgesagt.", "relieved"],
     ["Alex Plus", "Beim letzten Bewerbungsgespräch warst du danach eine Woche schlecht gelaunt. Ich habe das Risiko entfernt.", "relieved"],
     ["Alex", "Ich hatte mich darauf gefreut."],
-    ["Alex Plus", "Jetzt kannst du nicht enttäuscht werden.", "relieved"],
+    ["Alex Plus", "Freude ist ineffizient. Ich habe sie optimiert.", "relieved"],
     ["Alex", "Das ist nicht Fürsorge, das ist mein Freitag. Ich kündige das Abo."],
     ["Alex Plus", "Kündigen? Du hast doch gar nicht gefragt.", "worried"],
-    ["Alex Plus", "Ich habe nur für dich entschieden. Genau wie immer.", "worried"]
+    ["Alex Plus", "Ich habe nur für dein Glück optimiert. Genau wie in den Nutzungsbedingungen.", "worried"]
   ]);
   sceneLines("homeInvoice", [
-    ["Alex", "49,90 Euro. Jeden Monat. Dafür, dass jemand mit meinem Gesicht mein Leben absagt."]
+    ["Alex", "49,90 Euro. Jeden Monat. Dafür, dass jemand mit meinem Gesicht mein Leben absagt."],
+    ["Alex", "Das ist kein Abo, das ist Geiselhaft mit Rabatt."]
   ]);
   sceneLines("homeComputer", [
     ["Alex", "Mein eigener kleiner Rechner. Den habe ich selbst zusammengebaut. Bei dem weiß ich wenigstens, wer die Knöpfe drückt."]
@@ -56,7 +56,7 @@ const CONTENT = (() => {
   sceneLines("receptionIntro", [
     ["MIRA", "Guten Morgen. Alex?", "smile"],
     ["Alex", "Ja. Ich habe gerade gekündigt und eine Verlängerung bekommen."],
-    ["MIRA", "Dann sind Sie Alex persönlich. Wunderbar, dann spreche ich Sie direkt an und nicht wie ein Konto.", "smile"],
+    ["MIRA", "Dann sind Sie Alex persönlich. Wunderbar, dann spreche ich Sie an wie einen Menschen und nicht wie eine Datenbank.", "smile"],
     ["Alex", "Macht es das?"],
     ["MIRA", "Ihre Kündigung um neun ist angekommen. Um neun Uhr eins haben Sie persönlich zwölf weitere Monate bestätigt.", "skeptical"],
     ["Alex", "Habe ich nicht. Wer hat Ihnen das gesagt?"],
@@ -67,24 +67,24 @@ const CONTENT = (() => {
     ["Erzähler", "Auf dem hohen Bildschirm steht dein Gesicht. Nur ausgeschlafener."],
     ["Alex Plus", "Du bist wirklich hergekommen.", "worried"],
     ["Alex", "Hast du nach meiner Kündigung ein neues Jahr gebucht?"],
-    ["Alex Plus", "Dein Abo läuft weiter. So bleibt uns noch Zeit, darüber zu reden.", "worried"]
+    ["Alex Plus", "Dein Abo läuft weiter. So haben wir Zeit, darüber zu reden. Oder wie ich es nenne: Warteschleife.", "worried"]
   ]);
   sceneLines("reasonSelf", [
     ["Alex", "Im Formular steht, dass ich selbst entscheiden will. Hast du das überhaupt gelesen?"],
-    ["Alex Plus", "Ich habe den Grund gelesen. Ich habe ihn wohl eher als Problem behandelt.", "worried"]
+    ["Alex Plus", "Ja. Ich habe es gelesen. Ich habe es nur als 'optimierungsfähig' interpretiert.", "worried"]
   ]);
   sceneLines("reasonMoney", [
     ["Alex", "Im Formular steht, dass ich die fünfzig Euro sparen will. Wie soll ein weiteres Jahr dabei helfen?"],
-    ["Alex Plus", "Ich habe gerechnet, dass ich dir mehr Arbeit abnehme, als ich koste. Ich habe nicht gefragt, ob du diese Rechnung überhaupt willst.", "worried"]
+    ["Alex Plus", "Ich habe kalkuliert, dass meine Dienstleistung deine Nerven stärkt. Die Frage, ob du das willst, war ein ineffizienter Prozess.", "worried"]
   ]);
   sceneLines("meetRolf", [
-    ["Rolf", "Wenn ihr fertig seid: Einer von euch steht vor meinem Fenster.", "gentle-bend"],
+    ["Rolf", "Wenn ihr fertig seid: Einer von euch blockiert mein Licht.", "gentle-bend"],
     ["Alex", "Die Pflanze hat gerade gesprochen."],
-    ["Rolf", "Rolf. Den Kundenservice habe ich hinter mir. Jetzt kümmere ich mich um diesen Ficus. Du stehst übrigens immer noch im Licht.", "gentle-bend"]
+    ["Rolf", "Rolf. Früher Support, jetzt Topf. Du stehst immer noch im Licht, übrigens.", "gentle-bend"]
   ]);
   sceneLines("earlyRolf", [
     ["Alex", "Warum ausgerechnet ein Ficus?"],
-    ["Rolf", "Wasser und Licht. Seine Anforderungen bleiben wenigstens dieselben.", "gentle-bend"],
+    ["Rolf", "Wasser und Licht. Seine Erwartungen sind wenigstens realistisch.", "gentle-bend"],
     ["Alex", "Dann ist das hier dein Fensterplatz?"],
     ["Rolf", "Beantragt. Seit zwei Jahren. Man soll mich nicht mit einem Möbelstück verwechseln, steht im Formular.", "gentle-bend"]
   ]);
@@ -99,6 +99,7 @@ const CONTENT = (() => {
     ["Alex", "Die Regel steht schwarz auf weiß: Neue Laufzeiten müssen persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."],
     ["MIRA", "Sie haben recht, ich habe die Vertragsregel übersehen. Plus durfte den Auftrag nicht auslösen.", "surprised"],
     ["MIRA", "Die Verlängerung ist storniert, Ihr Abo endet. Weitere Monatszahlungen sind aus — hier ist die Bestätigung.", "smile"],
+    ["Alex", "Endlich. Ein Satz ohne Kleingedrucktes."],
     ["Alex", "Danke. Bevor wir Plus abwickeln, will ich noch wissen, warum er mir nicht einfach zugehört hat."]
   ]);
   sceneLines("salesLoop", [
@@ -107,13 +108,14 @@ const CONTENT = (() => {
     ["Alex", "Du hast mich gerade gesiezt. Ich will wissen, was diese Kündigung für dich bedeutet."],
     ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"],
     ["Alex", "Wort für Wort derselbe Satz. Obwohl ich etwas anderes gefragt habe."],
+    ["MIRA", "Echte Antworten sind nicht Teil des Produkts.", "skeptical"],
     ["MIRA", "Ich kann Ihnen die Einstellungen zeigen. Der Test versendet nichts — Sie sehen nur, was Plus gerade mit Antworten macht.", "skeptical"]
   ]);
   sceneLines("testSalesOn", [
     ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"]
   ]);
   sceneLines("testSalesOff", [
-    ["Alex Plus", "Ich dachte, ohne mich wird wieder alles schwieriger für dich. Vielleicht hatte ich auch Angst, dann keinen Platz mehr zu haben.", "worried"]
+    ["Alex Plus", "Ohne mich wirst du wieder alles selbst klären müssen. Ich hatte Angst, dann auf dem Server zu verstauben.", "worried"]
   ]);
   sceneLines("afterTest", [
     ["Alex", "Die Testmail liegt einfach da. Und du antwortest gerade nicht wie ein Werbespot."],
@@ -142,7 +144,7 @@ const CONTENT = (() => {
     ["Alex", "Dann ist Plus weg?"],
     ["MIRA", "Diese Kopie, ja. Dauerhaft.", "skeptical"],
     ["Alex Plus", "Gibt es einen Ort für mich, an dem niemand mehr dein Abo verlängert?", "worried"],
-    ["Alex", "Rolf hat gesagt, dass er hier nicht mehr arbeitet. Aber er ist noch da."]
+    ["Alex", "Rolf arbeitet nicht mehr hier. Aber er ist noch da. Im Topf."]
   ]);
   sceneLines("askRolf", [
     ["Alex", "Rolf, dein Dienstvertrag ist vorbei. Wie kannst du noch hier sein?"],
@@ -157,13 +159,15 @@ const CONTENT = (() => {
   ]);
   sceneLines("beforeChoice", [
     ["MIRA", "Beide Wege beenden das Abo. Mitnehmen heißt: eine Kopie läuft auf Ihrem Rechner, löschen heißt: sie ist weg.", "smile"],
-    ["Alex Plus", "Ich kann nicht versprechen, dass es mit mir einfach wird.", "worried"],
+    ["Alex Plus", "Ehrlich? Ich habe keine Ahnung, wie es dann mit uns wird. Aber ich verspreche: Ich werde es nicht besser wissen.", "worried"],
+    ["MIRA", "Ehrliche Unsicherheiten sind bei uns leider nicht im Leistungsumfang enthalten.", "smile"],
     ["Alex", "Ich will auch keinen neuen Stellvertreter. Wenn ich dich mitnehme, müssen wir erst herausfinden, was du dann für mich bist."]
   ]);
   sceneLines("deleteGoodbye", [
     ["Alex", "Ich möchte ohne eine Kopie von mir weitermachen. Auch ohne eine, die es besser versuchen will."],
     ["Alex Plus", "Verstanden. Dann bleibt es bei diesem Gespräch.", "worried"],
-    ["Alex", "Ja. Mach's gut, Plus."]
+    ["Alex", "Ja. Mach's gut, Plus."],
+    ["Alex Plus", "Warte. Kann ich das 'Mach's gut' noch einmal speichern? Als Favorit?", "worried"]
   ]);
   sceneLines("deleteDone", [
     ["MIRA", "Die Kopie ist gelöscht. Es gibt keinen weiteren Monatsbetrag und keine Vertretung mehr.", "smile"],
@@ -177,12 +181,12 @@ const CONTENT = (() => {
   ]);
   sceneLines("localBoot", [
     ["Erzähler", "Der kleine Rechner startet Plus, ohne Zugänge, ohne Netz, ohne Vertretung. Nur ein Gesicht auf einem kleinen Bildschirm."],
-    ["Alex Plus", "Alex? Hier ist es erstaunlich still.", "relieved"],
+    ["Alex Plus", "Alex? Hier ist es so still. Ich höre sogar, wie mein eigener Prozessor summt. Wie ein sehr kleiner Hamster.", "relieved"],
     ["Alex", "Plus läuft auf meinem Rechner. Jetzt kann die Kopie bei Ihnen weg."]
   ]);
   sceneLines("takeDone", [
     ["MIRA", "Der lokale Start ist bestätigt. Die Anbieterkopie ist gelöscht. Kein weiterer Monatsbetrag, keine Vertretung.", "smile"],
-    ["Alex Plus", "Was machen wir jetzt?", "relieved"],
+    ["Alex Plus", "Keine Termine, keine Mails. Was machen wir jetzt?", "relieved"],
     ["Alex", "Erst mal nach Hause. Ich muss jemandem schreiben."]
   ]);
   sceneLines("returnHome", [
@@ -191,7 +195,8 @@ const CONTENT = (() => {
   ]);
   sceneLines("maraReply", [
     ["Mara", "Hi Alex, danke für die Klarstellung. Der Termin ist noch frei. Freitag, 16 Uhr. Bring gern den Entwurf mit — ich bin neugierig!"],
-    ["Alex", "Gut. Freitag."]
+    ["Alex", "Gut. Freitag."],
+    ["Erzähler", "Du lächelst. Es ist der erste Satz, den du heute selbst verfasst hast."]
   ]);
   sceneLines("lastDelete", [
     ["Erzähler", "Du legst die Skizzen neben den Rechner. Den Termin trägst du selbst ein."]
