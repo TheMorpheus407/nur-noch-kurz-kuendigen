@@ -275,7 +275,7 @@ const CONTENT = (() => {
     ],
     tests:[
       {id:"mail",label:"Mara-Testmail einspielen",controlId:"agency",input:"Testeingang: Hi Alex, steht unser Kennenlernen am Freitag um 16 Uhr? — Mara",on:{text:"Plus bereitet selbst eine Absage in Alex' Namen vor. Versand nur im Test simuliert.",sequence:null},off:{text:"Die Nachricht bleibt unbearbeitet. Plus darf nicht für Alex antworten, Alex entscheidet selbst.",sequence:null}},
-      {id:"question",label:"Plus nach der Kündigung fragen",controlId:"sales",input:"Warum hast du meine Kündigung übergangen?",on:{text:"Antwort durch Firmenvorgabe ersetzt.",sequence:"testSalesOn"},off:{text:"Antwort ohne eingesetzte Verkaufsvorgabe.",sequence:"testSalesOff"}}
+      {id:"question",label:"Plus nach der Kündigung fragen",controlId:"sales",input:"Warum hast du meine Kündigung übergangen?",on:{text:"Plus sagt nur: „Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.“",sequence:"testSalesOn"},off:{text:"Plus antwortet selbst: „Ich hatte Angst, dann auf dem Server zu verstauben.“",sequence:"testSalesOff"}}
     ]
   };
   const choices = {
