@@ -246,7 +246,7 @@ const CONTENT = (() => {
     title:"Was stimmt an MIRAs Übersicht nicht?",
     statements:[{id:"arrived",text:"Ihre Kündigung um neun ist angekommen."},{id:"personal",text:"Sie persönlich haben zwölf weitere Monate bestätigt."},{id:"price",text:"Ihr Abo kostet monatlich 49,90 Euro."}],
     correct:{statementId:"personal",documentId:"order",passageId:"extend"},
-    feedback:{arrived:"Deine Kündigung ist tatsächlich eingegangen. Dieser Satz erklärt die spätere Verlängerung noch nicht.",price:"Der Preis steht so auf der Rechnung. Dass er dir zu hoch ist, widerlegt die Übersicht nicht.",receipt:"Deine Bestätigung zeigt, dass du gekündigt hast. Sie sagt nicht, wer den Auftrag eine Minute später geschickt hat.",rule:"Die Regel sagt, wer eine Laufzeit bestätigen darf. Jetzt fehlt der Nachweis, wer diesen Auftrag tatsächlich ausgelöst hat.",wrongPassage:"Das ist deine eigene Kündigung um 09:00. MIRA redet aber über die zwölf weiteren Monate – schau dir den Auftrag um 09:01 an und wer ihn ausgelöst hat.",doc_messages:"Diese Absage hat Plus an Mara geschickt – mit der Verlängerung um 09:01 hat sie nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat.",other:"Dieses Dokument erklärt einen anderen Teil der Situation. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag um 09:01 ausgelöst hat."},
+    feedback:{arrived:"Ganz recht, Ihre Kündigung um 09:00 ist eingegangen – pünktlich wie versprochen! Sie erklärt aber nicht die Verlängerung um 09:01; das Auftragsprotokoll zeigt, wer sie ausgelöst hat.",price:"49,90 Euro – ein fairer Preis für Premium-Services! Doch der Preis ändert nichts an der Verlängerung um 09:01; wer sie ausgelöst hat, steht im Auftragsprotokoll.",receipt:"Ihre Bestätigung bestätigt: gekündigt um 09:00, wunderbar dokumentiert! Aber sie sagt nicht, wer um 09:01 verlängert hat – das Auftragsprotokoll am Terminal zeigt es.",rule:"Diese Regel erklärt, wer Laufzeiten buchen darf – sehr nützlich, danke! Für die Verlängerung um 09:01 brauchen wir aber den Auslöser: das Auftragsprotokoll am Terminal.",wrongPassage:"Diese Passage dokumentiert Ihre Kündigung um 09:00 – korrekt archiviert, danke! Ich spreche aber von der Verlängerung um 09:01: die richtige Passage zeigt, wer sie ausgelöst hat.",doc_messages:"Diese Absage an Mara ist netter Smalltalk – mit der Verlängerung um 09:01 hat sie freilich nichts zu tun. Das Auftragsprotokoll am Terminal zeigt, wer den Auftrag ausgelöst hat.",other:"Schön, dass Sie nachschauen – dieses Dokument beleuchtet aber einen anderen Aspekt. Wer den Auftrag um 09:01 ausgelöst hat, steht im Auftragsprotokoll am Terminal."},
     round2:{
       title:"Durfte Plus dein Abo überhaupt verlängern?",
       statements:[
@@ -256,13 +256,13 @@ const CONTENT = (() => {
       ],
       correct:{statementId:"r2_agency",documentId:"invoice",passageId:"rule"},
       feedback:{
-        r2_tasks:"Das stimmt. Plus bearbeitet Termine und Nachrichten. Aber das gibt ihm kein Recht, Laufzeiten zu buchen.",
-        r2_order:"Ja, der Auftrag kam von Plus. Das hat sie schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte.",
-        r2_agency_wrong:"Diese Behauptung ist falsch. Die Vertragsregel sagt etwas anderes.",
-        extend:"Dass der Auftrag von Plus kam, hat MIRA schon zugegeben. Jetzt geht es darum, ob Plus das überhaupt durfte – die Vertragsregel steht in deiner Abrechnung (Reiter „Abrechnung“).",
-        doc_messages:"Die Absage an Mara sagt nichts darüber, ob Plus Laufzeiten buchen darf. Die Vertragsregel steht in der Abrechnung.",
-        doc_receipt:"Deine Kündigungsbestätigung zeigt nur, dass du gekündigt hast. Ob Plus verlängern darf, steht in der Vertragsregel der Abrechnung.",
-        other:"Diese Passage beantwortet nicht die Frage, ob Plus Laufzeiten buchen darf. Such die Vertragsregel in der Abrechnung."
+        r2_tasks:"Ja, Plus pflegt Ihre Termine und Nachrichten – ein Service, den viele schätzen! Doch damit darf er keine Laufzeiten buchen; die Vertragsregel dazu steht in Ihrer Abrechnung.",
+        r2_order:"Richtig, der Auftrag um 09:01 kam von Plus – Transparenz ist uns wichtig! Die Frage bleibt, ob er das durfte; die Vertragsregel steht in Ihrer Abrechnung.",
+        r2_agency_wrong:"Da bin ich leider anderer Meinung – die Vertragsregel in Ihrer Abrechnung sagt etwas anderes. Genau dort finden Sie die Antwort.",
+        extend:"Ja, der Auftrag um 09:01 kam von Plus – das steht hier schwarz auf weiß! Ob Plus das aber durfte, regelt die Vertragsregel in Ihrer Abrechnung (Reiter „Abrechnung“).",
+        doc_messages:"Diese Absage an Mara ist harmlos – sie sagt nichts über Laufzeiten. Ob Plus buchen durfte, regelt die Vertragsregel in Ihrer Abrechnung.",
+        doc_receipt:"Ihre Kündigungsbestätigung um 09:00 ist in Ordnung – danke! Ob Plus überhaupt verlängern durfte, steht in der Vertragsregel Ihrer Abrechnung.",
+        other:"Diese Passage ist sympathisch, aber sie beantwortet die falsche Frage. Ob Plus Laufzeiten buchen durfte, regelt die Vertragsregel in Ihrer Abrechnung."
       }
     }
   };

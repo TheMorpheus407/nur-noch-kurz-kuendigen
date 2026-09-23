@@ -1723,3 +1723,6 @@ button { font-family: var(--font-ui); }
   #dlg-diagnostic .diag-pair-head { flex-wrap: wrap; }
   #dlg-diagnostic .diag-compare { grid-template-columns: 1fr; }
 }
+
+/* P19 · Kreuzverhör: MIRA-Sprecherbadge in der Feedback-Zeile */
+.ch-feedback .ch-who { display:inline-block; background:#2f6f6a; color:#fff; font-size:12px; letter-spacing:0.05em; padding:2px 8px; border-radius:3px; margin-right:6px; }

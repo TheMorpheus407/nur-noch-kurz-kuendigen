@@ -393,7 +393,7 @@ const UI = (() => {
     portraitScene = v.sceneId;
     const resolved = line ? resolvePortrait(line) : null;
     if (resolved) currentPortrait = resolved;
-    else if (line) currentPortrait = null;
+    else if (line && line.speaker === "Rolf") currentPortrait = null;
     const pr = currentPortrait;
     if (pr) {
       const changed = pr.url !== portraitUrl;
@@ -544,6 +544,7 @@ const UI = (() => {
   /* ---------- Show-Momente: Stempel & Wackeln ---------- */
   let stampTimer = null;
   function showStamp() {
+    toast("");
     const layer = el.stampLayer;
     if (!layer) return;
     clear(layer);
@@ -832,7 +833,14 @@ const UI = (() => {
       selEl.textContent = "Deine Auswahl: " + stmtPart + " ↔ " + pasPart;
     }
     // Feedback
-    text($("#ch-feedback"), ch.feedback || "");
+    const fbEl = $("#ch-feedback");
+    if (fbEl) {
+      clear(fbEl);
+      if (ch.feedback) {
+        fbEl.appendChild(make("strong", "ch-who", "MIRA"));
+        fbEl.appendChild(make("span", "", " " + ch.feedback));
+      }
+    }
     // Hinweiszeile nur, solange noch keine Behauptung gewählt ist (bleibt mehr Platz für Unterlagen)
     const hintEl = $(".ch-hint");
     if (hintEl) hintEl.hidden = !!ch.selectedStatement;
