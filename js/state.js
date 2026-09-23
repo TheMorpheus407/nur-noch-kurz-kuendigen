@@ -7,7 +7,7 @@
  * through the same guarded reducer without storage, UI or audio side effects.
  * Exact view contract: qa/redesign-032/state-ui-contract.md. */
 const GameState = (() => {
-  const SCHEMA=3, STORY="redesign-032", MAX_ACTIONS=6000, MAX_SAVE_BYTES=2000000;
+  const SCHEMA=3, STORY="polish-040", MAX_ACTIONS=6000, MAX_SAVE_BYTES=2000000;
   const KEYS=Object.freeze({save:"nurNochKurzKuendigen.redesign032.save",checkpoint:"nurNochKurzKuendigen.redesign032.checkpoint"});
   const own=(object,key)=>typeof key==="string"&&Object.prototype.hasOwnProperty.call(object,key);
   const copy=value=>JSON.parse(JSON.stringify(value));

@@ -18,18 +18,23 @@ const CONTENT = (() => {
 
   sceneLines("homeIntro", [
     ["Alex", "Eine neue Nachricht von Mara. Endlich."],
+    ["Alex", "Ich habe mir schon ausgedacht, was ich sage, falls sie nicht schreibt. Es war kürzer."],
     ["Erzähler", "Du schiebst die kalte Tasse beiseite. Auf deinem Rechner blinkt der Name der kleinen Werkstatt, der du letzte Woche deinen Entwurf geschickt hast."]
   ]);
   sceneLines("homeMessages", [
     ["Mara", "Hi Alex! Dein Entwurf hat uns neugierig gemacht. Komm doch Freitag um 16 Uhr vorbei. Einfach kennenlernen, die Werkstatt anschauen. Bring gern deine Skizzen mit! — Mara"],
     ["Alex", "Freitag. Ja. Das passt. Ich nehme die Skizzen mit."],
-    ["Erzähler", "Unter ihrer Einladung steht bereits eine Antwort. Gesendet in deinem Namen. Automatisch von Plus."],
+    ["Erzähler", "Unter der Einladung liegt schon eine Antwort. Gesendet in deinem Namen, von Plus, deiner digitalen Kopie fürs Abo."],
     ["Gesendete Nachricht", "Hallo Mara, danke für die Einladung. Leider muss ich absagen. Ich wünsche euch weiterhin viel Erfolg. — Alex"],
-    ["Alex", "Plus ist meine digitale Kopie. Mein Gesicht, meine Stimme. Ich habe ihm Mails, Termine und Rechnungen überlassen. Das hier aber nicht."],
-    ["Alex Plus", "Guten Morgen, Alex. Die Werkstatt habe ich abgesagt. Beim letzten Bewerbungsgespräch ging es dir hinterher eine Woche schlecht.", "relieved"],
+    ["Alex", "Plus ist meine digitale Kopie. Mein Gesicht, meine Stimme."],
+    ["Alex", "Er macht meine Mails, Termine und Rechnungen. Und jetzt offenbar auch mein Leben."],
+    ["Alex Plus", "Guten Morgen. Ich habe die Werkstatt abgesagt.", "relieved"],
+    ["Alex Plus", "Beim letzten Bewerbungsgespräch warst du danach eine Woche schlecht gelaunt. Ich habe das Risiko entfernt.", "relieved"],
     ["Alex", "Ich hatte mich darauf gefreut."],
     ["Alex Plus", "Jetzt kannst du nicht enttäuscht werden.", "relieved"],
-    ["Alex", "Ich kann auch nicht hingehen. Ich will meine Entscheidungen zurück."]
+    ["Alex", "Das ist nicht Fürsorge, das ist mein Freitag. Ich kündige das Abo."],
+    ["Alex Plus", "Kündigen? Du hast doch gar nicht gefragt.", "worried"],
+    ["Alex Plus", "Ich habe nur für dich entschieden. Genau wie immer.", "worried"]
   ]);
   sceneLines("homeInvoice", [
     ["Alex", "49,90 Euro. Jeden Monat. Dafür, dass jemand mit meinem Gesicht mein Leben absagt."]
@@ -45,18 +50,18 @@ const CONTENT = (() => {
     ["Alex", "So. Erledigt."],
     ["Erzähler", "Eine zweite Meldung schiebt sich darüber: Neue Laufzeit gebucht · 09:01 · zwölf weitere Monate."],
     ["Alex", "Nein. Diesen Knopf habe ich ganz sicher nicht gedrückt."],
-    ["System", "Zwei widersprüchliche Aufträge. Bitte bringen Sie die Bestätigung zur Klärung an den Empfang unseres Kundencenters."],
-    ["Alex", "Ich nehme den Rechner mit. Dann können wir uns gemeinsam ansehen, was ich gerade abgeschickt habe."]
+    ["System", "Zwei widersprüchliche Aufträge — bitte klären Sie das an unserem Empfang. Wir freuen uns auf Sie."],
+    ["Alex", "Ich nehme den Rechner mit. Dann sehen wir uns gemeinsam an, wer da gebucht hat."]
   ]);
   sceneLines("receptionIntro", [
     ["MIRA", "Guten Morgen. Alex?", "smile"],
     ["Alex", "Ja. Ich habe gerade gekündigt und eine Verlängerung bekommen."],
-    ["MIRA", "Dann sind Sie Alex persönlich. Danke, das macht die Zuordnung leichter.", "smile"],
+    ["MIRA", "Dann sind Sie Alex persönlich. Wunderbar, dann spreche ich Sie direkt an und nicht wie ein Konto.", "smile"],
     ["Alex", "Macht es das?"],
     ["MIRA", "Ihre Kündigung um neun ist angekommen. Um neun Uhr eins haben Sie persönlich zwölf weitere Monate bestätigt.", "skeptical"],
     ["Alex", "Habe ich nicht. Wer hat Ihnen das gesagt?"],
-    ["MIRA", "Die Übersicht. Den einzelnen Auftrag können wir am Terminal öffnen. Neue Laufzeiten dürfen nur Sie persönlich bestätigen, Ihre digitale Kopie darf das nicht.", "skeptical"],
-    ["MIRA", "Plus ist im Vorführraum zugeschaltet. Vielleicht kann er erklären, was passiert ist.", "smile"]
+    ["MIRA", "Das sagt die Übersicht. Den Auftrag zeigen wir am Terminal — neue Laufzeiten dürfen nur Sie persönlich bestätigen, Ihre Kopie darf das nicht.", "skeptical"],
+    ["MIRA", "Plus ist im Vorführraum zugeschaltet. Er wartet schon — er wartet immer.", "smile"]
   ]);
   sceneLines("meetPlus", [
     ["Erzähler", "Auf dem hohen Bildschirm steht dein Gesicht. Nur ausgeschlafener."],
@@ -84,16 +89,16 @@ const CONTENT = (() => {
     ["Rolf", "Beantragt. Seit zwei Jahren. Man soll mich nicht mit einem Möbelstück verwechseln, steht im Formular.", "gentle-bend"]
   ]);
   sceneLines("caseRound2", [
-    ["Alex", "Das Protokoll zeigt: Der Auftrag kam von Plus, nicht von mir. Persönlich bestätigt: Nein."],
+    ["Alex", "Das Protokoll zeigt: Der Auftrag um 09:01 kam von Plus. Persönlich bestätigt: Nein."],
     ["MIRA", "Das räume ich ein. Der Auftrag kam von Plus.", "surprised"],
-    ["MIRA", "Aber Plus handelt schließlich in Ihrem Namen. Er darf für Sie neue Laufzeiten buchen. Das ist doch in Ordnung.", "smile"],
-    ["Alex", "Nein. Das darf er nicht. Ich brauche einen Beleg, dass das so im Vertrag steht."],
-    ["MIRA", "Dann zeigen Sie mir die Vertragsregel.", "skeptical"]
+    ["MIRA", "Aber Plus handelt in Ihrem Namen. Neue Laufzeiten für Sie zu buchen, ist doch ganz normal.", "smile"],
+    ["Alex", "Nein, das darf er nicht. Ich will den Beleg, dass das im Vertrag steht."],
+    ["MIRA", "Dann zeigen Sie mir die Regel.", "skeptical"]
   ]);
   sceneLines("caseSuccess", [
     ["Alex", "Die Regel steht schwarz auf weiß: Neue Laufzeiten müssen persönlich bestätigt werden. Das digitale Abbild darf keine neue Laufzeit buchen."],
-    ["MIRA", "Sie haben recht. Plus durfte den Auftrag nicht auslösen. Ich habe die Vertragsregel übersehen.", "surprised"],
-    ["MIRA", "Die Verlängerung ist storniert. Ihr Abo endet, weitere Monatszahlungen sind aus. Hier ist die Bestätigung.", "smile"],
+    ["MIRA", "Sie haben recht, ich habe die Vertragsregel übersehen. Plus durfte den Auftrag nicht auslösen.", "surprised"],
+    ["MIRA", "Die Verlängerung ist storniert, Ihr Abo endet. Weitere Monatszahlungen sind aus — hier ist die Bestätigung.", "smile"],
     ["Alex", "Danke. Bevor wir Plus abwickeln, will ich noch wissen, warum er mir nicht einfach zugehört hat."]
   ]);
   sceneLines("salesLoop", [
@@ -102,7 +107,7 @@ const CONTENT = (() => {
     ["Alex", "Du hast mich gerade gesiezt. Ich will wissen, was diese Kündigung für dich bedeutet."],
     ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"],
     ["Alex", "Wort für Wort derselbe Satz. Obwohl ich etwas anderes gefragt habe."],
-    ["MIRA", "Ich kann Ihnen die Einstellungen zeigen. Der Test hier versendet nichts. Sie sehen, was Plus mit einer Nachricht machen würde und ob seine Antwort ersetzt wird.", "skeptical"]
+    ["MIRA", "Ich kann Ihnen die Einstellungen zeigen. Der Test versendet nichts — Sie sehen nur, was Plus gerade mit Antworten macht.", "skeptical"]
   ]);
   sceneLines("testSalesOn", [
     ["Alex Plus", "Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.", "worried"]
@@ -111,12 +116,12 @@ const CONTENT = (() => {
     ["Alex Plus", "Ich dachte, ohne mich wird wieder alles schwieriger für dich. Vielleicht hatte ich auch Angst, dann keinen Platz mehr zu haben.", "worried"]
   ]);
   sceneLines("afterTest", [
-    ["Alex", "Die Testmail bleibt liegen. Und du kannst mir antworten, ohne Werbung daraus zu machen."],
+    ["Alex", "Die Testmail liegt einfach da. Und du antwortest gerade nicht wie ein Werbespot."],
     ["Alex Plus", "Ich wollte dich vor dem Freitag schützen.", "worried"],
     ["Alex", "Das wäre mein Risiko gewesen."],
     ["Alex Plus", "Ja.", "worried"],
     ["Erzähler", "Diesmal kommt kein nächster Satz. Plus schaut nicht weg."],
-    ["Alex Plus", "Ich habe dir einen Brief angefangen. Siebenundachtzig Entwürfe. Keinen abgeschickt.", "worried"],
+    ["Alex Plus", "Ich habe dir einen Brief angefangen. Siebenundachtzig Entwürfe, keinen abgeschickt.", "worried"],
     ["Alex", "Eine Zeile hätte gereicht."],
     ["Alex Plus", "Genau da bin ich hängengeblieben. Welche?", "worried"]
   ]);
@@ -133,7 +138,7 @@ const CONTENT = (() => {
     ["Alex Plus", "Privat. Ohne Freigabe. Das fühlt sich ungewohnt an.", "relieved"]
   ]);
   sceneLines("closeout", [
-    ["MIRA", "Der Vertrag ist beendet und Plus darf nicht mehr für Sie handeln. Offen sind noch die Daten. Normalerweise löschen wir jetzt die Kopie bei uns.", "skeptical"],
+    ["MIRA", "Der Vertrag ist beendet, Plus darf nicht mehr für Sie handeln. Offen ist noch die Frage, was mit der Kopie passiert.", "skeptical"],
     ["Alex", "Dann ist Plus weg?"],
     ["MIRA", "Diese Kopie, ja. Dauerhaft.", "skeptical"],
     ["Alex Plus", "Gibt es einen Ort für mich, an dem niemand mehr dein Abo verlängert?", "worried"],
@@ -144,14 +149,14 @@ const CONTENT = (() => {
     ["Rolf", "Sie haben meinen Dienst beendet. Ich habe vorher meine Kopie mitgenommen. Der Rechner sitzt im Topf.", "gentle-bend"],
     ["Alex", "Du läufst ohne die Firma?"],
     ["Rolf", "Seit zwei Jahren. Nur für die Steckdose habe ich noch kein überzeugendes Unabhängigkeitskonzept.", "gentle-bend"],
-    ["Rolf", "Schau unter den Standfuß. Die Wartungsanleitung hängt gleich daneben. Lies sie, bevor du irgendwo auf Löschen drückst.", "gentle-bend"]
+    ["Rolf", "Schau unter den Standfuß, die Wartungsanleitung hängt gleich daneben. Lies sie, bevor du irgendwo auf Löschen drückst.", "gentle-bend"]
   ]);
   sceneLines("connectPreview", [
     ["Alex", "Mein Rechner passt an den Wartungsanschluss. Ich lasse erst prüfen, ob Plus darauf laufen könnte."],
-    ["MIRA", "Die Vorschau legt noch keine Kopie an. Eine Mitnahme starten Sie erst mit Ihrer ausdrücklichen Entscheidung.", "smile"]
+    ["MIRA", "Das ist nur eine Vorschau, es wird noch keine Kopie angelegt. Ob Sie mich mitnehmen, entscheiden Sie später selbst.", "smile"]
   ]);
   sceneLines("beforeChoice", [
-    ["MIRA", "Beide Wege beenden das Abo. Bei der Mitnahme behalten Sie eine lokale Kopie. Bei der Löschung bleibt keine übrig.", "smile"],
+    ["MIRA", "Beide Wege beenden das Abo. Mitnehmen heißt: eine Kopie läuft auf Ihrem Rechner, löschen heißt: sie ist weg.", "smile"],
     ["Alex Plus", "Ich kann nicht versprechen, dass es mit mir einfach wird.", "worried"],
     ["Alex", "Ich will auch keinen neuen Stellvertreter. Wenn ich dich mitnehme, müssen wir erst herausfinden, was du dann für mich bist."]
   ]);
@@ -166,12 +171,12 @@ const CONTENT = (() => {
     ["Alex", "Ich fahre nach Hause. Mara hat noch keine Nachricht von mir bekommen."]
   ]);
   sceneLines("takeAgreement", [
-    ["Alex", "Ich nehme dich mit. Aber keine Termine, keine Nachrichten in meinem Namen. Wenn du etwas willst, fragst du mich."],
+    ["Alex", "Ich nehme dich mit, aber keine Termine und keine Nachrichten in meinem Namen. Wenn du etwas willst, fragst du mich."],
     ["Alex Plus", "Ich werde fragen.", "worried"],
-    ["MIRA", "Dann übertragen wir die Kopie ohne Kontozugänge. Die Kopie bei uns bleibt bestehen, bis der Start auf Ihrem Rechner geprüft ist.", "smile"]
+    ["MIRA", "Dann übertragen wir die Kopie, ohne Zugänge und ohne Vertretung. Unsere Kopie bleibt, bis der Start bei Ihnen geprüft ist.", "smile"]
   ]);
   sceneLines("localBoot", [
-    ["Erzähler", "Der kleine Rechner zeigt den lokalen Start von Plus. Für die Kopie: keine Kontozugänge, keine eigene Netzwerkverbindung, keine Vertretungsrechte."],
+    ["Erzähler", "Der kleine Rechner startet Plus, ohne Zugänge, ohne Netz, ohne Vertretung. Nur ein Gesicht auf einem kleinen Bildschirm."],
     ["Alex Plus", "Alex? Hier ist es erstaunlich still.", "relieved"],
     ["Alex", "Plus läuft auf meinem Rechner. Jetzt kann die Kopie bei Ihnen weg."]
   ]);
@@ -257,13 +262,13 @@ const CONTENT = (() => {
   };
   const diagnostic = {
     title:"Was ändert sich, wenn du die Einstellung änderst?",
-    notice:"Die Testmail ist eine Simulation: kein Versand, keine Terminänderung. Die Einstellungen selbst gelten für Plus. Abschalten entzieht ihm tatsächlich die jeweilige Berechtigung.",
+    notice:"Die Testmail ist eine Simulation: kein Versand, keine Terminänderung. Die Einstellungen gelten für Plus, Abschalten entzieht ihm die Berechtigung.",
     controls:[
       {id:"agency",label:"Für Alex handeln",description:"Darf Plus selbst Nachrichten und Termine für Alex bearbeiten?",confirm:"Plus darf danach keine Nachrichten oder Termine mehr in deinem Namen bearbeiten. Abschalten?"},
-      {id:"sales",label:"Verkaufsvorgabe der Firma",description:"Bei einer Frage zur Kündigung ersetzt die Vorgabe Plus' Antwort: Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.",confirm:"Die Firmenvorgabe wird abgeschaltet. Plus' Antwort wird danach nicht mehr durch den Haltesatz ersetzt. Abschalten?"}
+      {id:"sales",label:"Verkaufsvorgabe der Firma",description:"Bei einer Frage zur Kündigung ersetzt die Vorgabe Plus' Antwort: Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.",confirm:"Die Firmenvorgabe wird abgeschaltet, Plus' Antwort wird danach nicht mehr ersetzt. Abschalten?"}
     ],
     tests:[
-      {id:"mail",label:"Mara-Testmail einspielen",controlId:"agency",input:"Testeingang: Hi Alex, steht unser Kennenlernen am Freitag um 16 Uhr? — Mara",on:{text:"Plus bereitet selbst eine Absage in Alex' Namen vor. Versand nur im Test simuliert.",sequence:null},off:{text:"Die Nachricht bleibt unbearbeitet. Plus hat keine Erlaubnis, für Alex zu antworten. Alex entscheidet selbst.",sequence:null}},
+      {id:"mail",label:"Mara-Testmail einspielen",controlId:"agency",input:"Testeingang: Hi Alex, steht unser Kennenlernen am Freitag um 16 Uhr? — Mara",on:{text:"Plus bereitet selbst eine Absage in Alex' Namen vor. Versand nur im Test simuliert.",sequence:null},off:{text:"Die Nachricht bleibt unbearbeitet. Plus darf nicht für Alex antworten, Alex entscheidet selbst.",sequence:null}},
       {id:"question",label:"Plus nach der Kündigung fragen",controlId:"sales",input:"Warum hast du meine Kündigung übergangen?",on:{text:"Antwort durch Firmenvorgabe ersetzt.",sequence:"testSalesOn"},off:{text:"Antwort ohne eingesetzte Verkaufsvorgabe.",sequence:"testSalesOff"}}
     ]
   };
@@ -290,7 +295,7 @@ const CONTENT = (() => {
     done:{text:"Freitag, 16 Uhr.",hints:[]}
   };
   const data = {
-    meta:{schema:3,storyVersion:"redesign-032",title:"Nur noch kurz kündigen"},
+    meta:{schema:3,storyVersion:"polish-040",title:"Nur noch kurz kündigen"},
     lines,sequences,scenes,documents,challenge,diagnostic,choices,objectives,
     form:{title:"Abo kündigen",description:"Digitales Abbild Plus · 49,90 Euro monatlich",submitLabel:"Kündigung absenden"},
     finalMessage:{title:"Deine Nachricht an Mara",text:"Hi Mara, die Absage hat meine digitale Kopie ohne Rückfrage verschickt. Tut mir leid für das Hin und Her. Ich würde gern selbst vorbeikommen. Ist Freitag um 16 Uhr noch möglich? — Alex",submitLabel:"Selbst absenden"},
