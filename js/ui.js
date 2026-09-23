@@ -935,6 +935,13 @@ const UI = (() => {
     if (v && v.actions && v.actions.length) {
       for (const a of v.actions) {
         if (["setDiagnostic", "testDiagnostic"].includes(payload(a).type) || a === backAction(v)) continue;
+        if (payload(a).type === "continueDiagnostic") {
+          // Weiter-Schritt unübersehbar oben im Terminal (nicht in der Fußzeile)
+          const cont = actionButton(a, "btn-primary diag-continue");
+          controls.insertBefore(cont, controls.firstChild);
+          results.appendChild(make("p", "diag-done", "> Beide Tests ohne Einstellungen beobachtet. Plus kann jetzt frei antworten."));
+          continue;
+        }
         foot.appendChild(actionButton(a));
       }
     }

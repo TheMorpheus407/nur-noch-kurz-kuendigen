@@ -376,7 +376,7 @@ const GameState = (() => {
       });
       const tests=CONTENT.diagnostic.tests.map(t=>({id:t.id,label:t.label,input:t.input,action:add("test-"+t.id,t.label,payload("testDiagnostic",{testId:t.id}))}));
       v.diagnostic={title:CONTENT.diagnostic.title,notice:CONTENT.diagnostic.notice,controls,tests,observations:s.diagnostic.observations,latestResults:s.diagnostic.latestResults};
-      if(diagnosticReady(s))add("continueDiagnostic","Plus antworten",payload("continueDiagnostic"));
+      if(diagnosticReady(s))add("continueDiagnostic","Weiter: Mit Plus reden",payload("continueDiagnostic"));
     }
     if(s.mode==="confirm"){
       v.confirmation={kind:s.confirmation.kind,title:s.confirmation.title,text:s.confirmation.text};

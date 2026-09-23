@@ -1645,3 +1645,8 @@ button { font-family: var(--font-ui); }
 
 .ch-feedback.flash { animation: ch-flash 600ms ease; }
 @keyframes ch-flash { 0% { background: #f7c9bb; } 100% { background: inherit; } }
+
+/* P11 · Wartungsterminal (Diagnose): unübersehbarer Weiter-Schritt */
+#dlg-diagnostic .diag-continue { display:block; width:100%; margin:10px 0; font-size:18px; background: var(--koralle); color: var(--tinte); border:3px solid var(--tinte); animation: diag-pulse 1.4s ease-in-out infinite; }
+@keyframes diag-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(233,106,80,0.7); } 50% { box-shadow: 0 0 0 8px rgba(233,106,80,0); } }
+#dlg-diagnostic .diag-done { color:#9ff0cf; font-weight:700; }

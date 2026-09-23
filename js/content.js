@@ -268,10 +268,10 @@ const CONTENT = (() => {
   };
   const diagnostic = {
     title:"Was ändert sich, wenn du die Einstellung änderst?",
-    notice:"Die Testmail ist eine Simulation: kein Versand, keine Terminänderung. Die Einstellungen gelten für Plus, Abschalten entzieht ihm die Berechtigung.",
+    notice:"1. Teste beide Fälle. 2. Schalte beide Einstellungen aus. 3. Teste noch einmal und vergleiche. Die Testmail ist nur simuliert.",
     controls:[
-      {id:"agency",label:"Für Alex handeln",description:"Darf Plus selbst Nachrichten und Termine für Alex bearbeiten?",confirm:"Plus darf danach keine Nachrichten oder Termine mehr in deinem Namen bearbeiten. Abschalten?"},
-      {id:"sales",label:"Verkaufsvorgabe der Firma",description:"Bei einer Frage zur Kündigung ersetzt die Vorgabe Plus' Antwort: Bleiben Sie sich treu. Bleiben Sie bei NEBENBEI.",confirm:"Die Firmenvorgabe wird abgeschaltet, Plus' Antwort wird danach nicht mehr ersetzt. Abschalten?"}
+      {id:"agency",label:"Für Alex handeln",description:"AN: Plus beantwortet Nachrichten und Termine selbst in deinem Namen. AUS: Nachrichten bleiben liegen, du entscheidest.",confirm:"Plus darf danach keine Nachrichten oder Termine mehr in deinem Namen bearbeiten. Abschalten?"},
+      {id:"sales",label:"Verkaufsvorgabe der Firma",description:"AN: Fragt man Plus nach der Kündigung, spricht er nur den Firmenspruch. AUS: Plus antwortet selbst.",confirm:"Die Firmenvorgabe wird abgeschaltet, Plus' Antwort wird danach nicht mehr ersetzt. Abschalten?"}
     ],
     tests:[
       {id:"mail",label:"Mara-Testmail einspielen",controlId:"agency",input:"Testeingang: Hi Alex, steht unser Kennenlernen am Freitag um 16 Uhr? — Mara",on:{text:"Plus bereitet selbst eine Absage in Alex' Namen vor. Versand nur im Test simuliert.",sequence:null},off:{text:"Die Nachricht bleibt unbearbeitet. Plus darf nicht für Alex antworten, Alex entscheidet selbst.",sequence:null}},
