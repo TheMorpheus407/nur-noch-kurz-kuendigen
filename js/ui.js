@@ -862,53 +862,72 @@ const UI = (() => {
     if (!dg) { closeOverlay("diagnostic"); return; }
     text($("#diag-title"), dg.title || "Diagnose");
     text($("#diag-notice"), dg.notice || "");
-    // Schalter
+    // Schalter + Tests: je Einstellung eine Karte mit Schalter, Test und Vorher/Nachher (P13)
     const controls = $("#diag-controls");
     clear(controls);
+    const obsList = dg.observations || [];
+    const latestObs = dg.latestResults;
+    const obsText = (testId, state) => {
+      const match = (o) => !!o && o.testId === testId && o.controlState === state;
+      if (match(latestObs)) return latestObs.text || "";
+      for (let i = obsList.length - 1; i >= 0; i--) if (match(obsList[i])) return obsList[i].text || "";
+      return "";
+    };
     if (dg.controls && dg.controls.length) {
       for (const c of dg.controls) {
-        const row = make("div", "diag-row");
-        const left = make("div");
-        left.appendChild(make("div", "diag-label", c.label || ""));
-        if (c.description) left.appendChild(make("div", "diag-desc", c.description));
-        const status = make("span", "diag-status " + (c.active ? "on" : "off"), c.active ? "an" : "aus");
-        const sw = make("button", "switch");
-        sw.type = "button";
-        sw.setAttribute("role", "switch");
-        sw.setAttribute("aria-checked", String(!!c.active));
-        sw.setAttribute("aria-label", c.label || "Schalter");
-        sw.disabled = !c.action;
-        sw.dataset.focusKey = "diagnostic-control-" + c.id;
-        sw.addEventListener("click", () => {
-          // Schalteränderung: State erwartet setDiagnostic + ggf. confirmDiagnostic
-          if (c.action) onAction(c.action);
-        });
-        row.appendChild(left);
-        row.appendChild(status);
-        row.appendChild(sw);
-        controls.appendChild(row);
+        const t = (dg.tests || []).find(x => x.controlId === c.id) ||
+          (dg.tests || []).find(x => x.id === (c.id === "agency" ? "mail" : c.id === "sales" ? "question" : null));
+        const card = make("div", "diag-pair");
+        const head = make("div", "diag-pair-head");
+        head.appendChild(make("span", "diag-pair-label", c.label || ""));
+        head.appendChild(make("span", "diag-status " + (c.active ? "on" : "off"), c.active ? "AN" : "AUS"));
+        if (c.active) {
+          const sw = make("button", "switch");
+          sw.type = "button";
+          sw.setAttribute("role", "switch");
+          sw.setAttribute("aria-checked", "true");
+          sw.setAttribute("aria-label", (c.label || "Schalter") + " abschalten");
+          sw.disabled = !c.action;
+          sw.dataset.focusKey = "diagnostic-control-" + c.id;
+          sw.addEventListener("click", () => {
+            // Abschalten: State erwartet setDiagnostic + ggf. confirmDiagnostic
+            if (c.action) onAction(c.action);
+          });
+          head.appendChild(sw);
+        } else {
+          head.appendChild(make("span", "diag-off-label", "ausgeschaltet"));
+        }
+        card.appendChild(head);
+        if (c.description) card.appendChild(make("div", "diag-desc", c.description));
+        if (t) {
+          const testRow = make("div", "diag-pair-test");
+          testRow.appendChild(make("span", "diag-pair-testlabel", "Test: " + (t.label || "")));
+          const b = button("Testen", "btn", (btn) => {
+            if (t.action) onAction(t.action);
+          });
+          b.disabled = !t.action;
+          b.dataset.focusKey = "diagnostic-test-" + t.id;
+          b.setAttribute("aria-label", (t.label || "Versuch") + " testen");
+          testRow.appendChild(b);
+          card.appendChild(testRow);
+          const compare = make("div", "diag-compare");
+          const onBox = make("div", "diag-cmp on");
+          onBox.appendChild(make("strong", "", "Bei AN"));
+          onBox.appendChild(make("div", "diag-cmp-text", obsText(t.id, "on") || "noch nicht getestet"));
+          const offBox = make("div", "diag-cmp off");
+          offBox.appendChild(make("strong", "", "Bei AUS"));
+          offBox.appendChild(make("div", "diag-cmp-text", obsText(t.id, "off") || "noch nicht getestet"));
+          compare.appendChild(onBox);
+          compare.appendChild(offBox);
+          card.appendChild(compare);
+        }
+        controls.appendChild(card);
       }
     }
-    // Tests
+    // Tests: in die Karten integriert, eigener Abschnitt bleibt leer
     const tests = $("#diag-tests");
     clear(tests);
-    if (dg.tests && dg.tests.length) {
-      for (const t of dg.tests) {
-        const row = make("div", "diag-row");
-        const left = make("div");
-        left.appendChild(make("div", "diag-label", t.label || ""));
-        if (t.input) left.appendChild(make("div", "diag-desc", t.input));
-        const b = button("Testen", "btn", (btn) => {
-          if (t.action) onAction(t.action);
-        });
-        b.disabled = !t.action;
-        b.dataset.focusKey = "diagnostic-test-" + t.id;
-        b.setAttribute("aria-label", (t.label || "Versuch") + " testen");
-        row.appendChild(left);
-        row.appendChild(b);
-        tests.appendChild(row);
-      }
-    }
+    tests.hidden = true;
     // Beobachtungen / Ergebnisse
     const results = $("#diag-results");
     const previousScroll = results.scrollTop;
@@ -936,9 +955,9 @@ const UI = (() => {
       for (const a of v.actions) {
         if (["setDiagnostic", "testDiagnostic"].includes(payload(a).type) || a === backAction(v)) continue;
         if (payload(a).type === "continueDiagnostic") {
-          // Weiter-Schritt unübersehbar oben im Terminal (nicht in der Fußzeile)
+          // Weiter-Schritt am Ende der Karten (P13), nicht in der Fußzeile
           const cont = actionButton(a, "btn-primary diag-continue");
-          controls.insertBefore(cont, controls.firstChild);
+          controls.appendChild(cont);
           results.appendChild(make("p", "diag-done", "> Beide Tests ohne Einstellungen beobachtet. Plus kann jetzt frei antworten."));
           continue;
         }

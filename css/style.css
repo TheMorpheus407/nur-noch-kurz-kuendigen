@@ -1686,3 +1686,26 @@ button { font-family: var(--font-ui); }
     grid-column: 1 / -1;
   }
 }
+
+/* P13 · Wartungsterminal: je Einstellung eine Karte mit Schalter, Test und Vorher/Nachher */
+#dlg-diagnostic .diag-pair { border: 2px solid #2f6f6a; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: rgba(0,0,0,0.12); }
+#dlg-diagnostic .diag-pair-head { display:flex; align-items:center; gap:10px; justify-content:space-between; font-size:16px; font-weight:700; }
+#dlg-diagnostic .diag-pair-test { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px; }
+#dlg-diagnostic .diag-compare { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+#dlg-diagnostic .diag-cmp { border:1px dashed #2f6f6a; padding:6px 8px; font-size:14px; min-height:44px; }
+#dlg-diagnostic .diag-cmp strong { display:block; font-size:12px; color:#9ff0cf; letter-spacing:0.05em; }
+#dlg-diagnostic .diag-tests[hidden] { display:none !important; }
+@media (min-width: 900px) {
+  #dlg-diagnostic .diag-frame { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+}
+
+/* P14 · Wartungsterminal: beide Karten nebeneinander */
+@media (min-width: 900px) {
+  #dlg-diagnostic .diag-frame { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; }
+  #dlg-diagnostic .diag-controls { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; overflow-y: auto; }
+  #dlg-diagnostic .diag-controls .diag-continue { grid-column: 1 / -1; }
+  #dlg-diagnostic .diag-pair { margin-bottom: 0; }
+  #dlg-diagnostic .diag-results { display: none; }
+  #dlg-diagnostic .diag-tests { display: none; }
+  #dlg-diagnostic .diag-frame > .overlay-foot, #dlg-diagnostic .diag-frame > .overlay-tools { grid-column: 1; }
+}

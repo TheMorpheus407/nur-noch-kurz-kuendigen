@@ -371,10 +371,10 @@ const GameState = (() => {
     if(s.mode==="diagnostic"){
       const controls=CONTENT.diagnostic.controls.map(c=>{
         const active=s.diagnostic.controls[c.id],baseline=s.diagnostic.observations.some(o=>o.controlId===c.id&&o.controlState==="on");
-        const action=!active||baseline?add("control-"+c.id,(active?"Abschalten: ":"Einschalten: ")+c.label,payload("setDiagnostic",{controlId:c.id,value:!active})):null;
+        const action=active&&baseline?add("control-"+c.id,"Abschalten: "+c.label,payload("setDiagnostic",{controlId:c.id,value:false})):null;
         return {id:c.id,label:c.label,description:c.description,active,action};
       });
-      const tests=CONTENT.diagnostic.tests.map(t=>({id:t.id,label:t.label,input:t.input,action:add("test-"+t.id,t.label,payload("testDiagnostic",{testId:t.id}))}));
+      const tests=CONTENT.diagnostic.tests.map(t=>({id:t.id,controlId:t.controlId,label:t.label,input:t.input,action:add("test-"+t.id,t.label,payload("testDiagnostic",{testId:t.id}))}));
       v.diagnostic={title:CONTENT.diagnostic.title,notice:CONTENT.diagnostic.notice,controls,tests,observations:s.diagnostic.observations,latestResults:s.diagnostic.latestResults};
       if(diagnosticReady(s))add("continueDiagnostic","Weiter: Mit Plus reden",payload("continueDiagnostic"));
     }
